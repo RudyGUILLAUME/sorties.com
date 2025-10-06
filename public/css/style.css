@@ -1,0 +1,82 @@
+/* 🎨 Style général du site Sorties.com */
+
+/* ----------- GLOBAL ----------- */
+body {
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+/* ----------- HERO / BANNIÈRE ----------- */
+.hero {
+    /*background-image: url();*/
+    background-size: cover;
+    background-position: center;
+    color: white;
+    height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.hero h1 {
+    font-size: 3.5rem;
+    font-weight: 700;
+}
+
+.hero p {
+    font-size: 1.3rem;
+    margin-bottom: 2rem;
+}
+
+.hero .btn {
+    font-size: 1.1rem;
+    padding: 0.8rem 1.6rem;
+}
+
+/* ----------- FEATURES ----------- */
+.features {
+    padding: 60px 0;
+    background-color: #fff;
+}
+
+.features h2 {
+    margin-bottom: 2rem;
+}
+
+.features h5 {
+    color: #0d6efd;
+    margin-bottom: 0.5rem;
+}
+
+.features p {
+    color: #555;
+}
+
+/* ----------- FOOTER ----------- */
+footer {
+    background-color: #f1f1f1;
+    padding: 20px 0;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #6c757d;
+    border-top: 1px solid #dee2e6;
+}
+
+/* ----------- RESPONSIVE ----------- */
+@media (max-width: 768px) {
+    .hero {
+        height: 50vh;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .hero h1 {
+        font-size: 2rem;
+    }
+
+    .hero p {
+        font-size: 1rem;
+    }
+}

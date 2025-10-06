@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil - Sorties.com{% endblock %}
+
+{% block body %}
+    <!-- 🌄 Section bannière -->
+    <section class="hero text-center">
+        <div>
+            <h1>Bienvenue sur <strong>Sorties.com</strong></h1>
+            <p class="lead">Organisez, partagez et vivez des moments ensemble 🎉</p>
+            <div class="mt-4">
+                <a href="#" class="btn btn-primary btn-lg me-3">Voir les sorties</a>
+                <a href="#" class="btn btn-outline-light btn-lg">Créer une sortie</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 💡 Section avantages -->
+    <section class="features container text-center">
+        <h2>Pourquoi utiliser Sorties.com ?</h2>
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-4 mb-4">
+                <h5>🤝 Rencontrez des gens</h5>
+                <p>Participez à des activités et rencontrez de nouvelles personnes autour de vous.</p>
+            </div>
+            <div class="col-md-4 mb-4">
+                <h5>🎯 Organisez vos sorties</h5>
+                <p>Créez vos propres événements et invitez vos amis ou collègues en quelques clics.</p>
+            </div>
+            <div class="col-md-4 mb-4">
+                <h5>📅 Gardez le rythme</h5>
+                <p>Visualisez vos sorties passées et à venir dans un calendrier intuitif.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            &copy; {{ "now"|date("Y") }} Sorties.com — Projet Symfony développé par <strong>Rudy Guillaume, Lucas Robichon & Elowan Coquillau</strong>.
+        </div>
+    </footer>
+{% endblock %}
