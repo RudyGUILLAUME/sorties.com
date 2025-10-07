@@ -8,11 +8,13 @@
             </div>
             <div class="modal-body">
                 {% if registrationForm is defined %}
-                    {{ form_start(registrationForm) }}
+                    {{ form_start(registrationForm, { action: path('app_register'), method: 'POST' }) }}
+                    {{ form_errors(registrationForm) }}
                     {{ form_row(registrationForm.nom) }}
                     {{ form_row(registrationForm.prenom) }}
                     {{ form_row(registrationForm.mail) }}
                     {{ form_row(registrationForm.plainPassword, { label: 'Mot de passe' }) }}
+                    {{ form_row(registrationForm.site) }}
                     {{ form_row(registrationForm.agreeTerms) }}
                     <button type="submit" class="btn btn-primary w-100">Créer mon compte</button>
                     {{ form_end(registrationForm) }}
