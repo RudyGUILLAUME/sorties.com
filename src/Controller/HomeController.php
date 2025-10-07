@@ -2,17 +2,32 @@
 
 namespace App\Controller;
 
+use App\Entity\Participant;
+use App\Form\RegistrationFormType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 final class HomeController extends AbstractController
 {
-    #[Route('/home', name: 'app_home')]
-    public function index(): Response
+    #[Route('/', name: 'app_home')]
+    public function index(AuthenticationUtils $authenticationUtils): Response
     {
+        // 🔹 Formulaire d’inscription
+        $participant = new Participant();
+        $registrationForm = $this->createForm(RegistrationFormType::class, $participant);
+
+        // 🔹 Récupère les infos de connexion (erreur + dernier username)
+        $error = $authenticationUtils->getLastAuthenticationError();
+        $lastUsername = $authenticationUtils->getLastUsername();
+
         return $this->render('home/index.html.twig', [
-            'controller_name' => 'HomeController',
+            'registrationForm' => $registrationForm->createView(),
+            'error' => $error,
+            'last_username' => $lastUsername,
         ]);
     }
+
 }

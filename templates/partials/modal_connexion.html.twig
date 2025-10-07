@@ -6,16 +6,27 @@
                 <h5 class="modal-title">Connexion</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
+
             <div class="modal-body p-4">
-                <form>
+                <form method="post" action="{{ path('app_login') }}">
+                    {% if error %}
+                        <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+                    {% endif %}
+
                     <div class="mb-3">
                         <label for="username" class="form-label">Nom d'utilisateur</label>
-                        <input type="text" class="form-control" id="username" placeholder="Votre pseudo">
+                        <input type="text" name="_username" id="username" class="form-control"
+                               value="{{ last_username }}" required autofocus>
                     </div>
+
                     <div class="mb-3">
                         <label for="password" class="form-label">Mot de passe</label>
-                        <input type="password" class="form-control" id="password" placeholder="••••••••">
+                        <input type="password" name="_password" id="password" class="form-control" required>
                     </div>
+
+                    <input type="hidden" name="_csrf_token"
+                           value="{{ csrf_token('authenticate') }}">
+
                     <button type="submit" class="btn btn-primary w-100">Se connecter</button>
                 </form>
             </div>

@@ -24,14 +24,21 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link active" href="#">Accueil</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Sorties</a></li>
-                    <li class="nav-item">
-                        <!-- 🔹 Bouton pour ouvrir le modal -->
-                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Se connecter</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#registerModal">Créer un compte</a>
-                    </li>
+                    {% if app.user %}
+                        <a href="{{ path('app_logout') }}" class="nav-link">
+                            Se déconnecter
+                        </a>
+                    {% else %}
+                        <li class="nav-item">
+                            <!-- 🔹 Bouton pour ouvrir le modal -->
+                            <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Se connecter</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#registerModal">Créer un compte</a>
+                        </li>
+                    {% endif %}
+
+
                 </ul>
             </div>
         </div>

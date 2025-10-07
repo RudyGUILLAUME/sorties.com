@@ -6,26 +6,17 @@
                 <h5 class="modal-title">Créer un compte</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
+
             <div class="modal-body p-4">
-                <form>
-                    <div class="mb-3">
-                        <label for="registerUsername" class="form-label">Nom d'utilisateur</label>
-                        <input type="text" class="form-control" id="registerUsername" placeholder="Votre pseudo">
-                    </div>
-                    <div class="mb-3">
-                        <label for="registerEmail" class="form-label">Adresse e-mail</label>
-                        <input type="email" class="form-control" id="registerEmail" placeholder="exemple@email.com">
-                    </div>
-                    <div class="mb-3">
-                        <label for="registerPassword" class="form-label">Mot de passe</label>
-                        <input type="password" class="form-control" id="registerPassword" placeholder="••••••••">
-                    </div>
-                    <div class="mb-3">
-                        <label for="registerConfirm" class="form-label">Confirmer le mot de passe</label>
-                        <input type="password" class="form-control" id="registerConfirm" placeholder="••••••••">
-                    </div>
-                    <button type="submit" class="btn btn-success w-100">S’inscrire</button>
-                </form>
+                {{ form_start(registrationForm, {'action': path('app_register'), 'method': 'POST'}) }}
+                {{ form_row(registrationForm.nom) }}
+                {{ form_row(registrationForm.prenom) }}
+                {{ form_row(registrationForm.mail) }}
+                {{ form_row(registrationForm.plainPassword, {
+                    label: 'Mot de passe'
+                }) }}
+                <button type="submit" class="btn btn-success w-100 mt-3">S’inscrire</button>
+                {{ form_end(registrationForm) }}
             </div>
         </div>
     </div>
