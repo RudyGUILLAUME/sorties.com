@@ -1,33 +1,28 @@
-{# 🔹 Modal de connexion #}
-<div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">Connexion</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+{# partials/modal_connexion.html.twig #}
+
+<div class="modal fade" id="connexionModal" tabindex="-1" aria-labelledby="connexionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="connexionModalLabel">Connexion</h5>
             </div>
+            <div class="modal-body">
+                {% if error is defined and error %}
+                    <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+                {% endif %}
 
-            <div class="modal-body p-4">
-                <form method="post" action="{{ path('app_login') }}">
-                    {% if error %}
-                        <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-                    {% endif %}
-
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Nom d'utilisateur</label>
-                        <input type="text" name="_username" id="username" class="form-control"
-                               value="{{ last_username }}" required autofocus>
+                <form action="{{ path('app_login') }}" method="post">
+                    <div class="form-group mb-3">
+                        <label for="username">Email :</label>
+                        <input type="text" name="_username" id="username"
+                               value="{{ last_username is defined ? last_username : '' }}"
+                               class="form-control" required>
                     </div>
-
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Mot de passe</label>
+                    <div class="form-group mb-3">
+                        <label for="password">Mot de passe :</label>
                         <input type="password" name="_password" id="password" class="form-control" required>
                     </div>
-
-                    <input type="hidden" name="_csrf_token"
-                           value="{{ csrf_token('authenticate') }}">
-
-                    <button type="submit" class="btn btn-primary w-100">Se connecter</button>
+                    <button class="btn btn-primary w-100" type="submit">Se connecter</button>
                 </form>
             </div>
         </div>
