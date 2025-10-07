@@ -137,12 +137,12 @@ class Sortie
         return $this;
     }
 
-    public function getEtat(): ?string
+    public function getEtat(): ?Etat
     {
         return $this->etat;
     }
 
-    public function setEtat(string $etat): static
+    public function setEtat(?Etat $etat): static
     {
         $this->etat = $etat;
 
