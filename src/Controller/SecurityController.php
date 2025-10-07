@@ -18,9 +18,11 @@ class SecurityController extends AbstractController
         // last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();
 
-        return $this->render('security/login.html.twig', [
+        // Instead of rendering a standalone login page, redirect to home and open the modal via flash flag
+        $this->addFlash('open_login_modal', true);
+        return $this->redirectToRoute('app_home', [
             'last_username' => $lastUsername,
-            'error' => $error,
+            'login_error' => $error? $error->getMessageKey(): null,
         ]);
     }
 
