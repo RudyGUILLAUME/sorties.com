@@ -3,8 +3,10 @@
 namespace App\Form;
 
 use App\Entity\Participant;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -68,6 +70,13 @@ class RegistrationFormType extends AbstractType
                         'message' => 'You should agree to our terms.',
                     ]),
                 ],
+            ])
+            ->add('site', EntityType::class, [
+                'class' => 'App\Entity\Site',
+                'choice_label' => 'nom',
+                'label' => 'site',
+                'placeholder' => 'Choisissez votre site',
+
             ])
         ;
     }
