@@ -30,11 +30,16 @@ class RegistrationController extends AbstractController
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
 
+        if ($request->isMethod('GET')) {
+            // Open the register modal on home instead of rendering a standalone page
+            $this->addFlash('open_register_modal', true);
+            return $this->redirectToRoute('app_home');
+        }
+
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var string $plainPassword */
             $plainPassword = $form->get('plainPassword')->getData();
 
-            // encode the plain password
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
             $user->setAdministrateur(0);
             $user->setActif(1);
@@ -42,7 +47,6 @@ class RegistrationController extends AbstractController
             $entityManager->persist($user);
             $entityManager->flush();
 
-            // generate a signed url and email it to the user
             $this->emailVerifier->sendEmailConfirmation('app_verify_email', $user,
                 (new TemplatedEmail())
                     ->from(new Address('verify-account@sortie.com', 'Do not reply !'))
@@ -51,14 +55,15 @@ class RegistrationController extends AbstractController
                     ->htmlTemplate('registration/confirmation_email.html.twig')
             );
 
-            // do anything else you need here, like send an email
-
             return $security->login($user, 'form_login', 'main');
         }
 
-        return $this->render('registration/register.html.twig', [
-            'registrationForm' => $form,
-        ]);
+        // Invalid form submission: flash errors and reopen modal on home
+        foreach ($form->getErrors(true) as $error) {
+            $this->addFlash('danger', $error->getMessage());
+        }
+        $this->addFlash('open_register_modal', true);
+        return $this->redirectToRoute('app_home');
     }
 
     #[Route('/verify/email', name: 'app_verify_email')]
