@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détail de la sortie{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1 class="mb-4">{{ sortie.nom }}</h1>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-3">Date de début</dt>
+                <dd class="col-sm-9">{{ sortie.dateHeureDebut ? sortie.dateHeureDebut|date('d/m/Y H\\hi') : '' }}</dd>
+
+                <dt class="col-sm-3">Clôture inscriptions</dt>
+                <dd class="col-sm-9">{{ sortie.dateLimiteInscription ? sortie.dateLimiteInscription|date('d/m/Y H\\hi') : '' }}</dd>
+
+                <dt class="col-sm-3">Durée</dt>
+                <dd class="col-sm-9">{{ sortie.duree }}</dd>
+
+                <dt class="col-sm-3">Places max</dt>
+                <dd class="col-sm-9">{{ sortie.nbInscriptionsMax }}</dd>
+
+                <dt class="col-sm-3">Lieu</dt>
+                <dd class="col-sm-9">{{ sortie.lieu ? sortie.lieu.nom : '' }}</dd>
+
+                <dt class="col-sm-3">Site</dt>
+                <dd class="col-sm-9">{{ sortie.site ? sortie.site.nom : '' }}</dd>
+
+                <dt class="col-sm-3">Informations</dt>
+                <dd class="col-sm-9">{{ sortie.infosSortie }}</dd>
+            </dl>
+
+            <div class="mt-3 d-flex gap-2">
+                <a href="{{ path('app_sortie_index') }}" class="btn btn-secondary">Retour</a>
+                <a href="{{ path('app_sortie_edit', {id: sortie.id}) }}" class="btn btn-primary">Modifier</a>
+                <form method="post" action="{{ path('app_sortie_delete', {id: sortie.id}) }}" onsubmit="return confirm('Supprimer cette sortie ?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ sortie.id) }}">
+                    <button class="btn btn-outline-danger" type="submit">Supprimer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

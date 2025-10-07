@@ -1,7 +1,8 @@
-<nav class="navbar navbar-expand-lg shadow-sm">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark bg-gradient shadow-sm">
     <div class="container">
-        <a class="navbar-brand d-flex align-items-center" href="#">
-            <img id="logo" src="{{ asset('images/logo.png') }}" alt="Logo Sorties.com" height="100" class="me-2" onclick="window.location.href = '{{ path('app_home') }}';">
+        <a class="navbar-brand d-flex align-items-center" href="{{ path('app_home') }}">
+            <img src="{{ asset('images/testLogo.png') }}" alt="Logo Sorties.com" height="50" class="me-2">
+            <span class="fw-bold text-white">Sorties.com</span>
         </a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -10,7 +11,8 @@
 
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link active" href="{{path('app_home')}}">Accueil</a></li>
+                <li class="nav-item"><a class="nav-link active" href="{{ path('app_home') }}">Accueil</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ path('app_sortie_index') }}">Voir les sorties</a></li>
                 {% if app.user %}
                     <li>
                         <a class="nav-link" href="{{ path('app_profile_show', {'id': app.user.id}) }}">Mon profil</a>
