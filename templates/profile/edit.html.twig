@@ -3,29 +3,102 @@
 {% block title %}Mon profil{% endblock %}
 
 {% block body %}
-    <div class="container mt-4">
-        <h1>Modifier mon profil</h1>
 
-        {% for message in app.flashes('success') %}
-            <div class="alert alert-success">{{ message }}</div>
-        {% endfor %}
-        {% for message in app.flashes('error') %}
-            <div class="alert alert-danger">{{ message }}</div>
-        {% endfor %}
+    <div class="container rounded bg-white mt-5 mb-5">
+        <div class="row">
 
-        {{ form_start(form) }}
-        {{ form_row(form.prenom) }}
-        {{ form_row(form.nom) }}
-        {{ form_row(form.telephone) }}
-        {{ form_row(form.mail) }}
+            {# --- COLONNE PHOTO --- #}
+            <div class="col-md-3 border-right">
+                <div class="d-flex flex-column align-items-center text-center p-3 py-5">
+                    <img class="rounded-circle mt-5" width="150px"
+                         src="{{ asset('images/default-profile.jpg') }}"
+                         alt="Photo de profil">
+                    <span class="font-weight-bold">{{ app.user.prenom ~ ' ' ~ app.user.nom }}</span>
+                    <span class="text-black-50">{{ app.user.mail }}</span>
+                </div>
+            </div>
 
-        <hr>
-        <h4>Changer le mot de passe</h4>
-        {{ form_row(form.oldPassword) }}
-        {{ form_row(form.newPassword) }}
+            {# --- COLONNE FORMULAIRE --- #}
+            <div class="col-md-5 border-right">
+                <div class="p-3 py-5">
 
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="text-right">Mon profil</h4>
+                    </div>
 
-        <button class="btn btn-primary mt-3">Sauvegarder</button>
-        {{ form_end(form) }}
+                    {% for message in app.flashes('success') %}
+                        <div class="alert alert-success">{{ message }}</div>
+                    {% endfor %}
+                    {% for message in app.flashes('error') %}
+                        <div class="alert alert-danger">{{ message }}</div>
+                    {% endfor %}
+
+                    {{ form_start(form) }}
+
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <label class="labels">Prénom</label>
+                            {{ form_widget(form.prenom, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="labels">Nom</label>
+                            {{ form_widget(form.nom, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <label class="labels">Téléphone</label>
+                            {{ form_widget(form.telephone, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="col-md-12 mt-3">
+                            <label class="labels">Email</label>
+                            {{ form_widget(form.mail, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="col-md-12 mt-3">
+                            <label class="labels">Site</label>
+                            {{ form_widget(form.site, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                    </div>
+
+                    <hr>
+                    <h5 class="mt-3">Changer le mot de passe</h5>
+
+                    <div class="row mt-2">
+                        <div class="col-md-12">
+                            <label class="labels">Ancien mot de passe</label>
+                            {{ form_widget(form.oldPassword, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="col-md-12 mt-3">
+                            <label class="labels">Nouveau mot de passe</label>
+                            {{ form_widget(form.newPassword, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                    </div>
+
+                    <div class="mt-5 text-center">
+                        <button class="btn btn-primary profile-button" type="submit">Sauvegarder</button>
+                    </div>
+
+                    {{ form_rest(form) }}
+                    {{ form_end(form) }}
+                </div>
+            </div>
+
+            {# --- COLONNE DROITE --- #}
+            <div class="col-md-4">
+                <div class="p-3 py-5">
+                    <div class="d-flex justify-content-between align-items-center experience">
+                        <span>Informations supplémentaires</span>
+                    </div><br>
+
+                    <div class="col-md-12">
+                        <label class="labels">Autres informations</label>
+                        <input type="text" class="form-control" placeholder="ex: centre d'intérêt, rôle, etc.">
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
+
 {% endblock %}

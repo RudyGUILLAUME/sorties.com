@@ -1,27 +1,114 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Profil - {{ participant.prenom }} {{ participant.nom }}{% endblock %}
+{% block title %}Mon profil{% endblock %}
 
 {% block body %}
-<div class="container mt-4">
-    <h1 class="mb-4">Mon profil</h1>
 
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <h4 class="card-title mb-3">{{ participant.prenom }} {{ participant.nom }}</h4>
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item"><strong>Email :</strong> {{ participant.mail }}</li>
-                <li class="list-group-item"><strong>Téléphone :</strong> {{ participant.telephone }}</li>
-                <li class="list-group-item"><strong>Administrateur :</strong> {{ participant.administrateur ? 'Oui' : 'Non' }}</li>
-                <li class="list-group-item"><strong>Actif :</strong> {{ participant.actif ? 'Oui' : 'Non' }}</li>
-            </ul>
+    <div class="container rounded bg-white mt-5 mb-5">
+        <div class="row">
+
+            {# --- COLONNE PHOTO --- #}
+            <div class="col-md-3 border-right">
+                <div class="d-flex flex-column align-items-center text-center p-3 py-5">
+                    <img class="rounded-circle mt-5" width="150px"
+                         src="{{ asset('images/default-profile.jpg') }}"
+                         alt="Photo de profil">
+                    <span class="font-weight-bold">{{ app.user.prenom ~ ' ' ~ app.user.nom }}</span>
+                    <span class="text-black-50">{{ app.user.mail }}</span>
+                    {% if app.user.site %}
+                        <span class="text-muted">{{ app.user.site.nom }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            {# --- COLONNE INFORMATIONS PRINCIPALES --- #}
+            <div class="col-md-5 border-right">
+                <div class="p-3 py-5">
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="text-right">Mon profil</h4>
+                        <a href="{{ path('app_profile_edit', {'id': app.user.id}) }}" class="btn btn-outline-primary btn-sm">
+                            Modifier
+                        </a>
+
+                    </div>
+
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <label class="labels">Prénom</label>
+                            <p class="form-control-plaintext">{{ app.user.prenom }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="labels">Nom</label>
+                            <p class="form-control-plaintext">{{ app.user.nom }}</p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <label class="labels">Téléphone</label>
+                            <p class="form-control-plaintext">
+                                {{ app.user.telephone is not empty ? app.user.telephone : 'Non renseigné' }}
+                            </p>
+                        </div>
+
+                        <hr>
+
+                        <div class="col-md-12 mt-3">
+                            <label class="labels">Email</label>
+                            <p class="form-control-plaintext">{{ app.user.mail }}</p>
+                        </div>
+
+                        <hr>
+
+                        <div class="col-md-12 mt-3">
+                            <label class="labels">Site</label>
+                            <p class="form-control-plaintext">
+                                {{ app.user.site ? app.user.site.nom : 'Non défini' }}
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <hr>
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# --- COLONNE DROITE --- #}
+            <div class="col-md-4">
+                <div class="p-3 py-5">
+                    <div class="d-flex justify-content-between align-items-center experience">
+                        <span>Autres informations</span>
+                    </div><br>
+
+                    <div class="col-md-12">
+                        <label class="labels">Centres d’intérêt</label>
+                        <p class="form-control-plaintext text-muted">Non renseigné</p>
+                    </div><br>
+
+                    <div class="col-md-12">
+                        <label class="labels">Rôle utilisateur</label>
+                        <p class="form-control-plaintext">
+                            {% if 'ROLE_ADMIN' in app.user.roles %}
+                                Administrateur
+                            {% elseif 'ROLE_USER' in app.user.roles %}
+                                Utilisateur
+                            {% else %}
+                                Non défini
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <a class="btn btn-secondary" href="{{ path('app_profile_edit',{'id': app.user.id}) }}">Modifier</a>
-
-    <div class="mt-3">
-        <a href="{{ path('app_home') }}" class="btn btn-secondary">Retour à l'accueil</a>
-    </div>
-</div>
 {% endblock %}
