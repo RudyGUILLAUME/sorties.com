@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier le lieu{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1 class="mb-4">Modifier le lieu</h1>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            {{ form_start(form) }}
+                <div class="row g-3">
+                    <div class="col-md-6">{{ form_row(form.nom) }}</div>
+                    <div class="col-md-6">{{ form_row(form.rue) }}</div>
+                    <div class="col-md-6">{{ form_row(form.latitude) }}</div>
+                    <div class="col-md-6">{{ form_row(form.longitude) }}</div>
+                    <div class="col-md-12">{{ form_row(form.ville) }}</div>
+                </div>
+                <div class="mt-3 d-flex gap-2">
+                    <a href="{{ path('app_lieu_index') }}" class="btn btn-secondary">Annuler</a>
+                    <button class="btn btn-primary" type="submit">Enregistrer</button>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

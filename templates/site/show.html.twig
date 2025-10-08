@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détail du site{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1 class="mb-4">{{ site.nom }}</h1>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-3">ID</dt>
+                <dd class="col-sm-9">{{ site.id }}</dd>
+                <dt class="col-sm-3">Nom</dt>
+                <dd class="col-sm-9">{{ site.nom }}</dd>
+            </dl>
+            <div class="mt-3 d-flex gap-2">
+                <a href="{{ path('app_site_index') }}" class="btn btn-secondary">Retour</a>
+                <a href="{{ path('app_site_edit', {id: site.id}) }}" class="btn btn-primary">Modifier</a>
+                <form method="post" action="{{ path('app_site_delete', {id: site.id}) }}" onsubmit="return confirm('Supprimer ce site ?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ site.id) }}">
+                    <button class="btn btn-outline-danger" type="submit">Supprimer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

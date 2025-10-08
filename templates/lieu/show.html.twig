@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détail du lieu{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1 class="mb-4">{{ lieu.nom }}</h1>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-3">Rue</dt>
+                <dd class="col-sm-9">{{ lieu.rue }}</dd>
+                <dt class="col-sm-3">Latitude</dt>
+                <dd class="col-sm-9">{{ lieu.latitude }}</dd>
+                <dt class="col-sm-3">Longitude</dt>
+                <dd class="col-sm-9">{{ lieu.longitude }}</dd>
+                <dt class="col-sm-3">Ville</dt>
+                <dd class="col-sm-9">{{ lieu.ville ? lieu.ville.nom : '' }}</dd>
+            </dl>
+            <div class="mt-3 d-flex gap-2">
+                <a href="{{ path('app_lieu_index') }}" class="btn btn-secondary">Retour</a>
+                <a href="{{ path('app_lieu_edit', {id: lieu.id}) }}" class="btn btn-primary">Modifier</a>
+                <form method="post" action="{{ path('app_lieu_delete', {id: lieu.id}) }}" onsubmit="return confirm('Supprimer ce lieu ?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ lieu.id) }}">
+                    <button class="btn btn-outline-danger" type="submit">Supprimer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Lieux{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h1 class="h4 mb-0">Lieux</h1>
+        <a class="btn btn-primary" href="{{ path('app_lieu_new') }}">Nouveau lieu</a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nom</th>
+                        <th>Rue</th>
+                        <th>Latitude</th>
+                        <th>Longitude</th>
+                        <th>Ville</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lieu in lieux %}
+                        <tr>
+                            <td>{{ lieu.id }}</td>
+                            <td>{{ lieu.nom }}</td>
+                            <td>{{ lieu.rue }}</td>
+                            <td>{{ lieu.latitude }}</td>
+                            <td>{{ lieu.longitude }}</td>
+                            <td>{{ lieu.ville ? lieu.ville.nom : '' }}</td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm">
+                                    <a class="btn btn-outline-secondary" href="{{ path('app_lieu_edit', {id: lieu.id}) }}">Modifier</a>
+                                    <a class="btn btn-primary" href="{{ path('app_lieu_show', {id: lieu.id}) }}">Afficher</a>
+                                    <form method="post" action="{{ path('app_lieu_delete', {id: lieu.id}) }}" onsubmit="return confirm('Supprimer ce lieu ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ lieu.id) }}">
+                                        <button class="btn btn-outline-danger" type="submit">Supprimer</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">Aucun lieu.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
