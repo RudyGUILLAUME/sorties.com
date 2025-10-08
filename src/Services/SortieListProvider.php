@@ -1,0 +1,60 @@
+<?php
+
+namespace App\Services;
+
+use App\Entity\Participant;
+use App\Entity\Sortie;
+use App\Repository\SortieRepository;
+
+final class SortieListProvider
+{
+    public function __construct(private readonly SortieRepository $sortieRepository)
+    {
+    }
+
+    /**
+     * @param Participant $currentUser
+     * @param bool $onlyMyRegistrations
+     * @return array<int, array<string, mixed>>
+     */
+    public function getViewModels(Participant $currentUser, bool $onlyMyRegistrations = false): array
+    {
+        $sorties = $onlyMyRegistrations
+            ? $this->sortieRepository->findForParticipantWithRelations($currentUser->getId())
+            : $this->sortieRepository->findAllWithRelations();
+
+        $currentUserId = $currentUser->getId();
+        $isOrganisateur = in_array('ROLE_ORGANISATEUR', $currentUser->getRoles(), true);
+
+        $viewModels = [];
+        foreach ($sorties as $sortie) {
+            \assert($sortie instanceof Sortie);
+            $participants = $sortie->getParticipants();
+            $isRegistered = false;
+            foreach ($participants as $p) {
+                if ($p->getId() === $currentUserId) {
+                    $isRegistered = true;
+                    break;
+                }
+            }
+
+            $viewModels[] = [
+                'id' => $sortie->getId(),
+                'nom' => $sortie->getNom(),
+                'dateHeureDebut' => $sortie->getDateHeureDebut(),
+                'dateLimiteInscription' => $sortie->getDateLimiteInscription(),
+                'nbInscriptions' => $participants->count(),
+                'nbInscriptionsMax' => $sortie->getNbInscriptionsMax(),
+                'etatLibelle' => $sortie->getEtat()?->getLibelle(),
+                'organisateurNom' => $sortie->getOrganisateur()?->getNom(),
+                'isRegistered' => $isRegistered,
+                'canEdit' => $isOrganisateur && $sortie->getOrganisateur()?->getId() === $currentUserId,
+                'canWithdraw' => !$isOrganisateur && $isRegistered,
+            ];
+        }
+
+        return $viewModels;
+    }
+}
+
+

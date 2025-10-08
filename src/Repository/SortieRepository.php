@@ -16,6 +16,39 @@ class SortieRepository extends ServiceEntityRepository
         parent::__construct($registry, Sortie::class);
     }
 
+    /**
+     * Fetch all sorties with organizer, etat and participants to avoid N+1.
+     *
+     * @return Sortie[]
+     */
+    public function findAllWithRelations(): array
+    {
+        return $this->createQueryBuilder('s')
+            ->leftJoin('s.organisateur', 'o')->addSelect('o')
+            ->leftJoin('s.etat', 'e')->addSelect('e')
+            ->leftJoin('s.participants', 'p')->addSelect('p')
+            ->orderBy('s.dateHeureDebut', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Fetch sorties where the given participant is registered, with needed relations.
+     *
+     * @return Sortie[]
+     */
+    public function findForParticipantWithRelations(int $participantId): array
+    {
+        return $this->createQueryBuilder('s')
+            ->leftJoin('s.organisateur', 'o')->addSelect('o')
+            ->leftJoin('s.etat', 'e')->addSelect('e')
+            ->leftJoin('s.participants', 'p')->addSelect('p')
+            ->andWhere('p.id = :pid')
+            ->setParameter('pid', $participantId)
+            ->orderBy('s.dateHeureDebut', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
     //    /**
     //     * @return Sortie[] Returns an array of Sortie objects
     //     */
