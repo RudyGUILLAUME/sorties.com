@@ -13,10 +13,10 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 // #[IsGranted('ROLE_ORGANISATEUR')]
-#[Route('/lieux')]
+#[Route('/lieux', name: 'app_lieu_')]
 final class LieuController extends AbstractController
 {
-    #[Route('', name: 'app_lieu_index', methods: ['GET'])]
+    #[Route('', name: 'index', methods: ['GET'])]
     public function index(LieuRepository $lieuRepository): Response
     {
         return $this->render('lieu/index.html.twig', [
@@ -24,7 +24,7 @@ final class LieuController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_lieu_new', methods: ['GET', 'POST'])]
+    #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $em): Response
     {
         $lieu = new Lieu();
@@ -43,7 +43,7 @@ final class LieuController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_lieu_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'show', methods: ['GET'])]
     public function show(Lieu $lieu): Response
     {
         return $this->render('lieu/show.html.twig', [
@@ -51,7 +51,7 @@ final class LieuController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_lieu_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Lieu $lieu, EntityManagerInterface $em): Response
     {
         $form = $this->createForm(LieuType::class, $lieu);
@@ -69,7 +69,7 @@ final class LieuController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_lieu_delete', methods: ['POST'])]
+    #[Route('/{id}/delete', name: 'delete', methods: ['POST'])]
     public function delete(Request $request, Lieu $lieu, EntityManagerInterface $em): Response
     {
         if ($this->isCsrfTokenValid('delete'.$lieu->getId(), (string) $request->request->get('_token'))) {

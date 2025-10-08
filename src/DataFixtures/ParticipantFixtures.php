@@ -33,7 +33,7 @@ class ParticipantFixtures extends Fixture implements DependentFixtureInterface
         $participant->setActif(true);
         $participant->isVerified(true);
         $participant->setPassword($this->userPasswordHasher->hashPassword($participant, 'mdpadmin'));
-        $participant->setRoles(['ROLE_USER','ROLE_ADMIN']);
+        $participant->setRoles(['ROLE_USER', 'ROLE_ADMIN', 'ROLE_ORGANISATEUR']);
         $num_site=mt_rand(0,9);
         $participant->setSite($this->getReference(SiteFixtures::SITE_REFERENCE_PREFIX . $num_site, Site::class));
         $manager->persist($participant);
@@ -67,8 +67,12 @@ class ParticipantFixtures extends Fixture implements DependentFixtureInterface
             $participant->setActif(true);
             $participant->isVerified(true);
             $participant->setPassword($this->userPasswordHasher->hashPassword($participant, 'fakeuser'));
-            $participant->setRoles(['ROLE_USER']);
-
+            //ROLE_ORGANISATEUR uniquement aux participants 2, 3 et 4.
+            $roles = ['ROLE_USER'];
+            if (in_array($i, [2, 3, 4])) {
+                $roles[] = 'ROLE_ORGANISATEUR';
+            }
+            $participant->setRoles($roles);
             $num_site=mt_rand(0,9);
             $participant->setSite($this->getReference(SiteFixtures::SITE_REFERENCE_PREFIX . $num_site, Site::class));
 

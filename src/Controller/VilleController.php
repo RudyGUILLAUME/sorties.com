@@ -12,11 +12,11 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-// #[IsGranted('ROLE_ORGANISATEUR')]
-#[Route('/villes')]
+ #[IsGranted('ROLE_ORGANISATEUR')]
+#[Route('/villes', name: 'app_ville_')]
 final class VilleController extends AbstractController
 {
-    #[Route('', name: 'app_ville_index', methods: ['GET'])]
+    #[Route('', name: 'index', methods: ['GET'])]
     public function index(VilleRepository $villeRepository): Response
     {
         return $this->render('ville/index.html.twig', [
@@ -24,7 +24,7 @@ final class VilleController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_ville_new', methods: ['GET', 'POST'])]
+    #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $em): Response
     {
         $ville = new Ville();
@@ -43,7 +43,7 @@ final class VilleController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_ville_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'show', methods: ['GET'])]
     public function show(Ville $ville): Response
     {
         return $this->render('ville/show.html.twig', [
@@ -51,7 +51,7 @@ final class VilleController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_ville_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Ville $ville, EntityManagerInterface $em): Response
     {
         $form = $this->createForm(VilleType::class, $ville);
@@ -69,7 +69,7 @@ final class VilleController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_ville_delete', methods: ['POST'])]
+    #[Route('/{id}/delete', name: 'delete', methods: ['POST'])]
     public function delete(Request $request, Ville $ville, EntityManagerInterface $em): Response
     {
         if ($this->isCsrfTokenValid('delete'.$ville->getId(), (string) $request->request->get('_token'))) {
