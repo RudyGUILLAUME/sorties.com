@@ -10,6 +10,7 @@ class AzureBlobService
 {
     private $blobClient;
     private $container;
+
     private $account;
 
     public function __construct(string $account, string $key, string $container)
