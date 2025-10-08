@@ -9,10 +9,11 @@
         {% endfor %}
     {% endfor %}
 
-    <a class="btn btn-primary btn-lg me-3" href="{{ path('app_register') }}">Créer un compte</a>
+
 
     <ul>
-        <li><a href="#">Gérer les participants</a></li>
+        <li><a class="btn btn-primary btn-lg me-3" href="{{ path('app_register') }}">Créer un compte</a></li>
+        <li><a class="btn btn-primary btn-lg me-3" href="{{path('admin_import_csv')}}">Ajout de compte par fichier</a></li>
         <li><a href="#">Autres modules</a></li>
     </ul>
 {% endblock %}
