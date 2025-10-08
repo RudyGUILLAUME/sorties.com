@@ -23,27 +23,27 @@ class RegistrationController extends AbstractController
     {
     }
 
-    #[Route('/register', name: 'app_register')]
-    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, Security $security, EntityManagerInterface $entityManager): Response
+    #[Route('/admin/register', name: 'app_register')]
+    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager): Response
     {
+        if (!$this->isGranted('ROLE_ADMIN')) {
+            return $this->redirectToRoute('app_home');
+        }
+        
         $user = new Participant();
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
-
-        if ($request->isMethod('GET')) {
-            // Open the register modal on home instead of rendering a standalone page
-            $this->addFlash('open_register_modal', true);
-            return $this->redirectToRoute('app_home');
-        }
 
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var string $plainPassword */
             $plainPassword = $form->get('plainPassword')->getData();
 
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
-            $user->setAdministrateur(0);
             $user->setActif(1);
             $user->setRoles(['ROLE_USER']);
+            if($user->isAdministrateur()){
+                $user->addRoles('ROLE_ADMIN');
+            }
 
             $entityManager->persist($user);
             $entityManager->flush();
@@ -55,16 +55,17 @@ class RegistrationController extends AbstractController
                     ->subject('Please Confirm your Email')
                     ->htmlTemplate('registration/confirmation_email.html.twig')
             );
-
-            return $security->login($user, 'form_login', 'main');
+            $this->addFlash('success', 'Compte créé !');
+            return $this->redirectToRoute('admin_panel');
         }
 
         // Invalid form submission: flash errors and reopen modal on home
         foreach ($form->getErrors(true) as $error) {
             $this->addFlash('danger', $error->getMessage());
         }
-        $this->addFlash('open_register_modal', true);
-        return $this->redirectToRoute('app_home');
+        return $this->render('registration/register.html.twig', [
+            'registrationForm' => $form,
+        ]);
     }
 
     #[Route('/verify/email', name: 'app_verify_email')]

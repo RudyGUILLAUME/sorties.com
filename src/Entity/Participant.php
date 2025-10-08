@@ -241,6 +241,15 @@ class Participant implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+    /**
+     * @param string $role
+     */
+    public function addRoles(string $role): static
+    {
+        $this->roles[]= $role;
+
+        return $this;
+    }
 
     /**
      * @see PasswordAuthenticatedUserInterface
