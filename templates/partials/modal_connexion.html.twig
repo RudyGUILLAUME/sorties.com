@@ -1,35 +1,63 @@
 {# partials/modal_connexion.html.twig #}
-
-<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="connexionModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="connexionModalLabel">Connexion</h5>
-            </div>
             <div class="modal-body">
-                {% if error is defined and error %}
-                    <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-                {% endif %}
+                <form class="login-form" action="{{ path('app_login') }}" method="post">
 
-                <form action="{{ path('app_login') }}" method="post">
-                    <div class="form-group mb-3">
-                        <label for="username">Email :</label>
-                        <input type="text" name="_username" id="username"
-                               value="{{ last_username is defined ? last_username : '' }}"
-                               class="form-control" required autocomplete="username">
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="password">Mot de passe :</label>
-                        <input type="password" name="_password" id="password" class="form-control" required autocomplete="current-password">
+                <p class="form-title">Se connecter</p>
+
+                    {% if error is defined and error %}
+                        <div class="alert alert-danger text-center">
+                            {{ error.messageKey|trans(error.messageData, 'security') }}
+                        </div>
+                    {% endif %}
+
+                    <div class="input-container">
+                        <input
+                                type="text"
+                                name="_username"
+                                value="{{ last_username is defined ? last_username : '' }}"
+                                placeholder="Email"
+                                required
+                        />
+                        <span>
+              <svg stroke="currentColor" viewBox="0 0 24 24" fill="none"
+                   xmlns="http://www.w3.org/2000/svg">
+                <path d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
+                      stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></path>
+              </svg>
+            </span>
                     </div>
 
-                    <div class="checkbox mb-3">
-                        <input type="checkbox" name="_remember_me" id="_remember_me">
-                        <label for="_remember_me">Remember me</label>
+                    <div class="input-container">
+                        <input
+                                type="password"
+                                name="_password"
+                                placeholder="Mot de passe"
+                                required
+                        />
+                        <span>
+              <svg stroke="currentColor" viewBox="0 0 24 24" fill="none"
+                   xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></path>
+                <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                      stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></path>
+              </svg>
+            </span>
                     </div>
 
                     <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-                    <button class="btn btn-primary w-100" type="submit">Se connecter</button>
+
+                    <button class="submit" type="submit">Se connecter</button>
+
+                    <p class="signup-link">
+                        Pas encore de compte ?
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#registerModal" data-bs-dismiss="modal">
+                            S'inscrire
+                        </a>
+                    </p>
                 </form>
             </div>
         </div>

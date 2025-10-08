@@ -9,6 +9,7 @@ use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -22,49 +23,51 @@ class RegistrationFormType extends AbstractType
     {
         $builder
             ->add('nom', TextType::class, [
-                'label' => 'nom',
+                'label' => false,
                 'attr' => [
-                    'placeholder' => 'nom',
+                    'class' => 'form-control'
                 ],
             ])
             ->add('prenom', TextType::class, [
-                'label' => 'prenom',
-                'attr' => [
-                    'placeholder' => 'prenom',
-                ],
+                'label' => false,
             ])
             ->add('telephone', TextType::class, [
-                'label' => 'telephone',
-                'attr' => [
-                    'placeholder' => 'telephone',
-                ],
+                'label' => false,
             ])
+
             ->add('mail', EmailType::class, [
-                'label' => 'mail',
-                'attr' => [
-                    'placeholder' => 'mail',
-                ],
+                'label' => false,
             ])
-            ->add('plainPassword', PasswordType::class, [
-                // instead of being set onto the object directly,
-                // this is read and encoded in the controller
-                'label' => 'Password',
+            ->add('plainPassword', RepeatedType::class, [
+                'type' => PasswordType::class,
+                'invalid_message' => 'Les mots de passe doivent correspondre.',
                 'mapped' => false,
-                'attr' => ['autocomplete' => 'new-password'],
+                'first_options' => [
+                    'label' => false,
+                    'attr' => [
+                        'autocomplete' => 'new-password',
+                    ],
+                ],
+                'second_options' => [
+                    'label' => false,
+                    'attr' => [
+                        'autocomplete' => 'new-password',
+                    ],
+                ],
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please enter a password',
+                        'message' => 'Veuillez saisir un mot de passe',
                     ]),
                     new Length([
                         'min' => 6,
                         'minMessage' => 'Votre mot de passe doit contenir au moins 6 caractères',
-                        // max length allowed by Symfony for security reasons
                         'max' => 4096,
                     ]),
                 ],
             ])
             ->add('agreeTerms', CheckboxType::class, [
                 'mapped' => false,
+                'label' => 'J\'accepte les conditions générales d\'utilisation',
                 'constraints' => [
                     new IsTrue([
                         'message' => 'You should agree to our terms.',
@@ -74,8 +77,9 @@ class RegistrationFormType extends AbstractType
             ->add('site', EntityType::class, [
                 'class' => 'App\Entity\Site',
                 'choice_label' => 'nom',
-                'label' => 'site',
+                'label' => false,
                 'placeholder' => 'Choisissez votre site',
+
 
             ])
         ;

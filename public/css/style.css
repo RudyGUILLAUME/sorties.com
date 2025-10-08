@@ -7,9 +7,13 @@ body {
     color: #333;
 }
 
+.container {
+    max-width: 100%;
+}
+
 /* ----------- HERO / BANNIÈRE ----------- */
 .hero {
-    /*background-image: url();*/
+    background-image: url('../images/banniere.png');
     background-size: cover;
     background-position: center;
     color: white;
@@ -33,6 +37,16 @@ body {
 .hero .btn {
     font-size: 1.1rem;
     padding: 0.8rem 1.6rem;
+}
+
+#logo {
+    width: 100px;
+    margin-left: 10rem;
+}
+
+.navbar-nav {
+    margin-left: auto;
+    margin-right: 10rem;
 }
 
 /* ----------- FEATURES ----------- */

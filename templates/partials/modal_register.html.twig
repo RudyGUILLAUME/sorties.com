@@ -1,22 +1,58 @@
 {# partials/modal_register.html.twig #}
-
 <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="registerModalLabel">Créer un compte</h5>
-            </div>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content ">
             <div class="modal-body">
                 {% if registrationForm is defined %}
-                    {{ form_start(registrationForm, { action: path('app_register'), method: 'POST' }) }}
-                    {{ form_errors(registrationForm) }}
-                    {{ form_row(registrationForm.nom) }}
-                    {{ form_row(registrationForm.prenom) }}
-                    {{ form_row(registrationForm.mail) }}
-                    {{ form_row(registrationForm.plainPassword, { label: 'Mot de passe' }) }}
-                    {{ form_row(registrationForm.site) }}
-                    {{ form_row(registrationForm.agreeTerms) }}
-                    <button type="submit" class="btn btn-primary w-100">Créer mon compte</button>
+                    {{ form_start(registrationForm, { action: path('app_register'), method: 'POST', attr: { class: 'register-form' } }) }}
+
+                    <p class="title">Créer un compte</p>
+                    <p class="message">Inscris-toi pour rejoindre Sorties.com</p>
+
+                    <div class="flex">
+                        <label>
+                            {{ form_widget(registrationForm.prenom, {'attr': {'class': 'input'}}) }}
+                            <span>Prénom</span>
+                        </label>
+                        <label>
+                            {{ form_widget(registrationForm.nom, {'attr': {'class': 'input'}}) }}
+                            <span>Nom</span>
+                        </label>
+                    </div>
+
+                    <label>
+                        {{ form_widget(registrationForm.mail, {'attr': {'class': 'input'}}) }}
+                        <span>Email</span>
+                    </label>
+
+                    <label>
+                        {{ form_widget(registrationForm.telephone, {'attr': {'class': 'input'}}) }}
+                        <span>Téléphone</span>
+                    </label>
+
+                    <label>
+                        {{ form_widget(registrationForm.plainPassword.first, {'attr': {'class': 'input'}}) }}
+                        <span>Mot de passe</span>
+                    </label>
+
+                    <label>
+                        {{ form_widget(registrationForm.plainPassword.second, {'attr': {'class': 'input'}}) }}
+                        <span>Confirmer le mot de passe</span>
+                    </label>
+
+                    <label>
+                        {{ form_row(registrationForm.site, { 'attr':{'class': 'input'}}) }}
+                    </label>
+
+                    <label>
+                        {{ form_row(registrationForm.agreeTerms, { 'attr':{'class': 'input'}}) }}
+                    </label>
+
+
+
+
+                    <button type="submit" class="submit">S’inscrire</button>
+                    <p class="signin">Déjà un compte ? <a href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Connexion</a></p>
                     {{ form_end(registrationForm) }}
                 {% else %}
                     <div class="alert alert-info">
