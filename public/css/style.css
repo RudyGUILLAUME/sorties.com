@@ -353,5 +353,14 @@ body.modal-open #main-content {
     border: solid 1px #BA68C8
 }
 
+.profile-img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;      /* Recadre proprement */
+    border-radius: 50%;     /* Rend parfaitement rond */
+    border: 2px solid #ddd; /* Optionnel : petit cadre */
+}
+
+
 
 
