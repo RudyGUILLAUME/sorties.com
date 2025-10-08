@@ -3,6 +3,8 @@
 namespace App\Form;
 
 use App\Entity\Participant;
+use App\Entity\Site;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -32,8 +34,17 @@ class ModifierProfilType extends AbstractType
                 'constraints' => [
                     new Assert\Length(['min' => 6, 'minMessage' => '6 caractères minimum']),
                 ],
+            ])
+            ->add('site', EntityType::class, [
+                'class' => Site::class,
+                'choice_label' => 'nom',
+                'placeholder' => 'Choisissez votre site',
+                'label' => false,
+                'required' => false,
+                'attr' => [
+                    'class' => 'form-control'
+                ],
             ]);
-        ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void
