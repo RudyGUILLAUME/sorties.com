@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Participant;
 use App\Entity\Sortie;
 use App\Form\SortieType;
 use Doctrine\ORM\EntityManagerInterface;
@@ -29,12 +30,15 @@ final class SortieController extends AbstractController
     public function new(Request $request, EntityManagerInterface $em, EtatRepository $etatRepository): Response
     {
 
+        /** @var Participant $participant */
+        $participant = $this->getUser();
+
         $sortie = new Sortie();
 
         // Préremplissage si besoin
         $sortie->setDateHeureDebut(new \DateTime('+1 day'));
         $sortie->setDateLimiteInscription(new \DateTime('+12 hours'));
-        $sortie->setOrganisateur($user); // 👈 Définir l’organisateur connecté Besoin authentification
+        $sortie->setOrganisateur($participant); // 👈 Définir l’organisateur connecté Besoin authentification
 
         $form = $this->createForm(SortieType::class, $sortie);
         $form->handleRequest($request);
@@ -69,6 +73,7 @@ final class SortieController extends AbstractController
     #[Route('/sorties/{id}/edit', name: 'app_sortie_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Sortie $sortie, EntityManagerInterface $em): Response
     {
+
         $form = $this->createForm(SortieType::class, $sortie);
         $form->handleRequest($request);
 
