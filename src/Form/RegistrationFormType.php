@@ -23,33 +23,51 @@ class RegistrationFormType extends AbstractType
     {
         $builder
             ->add('nom', TextType::class, [
-                'label' => false,
+                'label' => "Nom",
                 'attr' => [
                     'class' => 'form-control'
                 ],
             ])
             ->add('prenom', TextType::class, [
-                'label' => false,
+                'label' => "Prenom",
             ])
             ->add('telephone', TextType::class, [
-                'label' => false,
+                'label' => "Téléphone",
             ])
 
             ->add('mail', EmailType::class, [
-                'label' => false,
+                'label' => "Mail",
+            ])
+            ->add('administrateur', CheckboxType::class, [
+                'label' => 'Administrateur',
+                'attr' => [
+                    'placeholder' => 'administrateur',
+                ],
+                'required' => false,
+            ])
+            ->add('site', EntityType::class, [
+                'class' => 'App\Entity\Site',
+                'choice_label' => 'nom',
+                'label' => 'site',
+                'placeholder' => 'Choisissez votre site',
+
             ])
             ->add('plainPassword', RepeatedType::class, [
                 'type' => PasswordType::class,
                 'invalid_message' => 'Les mots de passe doivent correspondre.',
+                // instead of being set onto the object directly,
+                // this is read and encoded in the controller
+                'label' => 'Password',
+
                 'mapped' => false,
                 'first_options' => [
-                    'label' => false,
+                    'label' => "Mot de passe",
                     'attr' => [
                         'autocomplete' => 'new-password',
                     ],
                 ],
                 'second_options' => [
-                    'label' => false,
+                    'label' => "Confirmation du mot de passe",
                     'attr' => [
                         'autocomplete' => 'new-password',
                     ],
@@ -73,14 +91,6 @@ class RegistrationFormType extends AbstractType
                         'message' => 'You should agree to our terms.',
                     ]),
                 ],
-            ])
-            ->add('site', EntityType::class, [
-                'class' => 'App\Entity\Site',
-                'choice_label' => 'nom',
-                'label' => false,
-                'placeholder' => 'Choisissez votre site',
-
-
             ])
         ;
     }

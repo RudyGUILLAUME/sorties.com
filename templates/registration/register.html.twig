@@ -3,11 +3,12 @@
 {% block title %}Register{% endblock %}
 
 {% block body %}
+    <link rel="stylesheet" href="{{ asset('css/register.css') }}">
     {% for flash_error in app.flashes('verify_email_error') %}
         <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
     {% endfor %}
 
-    <h1>Register</h1>
+    <h1 class="admin-h1">Register</h1>
 
     {{ form_errors(registrationForm) }}
 
@@ -16,11 +17,13 @@
         {{ form_row(registrationForm.prenom) }}
         {{ form_row(registrationForm.telephone) }}
         {{ form_row(registrationForm.mail) }}
+        {{ form_row(registrationForm.site) }}
         {{ form_row(registrationForm.plainPassword, {
             label: 'Password'
         }) }}
+        {{ form_row(registrationForm.administrateur) }}
         {{ form_row(registrationForm.agreeTerms) }}
 
-        <button type="submit" class="btn">Register</button>
+        <button type="submit" class="bouton-form">Register</button>
     {{ form_end(registrationForm) }}
 {% endblock %}
