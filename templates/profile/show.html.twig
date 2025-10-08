@@ -10,9 +10,11 @@
             {# --- COLONNE PHOTO --- #}
             <div class="col-md-3 border-right">
                 <div class="d-flex flex-column align-items-center text-center p-3 py-5">
-                    <img class="rounded-circle mt-5" width="150px"
-                         src="{{ asset('images/default-profile.jpg') }}"
-                         alt="Photo de profil">
+                    <img src="{{ app.user.imageProfil ?? asset('images/default-profile.jpg') }}"
+                         alt="Photo de profil"
+                         class="profile-img"
+                         width="150" height="150">
+
                     <span class="font-weight-bold">{{ app.user.prenom ~ ' ' ~ app.user.nom }}</span>
                     <span class="text-black-50">{{ app.user.mail }}</span>
                     {% if app.user.site %}
