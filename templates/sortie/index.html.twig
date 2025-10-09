@@ -25,6 +25,80 @@
             {% endif %}
         </div>
 
+    <div class="card shadow-sm mb-3 p-3">
+        {{ form_start(searchForm, {attr: {class: 'row g-2 align-items-end'}}) }}
+            <div class="col-12 col-md-4">{{ form_row(searchForm.q) }}</div>
+            <div class="col-12 col-md-3">{{ form_row(searchForm.site) }}</div>
+            <div class="col-6 col-md-2">{{ form_row(searchForm.dateMin) }}</div>
+            <div class="col-6 col-md-2">{{ form_row(searchForm.dateMax) }}</div>
+            <div class="col-12 d-flex flex-wrap gap-3 align-items-center">
+                {{ form_row(searchForm.organisateur) }}
+                {{ form_row(searchForm.inscrit) }}
+                {{ form_row(searchForm.nonInscrit) }}
+                {{ form_row(searchForm.passees) }}
+                <div class="ms-auto d-flex gap-2">
+                    {{ form_row(searchForm.search) }}
+                    <a href="{{ path('app_sortie_index') }}" class="btn btn-outline-secondary">Réinitialiser</a>
+                </div>
+            </div>
+        {{ form_end(searchForm) }}
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nom de la sortie</th>
+                        <th>Date de la sortie</th>
+                        <th>Clôture inscriptions</th>
+                        <th>Places max</th>
+                        <th>Etat</th>
+                        <th>Inscription</th>
+                        <th>Organisateur</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in sorties %}
+                        <tr>
+                            <td>{{ s.nom }}</td>
+                            <td>{{ s.dateHeureDebut ? s.dateHeureDebut|date('d/m/Y H\\hi') : '' }}</td>
+                            <td>{{ s.dateLimiteInscription ? s.dateLimiteInscription|date('d/m/Y H\\hi') : '' }}</td>
+                            <td>{{ s.participants|length }} / {{ s.nbInscriptionsMax }}</td>
+                            <td>{{ s.etat.libelle }}</td>
+                            <td>
+                                {% if participant and s.participants.contains(participant) %}
+                                    <form method="post" action="{{ path('app_sortie_unsubscribe', {'id': s.id}) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('unsubscribe' ~ s.id) }}">
+                                        <button class="btn btn-warning" type="submit">Se désinscrire</button>
+                                    </form>
+                                {% else %}
+                                    <form method="post" action="{{ path('app_sortie_subscribe', {'id': s.id}) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('subscribe' ~ s.id) }}">
+                                        <button class="btn btn-success" type="submit">S'inscrire</button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                            <td>{{ s.organisateur.prenom }} {{ s.organisateur.nom }}</td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a class="btn btn-outline-secondary" href="{{ path('app_sortie_edit', {id: s.id}) }}">Modifier</a>
+                                    <a class="btn btn-primary" href="{{ path('app_sortie_show', {id: s.id}) }}">Afficher</a>
+                                    <form method="post" action="{{ path('app_sortie_delete', {id: s.id}) }}" onsubmit="return confirm('Supprimer cette sortie ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ s.id) }}">
+                                        <button class="btn btn-outline-danger" type="submit">Supprimer</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">Aucune sortie à afficher.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         <!-- Menu Onglets -->
         <ul class="nav nav-tabs mb-3" id="sortieTabs" role="tablist">
             <li class="nav-item" role="presentation">

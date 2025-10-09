@@ -29,6 +29,15 @@ final class SortieController extends AbstractController
         $sortiesDisponibles = $sortieRepository->findDisponibles($now);
         $sortiesPleines = $sortieRepository->findPleines($now);
         $sortiesArchivees = $sortieRepository->findArchivees($archivageDate);
+        
+        // Build and handle search form
+        $form = $this->createForm(\App\Form\SortieSearchType::class, null, [
+            'method' => 'GET'
+        ]);
+        $form->handleRequest($request);
+        $criteria = $form->getData() ?? [];
+
+        $sorties = $sortieRepository->search($criteria, $participant?->getId());
 
         foreach ($sorties as $sortie) {
             $etatActuel = $sortie->getEtat()->getLibelle();
@@ -50,6 +59,7 @@ final class SortieController extends AbstractController
         return $this->render('sortie/index.html.twig', [
             'sorties' => $sorties,
             'participant' => $participant,
+            'searchForm' => $form->createView(),
             'sortiesDisponibles' => $sortiesDisponibles,
             'sortiesPleines' => $sortiesPleines,
             'sortiesArchivees' => $sortiesArchivees,

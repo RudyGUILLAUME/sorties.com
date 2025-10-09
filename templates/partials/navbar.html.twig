@@ -13,7 +13,6 @@
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item"><a class="nav-link active" href="{{ path('app_home') }}">Accueil</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ path('app_sortie_index') }}">Voir les sorties</a></li>
-
                 {% if app.user %}
                     {% if is_granted("ROLE_ADMIN") %}
                         <li class="nav-item">
