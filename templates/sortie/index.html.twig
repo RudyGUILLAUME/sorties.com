@@ -70,6 +70,9 @@
                         <th>Inscrits/Places</th>
                         <th>Etat</th>
                         <th>Inscrit</th>
+                        <th>Places max</th>
+                        <th>Etat</th>
+                        <th>Inscription</th>
                         <th>Organisateur</th>
                         <th class="text-end">Actions</th>
                     </tr>
@@ -86,6 +89,22 @@
                             <td>{{ app.user in s.participants ? 'Oui' : 'Non' }}</td>
                             <td>{{ s.organisateur.nom }}</td>
 
+                            <td>{{ s.participants|length }} / {{ s.nbInscriptionsMax }}</td>
+                            <td>{{ s.etat.libelle }}</td>
+                            <td>
+                                {% if participant and s.participants.contains(participant) %}
+                                    <form method="post" action="{{ path('app_sortie_unsubscribe', {'id': s.id}) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('unsubscribe' ~ s.id) }}">
+                                        <button class="btn btn-warning" type="submit">Se désinscrire</button>
+                                    </form>
+                                {% else %}
+                                    <form method="post" action="{{ path('app_sortie_subscribe', {'id': s.id}) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('subscribe' ~ s.id) }}">
+                                        <button class="btn btn-success" type="submit">S'inscrire</button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                            <td>{{ s.organisateur.prenom }} {{ s.organisateur.nom }}</td>
                             <td class="text-end">
                                 <div class="btn-group btn-group-sm" role="group">
                                     <a class="btn btn-outline-secondary" href="{{ path('app_sortie_edit', {id: s.id}) }}">Modifier</a>

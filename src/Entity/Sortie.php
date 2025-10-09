@@ -196,7 +196,7 @@ class Sortie
     public function addParticipant(Participant $participant): static
     {
         if (!$this->participants->contains($participant)) {
-            $this->participants->add($participant);
+            $this->participants[] = $participant;
         }
 
         return $this;
