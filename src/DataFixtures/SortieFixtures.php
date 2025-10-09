@@ -22,34 +22,47 @@ class SortieFixtures extends Fixture implements DependentFixtureInterface
 
     public function load(ObjectManager $manager): void
     {
-        for ($i = 0; $i < 5; $i++) {
+
+        $now = new \DateTime();
+
+        for ($i = 0; $i < 15; $i++) {
             $sortie = new Sortie();
             $sortie->setNom($this->faker->sentence(5));
-            $sortie->setDateHeureDebut($this->faker->dateTime());
+            $dateDebut = $this->faker->dateTimeBetween('-2 months', '+2 months'); // Date proche pour les tests
+            $sortie->setDateHeureDebut($dateDebut);
             $sortie->setDuree($this->faker->time());
             $sortie->setDateLimiteInscription($this->faker->dateTimeBetween('-1 month', $sortie->getDateLimiteInscription()));
             $sortie->setNbInscriptionsMax($this->faker->numberBetween(1, 30));
             $sortie->setInfosSortie($this->faker->paragraph(2));
+
+            // Affecter lieu, site, organisateur
             $num_lieu=mt_rand(0,9);
             $sortie->setLieu($this->getReference(LieuFixtures::LIEU_REFERENCE_PREFIX . $num_lieu, Lieu::class));
             $num_site=mt_rand(0,9);
             $sortie->setSite($this->getReference(SiteFixtures::SITE_REFERENCE_PREFIX . $num_site, Site::class));
             $num_etat=mt_rand(0,5);
-            $sortie->setEtat($this->getReference(EtatFixtures::ETAT_REFERENCE_PREFIX . $num_etat, Etat::class));
             $num_organisateur=mt_rand(0,9);
             $sortie->setOrganisateur($this->getReference(ParticipantFixtures::PARTICIPANT_REFERENCE_PREFIX . $num_organisateur, Participant::class));
 
+            // Si la date de début est passée, on force l'état à "Clôturée"
+            if ($dateDebut < $now) {
+                $etatCloturee = $manager->getRepository(Etat::class)->findOneBy(['libelle' => 'Clôturée']);
+                $sortie->setEtat($etatCloturee);
+            } else {
+                $sortie->setEtat($this->getReference(EtatFixtures::ETAT_REFERENCE_PREFIX . $num_etat, Etat::class));
+            }
+
 
             $used = [];
-            $nbParticipants = mt_rand(2, 8);
+            $maxPlaces = $sortie->getNbInscriptionsMax();
+            $nbParticipants = mt_rand(2, min(8, $maxPlaces)); // 🔒 max = nb max d'inscriptions
 
             for ($j = 0; $j < $nbParticipants; $j++) {
-                $index = mt_rand(0, 10-1);
+                do {
+                    $index = mt_rand(0, 9);
+                } while (in_array($index, $used));
 
-                // éviter les doublons
-                if (in_array($index, $used)) continue;
                 $used[] = $index;
-
                 $participant = $this->getReference(ParticipantFixtures::PARTICIPANT_REFERENCE_PREFIX . $index, Participant::class);
                 $sortie->addParticipant($participant);
             }
