@@ -18,15 +18,24 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 final class SortieController extends AbstractController
 {
     #[Route('/', name: 'index', methods: ['GET'])]
-    public function index(SortieRepository $sortieRepository): Response
+    public function index(Request $request, SortieRepository $sortieRepository): Response
     {
-        $sorties = $sortieRepository->findBy([], ['dateHeureDebut' => 'DESC']);
-        /** @var Participant $participant */
+        /** @var Participant|null $participant */
         $participant = $this->getUser();
+
+        // Build and handle search form
+        $form = $this->createForm(\App\Form\SortieSearchType::class, null, [
+            'method' => 'GET'
+        ]);
+        $form->handleRequest($request);
+        $criteria = $form->getData() ?? [];
+
+        $sorties = $sortieRepository->search($criteria, $participant?->getId());
 
         return $this->render('sortie/index.html.twig', [
             'sorties' => $sorties,
             'participant' => $participant,
+            'searchForm' => $form->createView(),
         ]);
     }
 

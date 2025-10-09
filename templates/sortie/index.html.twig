@@ -14,6 +14,25 @@
         </div>
     </div>
 
+    <div class="card shadow-sm mb-3 p-3">
+        {{ form_start(searchForm, {attr: {class: 'row g-2 align-items-end'}}) }}
+            <div class="col-12 col-md-4">{{ form_row(searchForm.q) }}</div>
+            <div class="col-12 col-md-3">{{ form_row(searchForm.site) }}</div>
+            <div class="col-6 col-md-2">{{ form_row(searchForm.dateMin) }}</div>
+            <div class="col-6 col-md-2">{{ form_row(searchForm.dateMax) }}</div>
+            <div class="col-12 d-flex flex-wrap gap-3 align-items-center">
+                {{ form_row(searchForm.organisateur) }}
+                {{ form_row(searchForm.inscrit) }}
+                {{ form_row(searchForm.nonInscrit) }}
+                {{ form_row(searchForm.passees) }}
+                <div class="ms-auto d-flex gap-2">
+                    {{ form_row(searchForm.search) }}
+                    <a href="{{ path('app_sortie_index') }}" class="btn btn-outline-secondary">Réinitialiser</a>
+                </div>
+            </div>
+        {{ form_end(searchForm) }}
+    </div>
+
     <div class="card shadow-sm">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
