@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Lieu;
 use App\Form\LieuType;
 use App\Repository\LieuRepository;
+use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -73,9 +74,15 @@ final class LieuController extends AbstractController
     public function delete(Request $request, Lieu $lieu, EntityManagerInterface $em): Response
     {
         if ($this->isCsrfTokenValid('delete'.$lieu->getId(), (string) $request->request->get('_token'))) {
-            $em->remove($lieu);
-            $em->flush();
-            $this->addFlash('success', 'Le lieu a été supprimé.');
+            try{
+                $em->remove($lieu);
+                $em->flush();
+                $this->addFlash('success', 'Le lieu a été supprimé.');
+            } catch (ForeignKeyConstraintViolationException $e) {
+                $this->addFlash('error', "⚠️ Impossible de supprimer le lieu {$lieu->getNom()} car il est encore lié à une ou plusieurs sorties.");
+            } catch (\Exception $e) {
+                $this->addFlash('error', "❌ Une erreur est survenue lors de la suppression du lieu.");
+            }
         }
 
         return $this->redirectToRoute('app_lieu_index');
