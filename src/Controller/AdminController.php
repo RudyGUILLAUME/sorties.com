@@ -39,12 +39,17 @@ final class AdminController extends AbstractController
             $file = $form->get('csv_file')->getData();
 
             if ($file) {
-                $count=$csv->createUsers($file->getPathname(),$em,$passwordHasher);
+                $return=$csv->createUsers($file->getPathname(),$em,$passwordHasher);
 
-                $this->addFlash('success', "$count utilisateurs importés avec succès !");
+                if (!empty($return[1])) {
+                    $this->addFlash('warning', implode(' ', $return[1]));
+                }
+
+                $this->addFlash('success', "$return[0] utilisateurs importés avec succès !");
                 return $this->redirectToRoute('admin_import_csv');
             }
         }
+
 
         return $this->render('admin/import.html.twig', [
             'form' => $form->createView(),
