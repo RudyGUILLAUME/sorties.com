@@ -2,9 +2,9 @@
 
 namespace App\Controller;
 
-use App\Entity\Participant;
 use App\Entity\Sortie;
 use App\Form\SortieType;
+use App\Repository\SiteRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\EtatRepository;
 use App\Repository\SortieRepository;
@@ -17,21 +17,32 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/sorties', name: 'app_sortie_')]
 final class SortieController extends AbstractController
 {
-    #[Route('/', name: 'index', methods: ['GET'])]
-    public function index(SortieRepository $sortieRepository): Response
+    #[Route('/sorties', name: 'app_sortie_index', methods: ['GET'])]
+    public function index(Request $request, SortieRepository $sortieRepository, SiteRepository $siteRepository): Response
     {
-        $sorties = $sortieRepository->findBy([], ['dateHeureDebut' => 'DESC']);
-        /** @var Participant $participant */
-        $participant = $this->getUser();
+        $q = $request->query->get('q');
+        $siteId = $request->query->get('site');
+        $dateDebut = $request->query->get('dateDebut');
+        $dateFin = $request->query->get('dateFin');
+
+        // conversions
+        $siteId = $siteId ? (int) $siteId : null;
+        $dateDebut = $dateDebut ? new \DateTime($dateDebut) : null;
+        $dateFin = $dateFin ? new \DateTime($dateFin) : null;
+
+        $sorties = $sortieRepository->findByFilters($q, $siteId, $dateDebut, $dateFin);
 
         return $this->render('sortie/index.html.twig', [
             'sorties' => $sorties,
-            'participant' => $participant,
+            'sites' => $siteRepository->findAll(),
         ]);
     }
 
-    #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    #[IsGranted('ROLE_ORGANISATEUR')]
+
+
+
+
+    #[Route('/sorties/new', name: 'app_sortie_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $em, EtatRepository $etatRepository): Response
     {
 
@@ -40,6 +51,7 @@ final class SortieController extends AbstractController
         // Préremplissage si besoin
         $sortie->setDateHeureDebut(new \DateTime('+1 day'));
         $sortie->setDateLimiteInscription(new \DateTime('+12 hours'));
+        $sortie->setOrganisateur($user); // 👈 Définir l’organisateur connecté Besoin authentification
         $sortie->setOrganisateur($this.participant); // 👈 Définir l’organisateur connecté Besoin authentification
 
         $form = $this->createForm(SortieType::class, $sortie);

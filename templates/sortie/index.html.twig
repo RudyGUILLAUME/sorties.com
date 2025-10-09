@@ -14,14 +14,62 @@
         </div>
     </div>
 
+    {# --- FORMULAIRE DE RECHERCHE PAR NOM --- #}
+    <form method="get" action="{{ path('app_sortie_index') }}" class="mb-3 d-flex gap-2">
+        <input type="text" name="q" value="{{ app.request.get('q') }}" class="form-control" placeholder="Rechercher une sortie...">
+        <button type="submit" class="btn btn-outline-primary">Rechercher</button>
+        {% if app.request.get('q') %}
+            <a href="{{ path('app_sortie_index') }}" class="btn btn-outline-secondary">Réinitialiser</a>
+        {% endif %}
+    </form>
+
+    {# --- FORMULAIRE DE FILTRE PAR SITE --- #}
+    <form method="get" action="{{ path('app_sortie_index') }}" class="mb-4">
+        <label for="site" class="form-label">Filtrer par site :</label>
+        <select id="site" name="site" class="form-select w-auto" onchange="this.form.submit()">
+            <option value="">Tous les sites</option>
+            {% for site in sites %}
+                <option value="{{ site.id }}" {% if app.request.get('site') == site.id|striptags %}selected{% endif %}>
+                    {{ site.nom }}
+                </option>
+            {% endfor %}
+        </select>
+    </form>
+
+    {# --- FORMULAIRE DE FILTRE PAR DATE --- #}
+    <form method="get" action="{{ path('app_sortie_index') }}" class="mb-4 row g-2 align-items-end">
+        <div class="col-md-4">
+            <label for="dateDebut" class="form-label">Entre :</label>
+            <input type="date" id="dateDebut" name="dateDebut"
+                   value="{{ app.request.get('dateDebut') }}"
+                   class="form-control">
+        </div>
+        <div class="col-md-4">
+            <label for="dateFin" class="form-label">et :</label>
+            <input type="date" id="dateFin" name="dateFin"
+                   value="{{ app.request.get('dateFin') }}"
+                   class="form-control">
+        </div>
+        <div class="col-md-4 text-end">
+            <button type="submit" class="btn btn-outline-primary">Filtrer</button>
+            {% if app.request.get('dateDebut') or app.request.get('dateFin') %}
+                <a href="{{ path('app_sortie_index') }}" class="btn btn-outline-secondary">Réinitialiser</a>
+            {% endif %}
+        </div>
+    </form>
+
     <div class="card shadow-sm">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
                         <th>Nom de la sortie</th>
+                        <th>Site</th>
                         <th>Date de la sortie</th>
                         <th>Clôture inscriptions</th>
+                        <th>Inscrits/Places</th>
+                        <th>Etat</th>
+                        <th>Inscrit</th>
                         <th>Places max</th>
                         <th>Etat</th>
                         <th>Inscription</th>
@@ -33,8 +81,14 @@
                     {% for s in sorties %}
                         <tr>
                             <td>{{ s.nom }}</td>
+                            <td>{{ s.site.nom }}</td>
                             <td>{{ s.dateHeureDebut ? s.dateHeureDebut|date('d/m/Y H\\hi') : '' }}</td>
                             <td>{{ s.dateLimiteInscription ? s.dateLimiteInscription|date('d/m/Y H\\hi') : '' }}</td>
+                            <td>{{ s.participants|length }}/{{ s.nbInscriptionsMax }}</td>
+                            <td>{{ s.etat.libelle }}</td>
+                            <td>{{ app.user in s.participants ? 'Oui' : 'Non' }}</td>
+                            <td>{{ s.organisateur.nom }}</td>
+
                             <td>{{ s.participants|length }} / {{ s.nbInscriptionsMax }}</td>
                             <td>{{ s.etat.libelle }}</td>
                             <td>
