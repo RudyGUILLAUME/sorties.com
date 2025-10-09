@@ -5,9 +5,8 @@ namespace App\Controller;
 use App\Entity\Participant;
 use App\Form\ImportCsvType;
 use App\Repository\ParticipantRepository;
-use App\Repository\SiteRepository;
+use App\Repository\SortieRepository;
 use App\Service\FichierCSVService;
-use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -70,13 +69,22 @@ final class AdminController extends AbstractController
     }
 
     #[Route('/{id}/toggle', name: 'toggle', methods: ['POST'])]
-    public function toggle(Request $request, Participant $participant, EntityManagerInterface $em): Response
+    public function toggle(Request $request, Participant $participant, EntityManagerInterface $em,SortieRepository $sortieRepository): Response
     {
         if ($this->isCsrfTokenValid('toggle'.$participant->getId(), (string) $request->request->get('_token'))) {
 
             if($participant->isActif()){
                 $participant->setActif(false);
                 $message="Le participant a été désactivé.";
+                $sorties = $sortieRepository->findBy([]);
+                foreach ($sorties as $sortie) {
+                    if($sortie->getParticipants()->contains($participant)){
+                        $sortie->getParticipants()->removeElement($participant);
+                    }
+                    if($sortie->getOrganisateur()===$participant){
+                        $em->remove($sortie);
+                    }
+                }
             }
             else{
                 $participant->setActif(true);

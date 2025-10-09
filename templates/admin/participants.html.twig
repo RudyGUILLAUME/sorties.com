@@ -40,7 +40,7 @@
                                 <div class="btn-group btn-group-sm">
                                     <a class="btn btn-outline-secondary" href="{{ path('app_profile_edit', {id: participant.id}) }}">Modifier</a>
                                     <a class="btn btn-primary" href="{{ path('app_profile_show', {id: participant.id}) }}">Afficher</a>
-                                    <form method="post" action="{{ path('admin_toggle', {id: participant.id}) }}">
+                                    <form method="post" action="{{ path('admin_toggle', {id: participant.id}) }}" {% if participant.actif %}onsubmit="return confirm('Désactiver ce participant ? Cela supprimera les sorties dont il est le créateur.');"{% endif %}>
                                         <input type="hidden" name="_token" value="{{ csrf_token('toggle' ~ participant.id) }}">
                                         {%  if participant.actif %}
                                             <button class="btn btn-outline-danger" type="submit">Désactiver</button>
