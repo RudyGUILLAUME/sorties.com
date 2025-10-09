@@ -18,7 +18,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 final class SortieController extends AbstractController
 {
     #[Route('/', name: 'index', methods: ['GET'])]
-    public function index(SortieRepository $sortieRepository, EntityManagerInterface $em, EtatRepository $etatRepository): Response
+    public function index(SortieRepository $sortieRepository, EntityManagerInterface $em, EtatRepository $etatRepository, Request $request): Response
     {
         $sorties = $sortieRepository->findBy([], ['dateHeureDebut' => 'DESC']);
         $participant = $this->getUser();
