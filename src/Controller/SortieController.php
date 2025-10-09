@@ -36,11 +36,12 @@ final class SortieController extends AbstractController
     {
 
         $sortie = new Sortie();
+        $participant = $this->getUser();
 
         // Préremplissage si besoin
         $sortie->setDateHeureDebut(new \DateTime('+1 day'));
         $sortie->setDateLimiteInscription(new \DateTime('+12 hours'));
-        $sortie->setOrganisateur($this.participant); // 👈 Définir l’organisateur connecté Besoin authentification
+        $sortie->setOrganisateur($participant); // 👈 Définir l’organisateur connecté Besoin authentification
 
         $form = $this->createForm(SortieType::class, $sortie);
         $form->handleRequest($request);
