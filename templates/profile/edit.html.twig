@@ -75,6 +75,10 @@
                             <label class="labels">Nouveau mot de passe</label>
                             {{ form_widget(form.newPassword, {'attr': {'class': 'form-control'}}) }}
                         </div>
+                        <div>
+                            <label class="labels">Changer la photo de profil</label>
+                            {{ form_widget(form.imageFile, {'attr': {'class': 'button-upload'}}) }}
+                        </div>
                     </div>
 
                     <div class="mt-5 text-center">
