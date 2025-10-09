@@ -49,38 +49,6 @@ class SortieRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
-
-    public function findByFilters(?string $term, ?int $siteId, ?\DateTimeInterface $dateDebut, ?\DateTimeInterface $dateFin): array
-    {
-        $qb = $this->createQueryBuilder('s')
-            ->leftJoin('s.site', 'site')
-            ->addSelect('site')
-            ->orderBy('s.dateHeureDebut', 'ASC');
-
-        if ($term) {
-            $qb->andWhere('s.nom LIKE :term')
-                ->setParameter('term', '%' . $term . '%');
-        }
-
-        if ($siteId) {
-            $qb->andWhere('site.id = :siteId')
-                ->setParameter('siteId', $siteId);
-        }
-
-        if ($dateDebut) {
-            $qb->andWhere('s.dateHeureDebut >= :dateDebut')
-                ->setParameter('dateDebut', $dateDebut->setTime(0, 0, 0));
-        }
-
-        if ($dateFin) {
-            $qb->andWhere('s.dateHeureDebut <= :dateFin')
-                ->setParameter('dateFin', $dateFin->setTime(23, 59, 59));
-        }
-
-        return $qb->getQuery()->getResult();
-    }
-
-
     //    /**
     //     * @return Sortie[] Returns an array of Sortie objects
     //     */
