@@ -13,14 +13,22 @@ class FichierCSVService
     {
     }
 
-    public function createUsers(String $pathname,EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher):int
+    public function createUsers(String $pathname,EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher):array
     {
         $handle = fopen($pathname, 'r');
         $header = fgetcsv($handle, 1000, ',');
 
         $count = 0;
+        $errors = [];
         while (($data = fgetcsv($handle, 1000, ',')) !== false) {
             [$nom, $prenom, $telephone,$mail,  $site, $administrateur,$actif,$password] = $data;
+
+            // Vérifie si l'utilisateur existe déjà
+            $existingUser = $em->getRepository(Participant::class)->findOneBy(['mail' => $mail]);
+            if ($existingUser) {
+                $errors[] = "❌ L'adresse mail {$mail} existe déjà.";
+                continue;
+            }
 
             $participant = new Participant();
             $participant->setNom($nom);
@@ -49,7 +57,8 @@ class FichierCSVService
 
         fclose($handle);
         $em->flush();
-        return $count;
+
+        return [$count,$errors];
 
     }
 }

@@ -12,8 +12,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-// #[IsGranted('ROLE_ADMIN')]
-#[Route('/sites')]
+ #[IsGranted('ROLE_ADMIN')]
+#[Route('/sites', name: 'app_site_')]
 final class SiteController extends AbstractController
 {
     #[Route('', name: 'app_site_index', methods: ['GET'])]
@@ -69,7 +69,7 @@ final class SiteController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_site_delete', methods: ['POST'])]
+    #[Route('/{id}/delete', name: 'app_site_delete', methods: ['POST'])]
     public function delete(Request $request, Site $site, EntityManagerInterface $em): Response
     {
         if ($this->isCsrfTokenValid('delete'.$site->getId(), (string) $request->request->get('_token'))) {
