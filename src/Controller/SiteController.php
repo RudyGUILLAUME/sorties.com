@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Site;
 use App\Form\SiteType;
 use App\Repository\SiteRepository;
+use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,7 +17,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/sites', name: 'app_site_')]
 final class SiteController extends AbstractController
 {
-    #[Route('', name: 'app_site_index', methods: ['GET'])]
+    #[Route('', name: 'index', methods: ['GET'])]
     public function index(SiteRepository $siteRepository): Response
     {
         return $this->render('site/index.html.twig', [
@@ -24,7 +25,7 @@ final class SiteController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_site_new', methods: ['GET', 'POST'])]
+    #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $em): Response
     {
         $site = new Site();
@@ -43,7 +44,7 @@ final class SiteController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_site_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'show', methods: ['GET'])]
     public function show(Site $site): Response
     {
         return $this->render('site/show.html.twig', [
@@ -51,7 +52,7 @@ final class SiteController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_site_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Site $site, EntityManagerInterface $em): Response
     {
         $form = $this->createForm(SiteType::class, $site);
@@ -69,13 +70,19 @@ final class SiteController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/delete', name: 'app_site_delete', methods: ['POST'])]
+    #[Route('/{id}/delete', name: 'delete', methods: ['POST'])]
     public function delete(Request $request, Site $site, EntityManagerInterface $em): Response
     {
         if ($this->isCsrfTokenValid('delete'.$site->getId(), (string) $request->request->get('_token'))) {
-            $em->remove($site);
-            $em->flush();
-            $this->addFlash('success', 'Le site a été supprimé.');
+            try{
+                $em->remove($site);
+                $em->flush();
+                $this->addFlash('success', 'Le site a été supprimé.');
+            } catch (ForeignKeyConstraintViolationException $e) {
+                $this->addFlash('error', "⚠️ Impossible de supprimer le site {$site->getNom()} car il est encore lié à un ou plusieurs participants/sorties.");
+            } catch (\Exception $e) {
+                $this->addFlash('error', "❌ Une erreur est survenue lors de la suppression du site.");
+            }
         }
 
         return $this->redirectToRoute('app_site_index');
