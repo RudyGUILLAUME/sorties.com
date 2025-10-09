@@ -73,6 +73,11 @@ final class SortieController extends AbstractController
         $participant = $this->getUser();
         $sortie = new Sortie();
 
+        if(!$participant->isActif()){
+            $this->addFlash('error', 'Votre compte est désactivé, vous ne pouvez pas créer de sortie.');
+            return $this->redirectToRoute('app_home');
+        }
+
         // Préremplissage si besoin
         $sortie->setDateHeureDebut(new \DateTime('+1 day'));
         $sortie->setDateLimiteInscription(new \DateTime('+12 hours'));
@@ -159,6 +164,11 @@ final class SortieController extends AbstractController
     public function subscribe(Sortie $sortie, EntityManagerInterface $em, Request $request): Response
     {
         $participant = $this->getUser();
+
+        if(!$participant->isActif()){
+            $this->addFlash('error', 'Votre compte est désactivé, vous ne pouvez pas vous inscrire.');
+            return $this->redirectToRoute('app_home');
+        }
 
         if (!$this->isCsrfTokenValid('subscribe' . $sortie->getId(), $request->request->get('_token'))) {
             throw $this->createAccessDeniedException('Invalid CSRF token');
