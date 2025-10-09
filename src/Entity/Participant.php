@@ -235,6 +235,20 @@ class Participant implements UserInterface, PasswordAuthenticatedUserInterface
         return array_unique($roles);
     }
 
+    public function getRoleLabel(): string
+    {
+        if (in_array('ROLE_ADMIN', $this->roles)) {
+            return 'Admin';
+        }
+
+        if (in_array('ROLE_ORGANISATEUR', $this->roles)) {
+            return 'Organisateur';
+        }
+
+        return 'Utilisateur';
+    }
+
+
     /**
      * @param list<string> $roles
      */

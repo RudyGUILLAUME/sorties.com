@@ -1,0 +1,66 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Participants{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h1 class="h4 mb-0">Participants</h1>
+            <a class="btn btn-primary" href="{{ path('app_register') }}">Nouveau participant</a>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nom</th>
+                        <th>Prénom</th>
+                        <th>Mail</th>
+                        <th>Site</th>
+                        <th>Roles</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for participant in participants %}
+                        <tr>
+                            <td>{{ participant.id }}</td>
+                            <td>{{ participant.nom }}</td>
+                            <td>{{ participant.prenom }}</td>
+                            <td>{{ participant.mail }}</td>
+                            <td>{{ participant.site.nom }}</td>
+                            <td>
+                                {% for role in participant.roles %}
+                                    {{ role }}
+                                {% endfor %}
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm">
+                                    <a class="btn btn-outline-secondary" href="{{ path('app_profile_edit', {id: participant.id}) }}">Modifier</a>
+                                    <a class="btn btn-primary" href="{{ path('app_profile_show', {id: participant.id}) }}">Afficher</a>
+                                    <form method="post" action="{{ path('admin_toggle', {id: participant.id}) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('toggle' ~ participant.id) }}">
+                                        {%  if participant.actif %}
+                                            <button class="btn btn-outline-danger" type="submit">Désactiver</button>
+                                        {% else %}
+                                            <button class="btn btn-outline-primary" type="submit">Activer</button>
+                                        {% endif %}
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">Aucun participant.</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+

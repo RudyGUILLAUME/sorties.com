@@ -106,6 +106,56 @@ class SortieRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * Trouve les sorties disponibles (places restantes, pas archivées)
+     *
+     * @param \DateTimeInterface $now
+     * @return Sortie[]
+     */
+    public function findDisponibles(\DateTimeInterface $now): array
+    {
+        return $this->createQueryBuilder('s')
+            ->andWhere('s.dateHeureDebut > :now')
+            ->andWhere('SIZE(s.participants) < s.nbInscriptionsMax')
+            ->setParameter('now', $now)
+            ->orderBy('s.dateHeureDebut', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Trouve les sorties pleines (participants >= max)
+     *
+     * @param \DateTimeInterface $now
+     * @return Sortie[]
+     */
+    public function findPleines(\DateTimeInterface $now): array
+    {
+        return $this->createQueryBuilder('s')
+            ->andWhere('s.dateHeureDebut > :now')
+            ->andWhere('SIZE(s.participants) >= s.nbInscriptionsMax')
+            ->setParameter('now', $now)
+            ->orderBy('s.dateHeureDebut', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Trouve les sorties archivées (plus d'un mois après la date)
+     *
+     * @param \DateTimeInterface $archiveDate
+     * @return Sortie[]
+     */
+    public function findArchivees(\DateTimeInterface $archiveDate): array
+    {
+        return $this->createQueryBuilder('s')
+            ->andWhere('s.dateHeureDebut <= :archiveDate')
+            ->setParameter('archiveDate', $archiveDate)
+            ->orderBy('s.dateHeureDebut', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
     //    /**
     //     * @return Sortie[] Returns an array of Sortie objects
     //     */
