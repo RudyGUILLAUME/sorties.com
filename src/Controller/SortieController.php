@@ -88,11 +88,20 @@ final class SortieController extends AbstractController
         $form = $this->createForm(SortieType::class, $sortie);
         $form->handleRequest($request);
 
+
         if ($form->isSubmitted() && $form->isValid()) {
             // Définir l’état par défaut à "En création"
-            $etat = $etatRepository->findOneBy(['libelle' => 'En création']) ?? $etatRepository->findOneBy([]);
+            $etat = $etatRepository->findOneBy(['libelle' => 'Créée']) ?? $etatRepository->findOneBy([]);
             if ($etat) {
                 $sortie->setEtat($etat);
+            }
+
+            if($sortie->getDateLimiteInscription()->format("Y-m-d H:i:s") < date("Y-m-d H:i:s")){
+                $sortie->setEtat($etatRepository->findOneBy(['libelle' => 'Clôturée']));
+            }
+
+            if($sortie->getDateHeureDebut()->format("Y-m-d H:i:s") < date("Y-m-d H:i:s")){
+                $sortie->setEtat($etatRepository->findOneBy(['libelle' => 'Activité en cours']));
             }
 
             $em->persist($sortie);

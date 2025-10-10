@@ -67,15 +67,19 @@
 
 
                         <td>{{ s.organisateur.prenom }} {{ s.organisateur.nom }}</td>
-                        {% if app.user and s.etat.libelle == 'Créée' and (s.organisateur.id == app.user.id or 'ROLE_ADMIN' in app.user.roles) %}
+                        {% if app.user and (s.organisateur.id == app.user.id or 'ROLE_ADMIN' in app.user.roles) %}
                             <td class="text-end">
                                 <div class="btn-group btn-group-sm" role="group" onclick="event.stopPropagation();">
-                                    <a class="btn btn-outline-secondary" href="{{ path('app_sortie_edit', {id: s.id}) }}">Modifier</a>
-                                    <form method="post" action="{{ path('app_sortie_delete', {id: s.id}) }}" onsubmit="return confirm('Supprimer cette sortie ?');">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ s.id) }}">
-                                        <button class="btn btn-outline-danger" type="submit">Supprimer</button>
-                                    </form>
-                                    {% if s.organisateur == app.user and s.etat.libelle not in ['Annulée', 'Clôturée', 'Passée'] %}
+                                    {% if s.etat.libelle == 'Créée' %}
+                                        <a class="btn btn-outline-secondary" href="{{ path('app_sortie_edit', {id: s.id}) }}">Modifier</a>
+                                    {% endif %}
+                                    {% if (s.organisateur == app.user or 'ROLE_ADMIN') and s.etat.libelle == 'Créée' %}
+                                        <form method="post" action="{{ path('app_sortie_delete', {id: s.id}) }}" onsubmit="return confirm('Supprimer cette sortie ?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ s.id) }}">
+                                            <button class="btn btn-outline-danger" type="submit">Supprimer</button>
+                                        </form>
+                                    {% endif %}
+                                    {% if (s.organisateur == app.user or 'ROLE_ADMIN') and s.etat.libelle not in ['Annulée', 'Passée','Créée','Activité en cours'] %}
                                         <form method="post" action="{{ path('app_sortie_cancel', {'id': s.id}) }}" onsubmit="return confirm('Confirmer l\'annulation ?');">
                                             <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ s.id) }}">
                                             <button class="btn btn-outline-danger">Annuler la sortie</button>
