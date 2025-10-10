@@ -20,6 +20,7 @@ final class SortieController extends AbstractController
     #[Route('/', name: 'index', methods: ['GET'])]
     public function index(SortieRepository $sortieRepository, EntityManagerInterface $em, EtatRepository $etatRepository, Request $request): Response
     {
+        $tab = $request->query->get('tab', 'toutes');
         $sorties = $sortieRepository->findBy([], ['dateHeureDebut' => 'DESC']);
         $participant = $this->getUser();
 
@@ -29,7 +30,7 @@ final class SortieController extends AbstractController
         $sortiesDisponibles = $sortieRepository->findDisponibles($now);
         $sortiesPleines = $sortieRepository->findPleines($now);
         $sortiesArchivees = $sortieRepository->findArchivees($archivageDate);
-        
+
         // Build and handle search form
         $form = $this->createForm(\App\Form\SortieSearchType::class, null, [
             'method' => 'GET'
@@ -63,6 +64,7 @@ final class SortieController extends AbstractController
             'sortiesDisponibles' => $sortiesDisponibles,
             'sortiesPleines' => $sortiesPleines,
             'sortiesArchivees' => $sortiesArchivees,
+            'activeTab' => $tab,
         ]);
     }
 
@@ -117,8 +119,8 @@ final class SortieController extends AbstractController
     #[IsGranted('ROLE_ORGANISATEUR')]
     public function edit(Request $request, Sortie $sortie, EntityManagerInterface $em): Response
     {
-        // Bloquer l'édition si l'état n'est pas "En création"
-        if ($sortie->getEtat()->getLibelle() !== 'En création') {
+        // Bloquer l'édition si l'état n'est pas "Créée"
+        if ($sortie->getEtat()->getLibelle() !== 'Créée') {
             $this->addFlash('danger', 'Vous ne pouvez modifier cette sortie que si elle est en création.');
             return $this->redirectToRoute('app_sortie_index');
         }
@@ -142,8 +144,8 @@ final class SortieController extends AbstractController
     #[IsGranted('ROLE_ORGANISATEUR')]
     public function delete(Request $request, Sortie $sortie, EntityManagerInterface $em): Response
     {
-        // Vérifier que l'état est "En création" avant suppression
-        if ($sortie->getEtat()->getLibelle() !== 'En création') {
+        // Vérifier que l'état est "Créée" avant suppression
+        if ($sortie->getEtat()->getLibelle() !== 'Créée') {
             $this->addFlash('danger', 'Impossible de supprimer une sortie publiée ou clôturée.');
             return $this->redirectToRoute('app_sortie_index');
         }
@@ -186,7 +188,9 @@ final class SortieController extends AbstractController
             $this->addFlash('success', 'Inscription réussie !');
         }
 
-        return $this->redirectToRoute('app_sortie_index');
+        //Redirection vers onglet Disponibles
+        $tab = $request->query->get('tab', 'disponibles');
+        return $this->redirectToRoute('app_sortie_index', ['tab' => $tab]);
     }
 
 
@@ -207,10 +211,21 @@ final class SortieController extends AbstractController
         }
 
         // Autoriser désinscription si inscrit, même si la sortie est "Clôturée"
-        if (!in_array($sortie->getEtat()->getLibelle(), ['Ouverte', 'En création', 'Clôturée'])) {
+        if (!in_array($sortie->getEtat()->getLibelle(), ['Ouverte', 'Créée', 'Clôturée'])) {
             $this->addFlash('danger', 'Vous ne pouvez plus vous désinscrire de cette sortie.');
             return $this->redirectToRoute('app_sortie_index');
         }
+
+        // 🔒 Si la sortie est "Clôturée" ET que la date limite d’inscription est dépassée
+        if (
+            $sortie->getEtat()->getLibelle() === 'Clôturée' &&
+            $sortie->getDateLimiteInscription() < new \DateTime()
+        ) {
+            $this->addFlash('danger', 'Vous ne pouvez plus vous désinscrire : la date limite est dépassée.');
+
+            //Redirection vers onglet Disponibles
+            $tab = $request->query->get('tab', 'disponibles');
+            return $this->redirectToRoute('app_sortie_index', ['tab' => $tab]);        }
 
         // Désinscription
         $sortie->removeParticipant($participant);
@@ -237,7 +252,7 @@ final class SortieController extends AbstractController
     #[IsGranted('ROLE_ORGANISATEUR')]
     public function publish(Sortie $sortie, EtatRepository $etatRepository, EntityManagerInterface $em): Response
     {
-        if ($sortie->getEtat()->getLibelle() !== 'En création') {
+        if ($sortie->getEtat()->getLibelle() !== 'Créée') {
             $this->addFlash('warning', 'La sortie ne peut pas être publiée.');
             return $this->redirectToRoute('app_sortie_index');
         }

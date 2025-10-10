@@ -32,26 +32,32 @@
                                 {% set maintenant = "now"|date('U') %}
                                 {% set dateLimiteInscription = s.dateLimiteInscription ? s.dateLimiteInscription|date('U') : 0 %}
                                 {% set placesDisponibles = (s.nbInscriptionsMax - s.participants|length) > 0 %}
+                                {% set inscrit = s.participants.contains(app.user) %}
+                                {% set dateLimiteAtteinte = dateLimiteInscription and dateLimiteInscription < maintenant %}
 
-                                {% if s.participants.contains(app.user) %}
-                                    <div class="mb-1"><span class="badge bg-info text-dark">Inscrit</span></div>
+                                {% if inscrit %}
+                                    {# Bouton Désinscription actif ou désactivé avec tooltip #}
+                                    {% set canUnsubscribe = etat in ['Ouverte', 'Créée'] or (etat == 'Clôturée' and not dateLimiteAtteinte) %}
+                                    <form method="post" action="{{ path('app_sortie_unsubscribe', {'id': s.id}) }}?tab=disponibles" onclick="event.stopPropagation();">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('unsubscribe' ~ s.id) }}">
+                                        <button
+                                                class="btn btn-warning btn-sm"
+                                                type="submit"
+                                                {% if not canUnsubscribe %}disabled aria-disabled="true" title="Désinscription fermée : date limite dépassée ou sortie clôturée"{% endif %}
+                                        >
+                                            Se désinscrire
+                                        </button>
+                                    </form>
 
-                                    {% if etat in ['Ouverte', 'En création', 'Clôturée'] %}
-                                        <form method="post" action="{{ path('app_sortie_unsubscribe', {'id': s.id}) }}" onclick="event.stopPropagation();">
-                                            <input type="hidden" name="_token" value="{{ csrf_token('unsubscribe' ~ s.id) }}">
-                                            <button class="btn btn-warning btn-sm" type="submit">Se désinscrire</button>
-                                        </form>
-                                    {% else %}
-                                        <span class="badge bg-danger">Désinscription fermée</span>
-                                    {% endif %}
                                 {% else %}
-                                    {% if etat == 'Ouverte' and placesDisponibles and dateLimiteInscription > maintenant %}
-                                        <form method="post" action="{{ path('app_sortie_subscribe', {'id': s.id}) }}" onclick="event.stopPropagation();">
+                                    {# Bouton Inscription visible uniquement si ouvert et places dispos #}
+                                    {% if etat == 'Ouverte' and placesDisponibles and not dateLimiteAtteinte %}
+                                        <form method="post" action="{{ path('app_sortie_subscribe', {'id': s.id}) }}?tab=disponibles" onclick="event.stopPropagation();">
                                             <input type="hidden" name="_token" value="{{ csrf_token('subscribe' ~ s.id) }}">
-                                            <button class="btn btn-success btn-sm" type="submit">S'inscrire</button>
+                                            <button class="btn btn-success btn-sm">S'inscrire</button>
                                         </form>
                                     {% else %}
-                                        <span class="badge bg-danger">Inscription fermée</span>
+                                        <span class="badge bg-danger" title="Inscription fermée">Inscription fermée</span>
                                     {% endif %}
                                 {% endif %}
                             {% else %}
@@ -59,8 +65,9 @@
                             {% endif %}
                         </td>
 
+
                         <td>{{ s.organisateur.prenom }} {{ s.organisateur.nom }}</td>
-                        {% if app.user %}
+                        {% if app.user and s.etat.libelle == 'Créée' and (s.organisateur.id == app.user.id or 'ROLE_ADMIN' in app.user.roles) %}
                             <td class="text-end">
                                 <div class="btn-group btn-group-sm" role="group" onclick="event.stopPropagation();">
                                     <a class="btn btn-outline-secondary" href="{{ path('app_sortie_edit', {id: s.id}) }}">Modifier</a>
@@ -74,7 +81,7 @@
                                             <button class="btn btn-outline-danger">Annuler la sortie</button>
                                         </form>
                                     {% endif %}
-                                    {% if s.etat.libelle == 'En création' %}
+                                    {% if s.etat.libelle == 'Créée' %}
                                         <form method="post" action="{{ path('app_sortie_publish', {'id': s.id}) }}">
                                             <input type="hidden" name="_token" value="{{ csrf_token('publish' ~ s.id) }}">
                                             <button class="btn btn-primary">Publier la sortie</button>
