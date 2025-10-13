@@ -69,6 +69,45 @@
                     </form>
                 {% endif %}
             </div>
+
+            <h2>Commentaires</h2>
+            <p>Note moyenne : {{ sortie.noteMoyenne ? sortie.noteMoyenne|number_format(1, ',', ' ') ~ '/5' : 'Pas encore notée' }}</p>
+
+            {% for commentaire in sortie.commentaires %}
+                <div class="comment">
+                    <p><strong>{{ commentaire.auteur.prenom }} :</strong></p>
+                    <p>{{ commentaire.message }}</p>
+                    <p>Note :
+                        {% for i in 1..commentaire.note %}
+                            ⭐
+                        {% endfor %}
+                    </p>
+                    <small>Posté le {{ commentaire.createdAt|date('d-m-Y H:i:s') }}</small>
+
+                    {% if app.user and (commentaire.auteur == app.user or is_granted('ROLE_ADMIN')) %}
+                        <a href="{{ path('commentaire_edit', { id: commentaire.id }) }}" class="btn btn-sm btn-outline-warning">
+                            ✏️ Modifier
+                        </a>
+                    {% endif %}
+                    <form method="post" action="{{ path('commentaire_delete', {id: commentaire.id}) }}" onsubmit="return confirm('Supprimer ce commentaire ?');">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ commentaire.id) }}">
+                        <button class="btn btn-danger" type="submit">Supprimer</button>
+                    </form>
+                </div>
+            {% else %}
+                <p>Aucun commentaire pour le moment.</p>
+            {% endfor %}
+
+            {% if app.user %}
+                <h3>Laisser un commentaire</h3>
+                {{ form_start(commentaireForm) }}
+                {{ form_row(commentaireForm.message) }}
+                {{ form_row(commentaireForm.note) }}
+                <button class="btn btn-primary">Envoyer</button>
+                {{ form_end(commentaireForm) }}
+            {% else %}
+                <p><a href="{{ path('app_login') }}">Connecte-toi</a> pour laisser un commentaire.</p>
+            {% endif %}
         </div>
     </div>
 </div>
