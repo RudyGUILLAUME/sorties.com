@@ -31,15 +31,25 @@ final class ProfileController extends AbstractController
         return $this->redirectToRoute('app_home');
     }
 
-    #[Route('/profil/{id}/edit', name: 'app_profile_edit', requirements: ['id' => '\d+'])]
+    #[Route('/profil/{id}/edit', name: 'app_profile_edit', requirements: ['id' => '\\d+'])]
     public function edit(
+        Participant $participant,
         Request $request,
         EntityManagerInterface $em,
         UserPasswordHasherInterface $passwordHasher,
         AzureBlobService $azure
     ): Response {
-        /** @var Participant $participant */
-        $participant = $this->getUser();
+        // Access control: allow editing self or any participant if admin
+        /** @var Participant $currentUser */
+        $currentUser = $this->getUser();
+        $isAdmin = $this->isGranted('ROLE_ADMIN');
+        if (!$isAdmin && (!$currentUser || $currentUser->getId() !== $participant->getId())) {
+            $this->addFlash('error', 'Accès refusé.');
+            if (!$currentUser) {
+                return $this->redirectToRoute('app_home');
+            }
+            return $this->redirectToRoute('app_profile_show', ['id' => $currentUser->getId()]);
+        }
 
         $form = $this->createForm(ModifierProfilType::class, $participant);
         $form->handleRequest($request);
@@ -72,9 +82,13 @@ final class ProfileController extends AbstractController
 
             // ✅ Gestion du mot de passe
             if ($newPassword) {
-                if (!$passwordHasher->isPasswordValid($participant, $oldPassword)) {
-                    $this->addFlash('error', 'Ancien mot de passe incorrect ❌');
-                    return $this->redirectToRoute('app_profile_edit', ['id' => $participant->getId()]);
+                // Only require old password when the user edits their own profile (non-admin context)
+                $editingSelf = $currentUser && $currentUser->getId() === $participant->getId();
+                if ($editingSelf && !$isAdmin) {
+                    if (!$passwordHasher->isPasswordValid($participant, $oldPassword)) {
+                        $this->addFlash('error', 'Ancien mot de passe incorrect ❌');
+                        return $this->redirectToRoute('app_profile_edit', ['id' => $participant->getId()]);
+                    }
                 }
 
                 $hashedPassword = $passwordHasher->hashPassword($participant, $newPassword);
@@ -90,6 +104,7 @@ final class ProfileController extends AbstractController
 
         return $this->render('profile/edit.html.twig', [
             'form' => $form->createView(),
+            'participant' => $participant,
         ]);
     }
 }

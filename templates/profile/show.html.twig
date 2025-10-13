@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Mon profil{% endblock %}
+{% block title %}Profil{% endblock %}
 
 {% block body %}
 
@@ -10,15 +10,15 @@
             {# --- COLONNE PHOTO --- #}
             <div class="col-md-3 border-right">
                 <div class="d-flex flex-column align-items-center text-center p-3 py-5">
-                    <img src="{{ app.user.imageProfil ?? asset('images/default-profile.jpg') }}"
+                    <img src="{{ participant.imageProfil ?? asset('images/default-profile.jpg') }}"
                          alt="Photo de profil"
                          class="profile-img"
                          width="150" height="150">
 
-                    <span class="font-weight-bold">{{ app.user.prenom ~ ' ' ~ app.user.nom }}</span>
-                    <span class="text-black-50">{{ app.user.mail }}</span>
-                    {% if app.user.site %}
-                        <span class="text-muted">{{ app.user.site.nom }}</span>
+                    <span class="font-weight-bold">{{ participant.prenom ~ ' ' ~ participant.nom }}</span>
+                    <span class="text-black-50">{{ participant.mail }}</span>
+                    {% if participant.site %}
+                        <span class="text-muted">{{ participant.site.nom }}</span>
                     {% endif %}
                 </div>
             </div>
@@ -28,21 +28,23 @@
                 <div class="p-3 py-5">
 
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h4 class="text-right">Mon profil</h4>
-                        <a href="{{ path('app_profile_edit', {'id': app.user.id}) }}" class="btn btn-outline-primary btn-sm">
+                        <h4 class="text-right">Profil</h4>
+                        {% if app.user and app.user.id == participant.id %}
+                        <a href="{{ path('app_profile_edit', {'id': participant.id}) }}" class="btn btn-outline-primary btn-sm">
                             Modifier
                         </a>
+                        {% endif %}
 
                     </div>
 
                     <div class="row mt-2">
                         <div class="col-md-6">
                             <label class="labels">Prénom</label>
-                            <p class="form-control-plaintext">{{ app.user.prenom }}</p>
+                            <p class="form-control-plaintext">{{ participant.prenom }}</p>
                         </div>
                         <div class="col-md-6">
                             <label class="labels">Nom</label>
-                            <p class="form-control-plaintext">{{ app.user.nom }}</p>
+                            <p class="form-control-plaintext">{{ participant.nom }}</p>
                         </div>
                     </div>
 
@@ -52,7 +54,7 @@
                         <div class="col-md-12">
                             <label class="labels">Téléphone</label>
                             <p class="form-control-plaintext">
-                                {{ app.user.telephone is not empty ? app.user.telephone : 'Non renseigné' }}
+                                {{ participant.telephone is not empty ? participant.telephone : 'Non renseigné' }}
                             </p>
                         </div>
 
@@ -60,7 +62,7 @@
 
                         <div class="col-md-12 mt-3">
                             <label class="labels">Email</label>
-                            <p class="form-control-plaintext">{{ app.user.mail }}</p>
+                            <p class="form-control-plaintext">{{ participant.mail }}</p>
                         </div>
 
                         <hr>
@@ -68,7 +70,7 @@
                         <div class="col-md-12 mt-3">
                             <label class="labels">Site</label>
                             <p class="form-control-plaintext">
-                                {{ app.user.site ? app.user.site.nom : 'Non défini' }}
+                                {{ participant.site ? participant.site.nom : 'Non défini' }}
                             </p>
                         </div>
 
@@ -98,9 +100,9 @@
                     <div class="col-md-12">
                         <label class="labels">Rôle utilisateur</label>
                         <p class="form-control-plaintext">
-                            {% if 'ROLE_ADMIN' in app.user.roles %}
+                            {% if 'ROLE_ADMIN' in participant.roles %}
                                 Administrateur
-                            {% elseif 'ROLE_USER' in app.user.roles %}
+                            {% elseif 'ROLE_USER' in participant.roles %}
                                 Utilisateur
                             {% else %}
                                 Non défini

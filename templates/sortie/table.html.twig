@@ -65,8 +65,13 @@
                             {% endif %}
                         </td>
 
+                        <td>
+                            <a href="{{ path('app_profile_show', {id: s.organisateur.id}) }}" onclick="event.stopPropagation();">
+                                {{ s.organisateur.prenom }} {{ s.organisateur.nom }}
+                            </a>
+                        </td>
+                        {% if app.user %}
 
-                        <td>{{ s.organisateur.prenom }} {{ s.organisateur.nom }}</td>
                         {% if app.user and (s.organisateur.id == app.user.id or 'ROLE_ADMIN' in app.user.roles) %}
                             <td class="text-end">
                                 <div class="btn-group btn-group-sm" role="group" onclick="event.stopPropagation();">
