@@ -47,13 +47,13 @@ class ModifierProfilType extends AbstractType
                     'class' => 'form-control'
                 ],
             ])
-            ->add('imageFile', FileType::class, [
+            ->add('image_profil', FileType::class, [
                 'label' => 'Photo de profil',
                 'mapped' => false, // pas lié directement à l’entité
                 'required' => false,
                 'constraints' => [
                     new File([
-                        'maxSize' => '4M',
+                        'maxSize' => '5M',
                         'mimeTypes' => ['image/jpeg', 'image/png', 'image/webp'],
                         'mimeTypesMessage' => 'Veuillez télécharger une image valide (JPEG, PNG, WEBP).',
                     ]),
