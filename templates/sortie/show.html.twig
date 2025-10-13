@@ -38,7 +38,7 @@
                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ sortie.id) }}">
                     <button class="btn btn-outline-danger" type="submit">Supprimer</button>
                 </form>
-                {% if sortie.etat.libelle == 'En création' %}
+                {% if sortie.etat.libelle == 'Créée' %}
                     <form method="post" action="{{ path('app_sortie_publish', {'id': sortie.id}) }}">
                         <input type="hidden" name="_token" value="{{ csrf_token('publish' ~ sortie.id) }}">
                         <button class="btn btn-primary">Publier la sortie</button>

@@ -8,7 +8,7 @@ use Doctrine\Persistence\ObjectManager;
 class EtatFixtures extends Fixture
 {
     public const ETAT_REFERENCE_PREFIX = 'etat-';
-    private array $etats = ["En création","Ouverte","Clôturée","Activité en cours","Passée","Annulée"];
+    private array $etats = ["Créée","Ouverte","Clôturée","Activité en cours","Passée","Annulée"];
     public function __construct()
     {
 
