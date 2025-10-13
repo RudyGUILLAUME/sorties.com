@@ -25,7 +25,7 @@ final class SortieController extends AbstractController
         $sorties = $sortieRepository->findBy([], ['dateHeureDebut' => 'DESC']);
         $participant = $this->getUser();
 
-        $now = new \DateTime();
+        $now = (new \DateTime('now', new \DateTimeZone('Europe/Paris')));
         $archivageDate = (clone $now)->modify('-1 month');
 
         $sortiesDisponibles = $sortieRepository->findDisponibles($now);
@@ -82,8 +82,8 @@ final class SortieController extends AbstractController
         }
 
         // Préremplissage si besoin
-        $sortie->setDateHeureDebut(new \DateTime('+1 day'));
-        $sortie->setDateLimiteInscription(new \DateTime('+12 hours'));
+        $sortie->setDateHeureDebut(new \DateTime('+1 day',new \DateTimeZone('Europe/Paris')));
+        $sortie->setDateLimiteInscription(new \DateTime('+12 hours',new \DateTimeZone('Europe/Paris')));
         $sortie->setOrganisateur($participant);
 
         $form = $this->createForm(SortieType::class, $sortie);
@@ -96,12 +96,13 @@ final class SortieController extends AbstractController
             if ($etat) {
                 $sortie->setEtat($etat);
             }
+            $date_now=(new \DateTime('now', new \DateTimeZone('Europe/Paris')))->format("Y-m-d H:i:s");
 
-            if($sortie->getDateLimiteInscription()->format("Y-m-d H:i:s") < date("Y-m-d H:i:s")){
+            if($sortie->getDateLimiteInscription()->format("Y-m-d H:i:s") < $date_now){
                 $sortie->setEtat($etatRepository->findOneBy(['libelle' => 'Clôturée']));
             }
 
-            if($sortie->getDateHeureDebut()->format("Y-m-d H:i:s") < date("Y-m-d H:i:s")){
+            if($sortie->getDateHeureDebut()->format("Y-m-d H:i:s") < $date_now){
                 $sortie->setEtat($etatRepository->findOneBy(['libelle' => 'Activité en cours']));
             }
 
@@ -229,7 +230,7 @@ final class SortieController extends AbstractController
         // 🔒 Si la sortie est "Clôturée" ET que la date limite d’inscription est dépassée
         if (
             $sortie->getEtat()->getLibelle() === 'Clôturée' &&
-            $sortie->getDateLimiteInscription() < new \DateTime()
+            $sortie->getDateLimiteInscription() < (new \DateTime('now', new \DateTimeZone('Europe/Paris')))->format("Y-m-d H:i:s")
         ) {
             $this->addFlash('danger', 'Vous ne pouvez plus vous désinscrire : la date limite est dépassée.');
 
