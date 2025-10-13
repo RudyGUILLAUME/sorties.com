@@ -59,7 +59,11 @@
                             {% endif %}
                         </td>
 
-                        <td>{{ s.organisateur.prenom }} {{ s.organisateur.nom }}</td>
+                        <td>
+                            <a href="{{ path('app_profile_show', {id: s.organisateur.id}) }}" onclick="event.stopPropagation();">
+                                {{ s.organisateur.prenom }} {{ s.organisateur.nom }}
+                            </a>
+                        </td>
                         {% if app.user %}
                             <td class="text-end">
                                 <div class="btn-group btn-group-sm" role="group" onclick="event.stopPropagation();">
