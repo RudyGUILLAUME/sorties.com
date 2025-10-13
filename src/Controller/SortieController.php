@@ -11,10 +11,13 @@ use App\Repository\EtatRepository;
 use App\Repository\SortieRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[Route('/sorties', name: 'app_sortie_')]
 final class SortieController extends AbstractController
@@ -73,7 +76,7 @@ final class SortieController extends AbstractController
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     #[IsGranted(new Expression('is_granted("ROLE_ADMIN") or is_granted("ROLE_ORGANISATEUR")'))]
-    public function new(Request $request, EntityManagerInterface $em, EtatRepository $etatRepository,GestionDateService $gestionDate): Response
+    public function new(Request $request, EntityManagerInterface $em, EtatRepository $etatRepository,GestionDateService $gestionDate, SluggerInterface $slugger): Response
     {
         $participant = $this->getUser();
         $sortie = new Sortie();
@@ -99,6 +102,25 @@ final class SortieController extends AbstractController
                 $sortie->setEtat($etat);
             }
 
+            $imageFile = $form->get('image_principale')->getData();
+
+            if ($imageFile) {
+                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
+
+                try {
+                    $imageFile->move(
+                        $this->getParameter('sorties_images_directory'),
+                        $newFilename
+                    );
+                } catch (FileException $e) {
+                    // Gestion d’erreur (log, message flash, etc.)
+                }
+
+                $sortie->setImagePrincipale($newFilename);
+            }
+
             $gestionDate->GestionDate($em,$etatRepository,$sortie);
 
             $em->flush();
@@ -122,7 +144,7 @@ final class SortieController extends AbstractController
 
     #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
     #[IsGranted(new Expression('is_granted("ROLE_ADMIN") or is_granted("ROLE_ORGANISATEUR")'))]
-    public function edit(Request $request, Sortie $sortie, EntityManagerInterface $em, EtatRepository $etatRepository,GestionDateService $gestionDate): Response
+    public function edit(Request $request, Sortie $sortie, EntityManagerInterface $em, EtatRepository $etatRepository,GestionDateService $gestionDate, SluggerInterface $slugger): Response
     {
         $gestionDate->GestionDate($em,$etatRepository,$sortie);
 
@@ -136,6 +158,34 @@ final class SortieController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+            $imageFile = $form->get('image_principale')->getData();
+
+            if ($imageFile) {
+                $filesystem = new Filesystem();
+
+                if ($sortie->getImagePrincipale()) {
+                    $oldImagePath = $this->getParameter('sorties_images_directory') . '/' . $sortie->getImagePrincipale();
+                    if ($filesystem->exists($oldImagePath)) {
+                        $filesystem->remove($oldImagePath);
+                    }
+                }
+
+                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
+
+                try {
+                    $imageFile->move(
+                        $this->getParameter('sorties_images_directory'),
+                        $newFilename
+                    );
+                } catch (FileException $e) {
+                }
+
+                $sortie->setImagePrincipale($newFilename);
+            }
+
             $em->flush();
             $this->addFlash('success', 'La sortie a été mise à jour.');
             return $this->redirectToRoute('app_sortie_index');
