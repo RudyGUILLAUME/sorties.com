@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\EtatRepository;
 use App\Repository\SortieRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -69,7 +70,7 @@ final class SortieController extends AbstractController
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    #[IsGranted('ROLE_ORGANISATEUR')]
+    #[IsGranted(new Expression('is_granted("ROLE_ADMIN") or is_granted("ROLE_ORGANISATEUR")'))]
     public function new(Request $request, EntityManagerInterface $em, EtatRepository $etatRepository): Response
     {
         $participant = $this->getUser();
@@ -125,7 +126,7 @@ final class SortieController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
-    #[IsGranted('ROLE_ORGANISATEUR')]
+    #[IsGranted(new Expression('is_granted("ROLE_ADMIN") or is_granted("ROLE_ORGANISATEUR")'))]
     public function edit(Request $request, Sortie $sortie, EntityManagerInterface $em): Response
     {
         // Bloquer l'édition si l'état n'est pas "Créée"
@@ -150,7 +151,7 @@ final class SortieController extends AbstractController
     }
 
     #[Route('/{id}/delete', name: 'delete', methods: ['POST'])]
-    #[IsGranted('ROLE_ORGANISATEUR')]
+    #[IsGranted(new Expression('is_granted("ROLE_ADMIN") or is_granted("ROLE_ORGANISATEUR")'))]
     public function delete(Request $request, Sortie $sortie, EntityManagerInterface $em): Response
     {
         // Vérifier que l'état est "Créée" avant suppression
@@ -258,7 +259,7 @@ final class SortieController extends AbstractController
 
 
     #[Route('/{id}/publish', name: 'publish', methods: ['POST'])]
-    #[IsGranted('ROLE_ORGANISATEUR')]
+    #[IsGranted(new Expression('is_granted("ROLE_ADMIN") or is_granted("ROLE_ORGANISATEUR")'))]
     public function publish(Sortie $sortie, EtatRepository $etatRepository, EntityManagerInterface $em): Response
     {
         if ($sortie->getEtat()->getLibelle() !== 'Créée') {
@@ -275,18 +276,19 @@ final class SortieController extends AbstractController
     }
 
     #[Route('/{id}/cancel', name: 'cancel', methods: ['POST'])]
-    #[IsGranted('ROLE_ORGANISATEUR')]
+    #[IsGranted(new Expression('is_granted("ROLE_ADMIN") or is_granted("ROLE_ORGANISATEUR")'))]
     public function cancel(Sortie $sortie, EtatRepository $etatRepository, EntityManagerInterface $em): Response
     {
+
         // Seul l'organisateur peut annuler
-        if ($this->getUser() !== $sortie->getOrganisateur()) {
-            $this->addFlash('danger', 'Seul l\'organisateur peut annuler la sortie.');
+        if ($this->getUser() !== $sortie->getOrganisateur()&&!(in_array($this->isGranted('ROLE_ADMIN'), $this->getUser()->getRoles()))) {
+            $this->addFlash('danger', 'Seul l\'organisateur ou un admin peut annuler la sortie.');
             return $this->redirectToRoute('app_sortie_index');
         }
 
         // Si déjà annulée, ou clôturée, etc. on bloque
         $etat = $sortie->getEtat()->getLibelle();
-        if (in_array($etat, ['Annulée', 'Clôturée', 'Passée'])) {
+        if (in_array($etat, ['Annulée', 'Créée', 'Passée','Activité en cours'])) {
             $this->addFlash('warning', 'Cette sortie ne peut pas être annulée.');
             return $this->redirectToRoute('app_sortie_index');
         }
