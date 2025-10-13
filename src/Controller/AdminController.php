@@ -7,6 +7,7 @@ use App\Form\ImportCsvType;
 use App\Repository\ParticipantRepository;
 use App\Repository\SortieRepository;
 use App\Service\FichierCSVService;
+use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -93,6 +94,24 @@ final class AdminController extends AbstractController
             $em->persist($participant);
             $em->flush();
             $this->addFlash('success', $message);
+        }
+
+        return $this->redirectToRoute('admin_participants');
+    }
+
+    #[Route('/{id}/delete', name: 'delete', methods: ['POST'])]
+    public function delete(Request $request, Participant $participant, EntityManagerInterface $em): Response
+    {
+        if ($this->isCsrfTokenValid('delete'.$participant->getId(), (string) $request->request->get('_token'))) {
+            try{
+                $em->remove($participant);
+                $em->flush();
+                $this->addFlash('success', 'Le participant a été supprimé.');
+            } catch (ForeignKeyConstraintViolationException $e) {
+                $this->addFlash('error', "⚠️ Impossible de supprimer le participant {$participant->getNom()} car il est encore lié à une ou plusieurs sorties.");
+            } catch (\Exception $e) {
+                $this->addFlash('error', "❌ Une erreur est survenue lors de la suppression du participant.");
+            }
         }
 
         return $this->redirectToRoute('admin_participants');
