@@ -31,6 +31,21 @@
                 <dd class="col-sm-9">{{ sortie.infosSortie }}</dd>
             </dl>
 
+            <div class="card mt-4">
+                <div class="card-body text-center">
+                    <h5 class="card-title">
+                        Météo prévue à {{ sortie.lieu.ville.nom }} le {{ sortie.dateHeureDebut|date('d/m/Y') }}
+                    </h5>
+                    <div
+                            id="meteo-widget"
+                            data-ville="{{ sortie.lieu.ville.nom }}"
+                            data-date="{{ sortie.dateHeureDebut|date('Y-m-d') }}"
+                    >
+                        <p>Chargement de la météo...</p>
+                    </div>
+                </div>
+            </div>
+
             <div class="mt-3 d-flex gap-2">
                 <a href="{{ path('app_sortie_index') }}" class="btn btn-secondary">Retour</a>
                 <a href="{{ path('app_sortie_edit', {id: sortie.id}) }}" class="btn btn-primary">Modifier</a>
@@ -48,6 +63,13 @@
         </div>
     </div>
 </div>
+
+    <script src="{{ asset('js/meteo.js') }}"></script>
+
 {% endblock %}
+
+
+
+
 
 
