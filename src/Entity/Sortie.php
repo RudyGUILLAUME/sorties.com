@@ -21,8 +21,8 @@ class Sortie
     #[ORM\Column]
     private ?\DateTime $dateHeureDebut = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $duree = null;
+    #[ORM\Column]
+    private ?int $duree = null;
 
     #[ORM\Column]
     private ?\DateTime $dateLimiteInscription = null;
@@ -89,12 +89,12 @@ class Sortie
         return $this;
     }
 
-    public function getDuree(): ?string
+    public function getDuree(): ?int
     {
         return $this->duree;
     }
 
-    public function setDuree(string $duree): static
+    public function setDuree(int $duree): static
     {
         $this->duree = $duree;
 

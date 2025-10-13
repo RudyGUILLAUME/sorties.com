@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Participant;
 use App\Entity\Sortie;
 use App\Form\SortieType;
+use App\Service\GestionDateService;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\EtatRepository;
 use App\Repository\SortieRepository;
@@ -19,13 +20,13 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 final class SortieController extends AbstractController
 {
     #[Route('/', name: 'index', methods: ['GET'])]
-    public function index(SortieRepository $sortieRepository, EntityManagerInterface $em, EtatRepository $etatRepository, Request $request): Response
+    public function index(SortieRepository $sortieRepository, EntityManagerInterface $em, EtatRepository $etatRepository, Request $request,GestionDateService $gestionDate): Response
     {
         $tab = $request->query->get('tab', 'toutes');
         $sorties = $sortieRepository->findBy([], ['dateHeureDebut' => 'DESC']);
         $participant = $this->getUser();
 
-        $now = new \DateTime();
+        $now = (new \DateTime('now', new \DateTimeZone('Europe/Paris')));
         $archivageDate = (clone $now)->modify('-1 month');
 
         $sortiesDisponibles = $sortieRepository->findDisponibles($now);
@@ -42,6 +43,7 @@ final class SortieController extends AbstractController
         $sorties = $sortieRepository->search($criteria, $participant?->getId());
 
         foreach ($sorties as $sortie) {
+            $gestionDate->GestionDate($em,$etatRepository,$sortie);
             $etatActuel = $sortie->getEtat()->getLibelle();
 
             // Nombre max atteint ou date limite dépassée
@@ -71,7 +73,7 @@ final class SortieController extends AbstractController
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     #[IsGranted(new Expression('is_granted("ROLE_ADMIN") or is_granted("ROLE_ORGANISATEUR")'))]
-    public function new(Request $request, EntityManagerInterface $em, EtatRepository $etatRepository): Response
+    public function new(Request $request, EntityManagerInterface $em, EtatRepository $etatRepository,GestionDateService $gestionDate): Response
     {
         $participant = $this->getUser();
         $sortie = new Sortie();
@@ -82,8 +84,8 @@ final class SortieController extends AbstractController
         }
 
         // Préremplissage si besoin
-        $sortie->setDateHeureDebut(new \DateTime('+1 day'));
-        $sortie->setDateLimiteInscription(new \DateTime('+12 hours'));
+        $sortie->setDateHeureDebut(new \DateTime('+1 day',new \DateTimeZone('Europe/Paris')));
+        $sortie->setDateLimiteInscription(new \DateTime('+12 hours',new \DateTimeZone('Europe/Paris')));
         $sortie->setOrganisateur($participant);
 
         $form = $this->createForm(SortieType::class, $sortie);
@@ -97,15 +99,8 @@ final class SortieController extends AbstractController
                 $sortie->setEtat($etat);
             }
 
-            if($sortie->getDateLimiteInscription()->format("Y-m-d H:i:s") < date("Y-m-d H:i:s")){
-                $sortie->setEtat($etatRepository->findOneBy(['libelle' => 'Clôturée']));
-            }
+            $gestionDate->GestionDate($em,$etatRepository,$sortie);
 
-            if($sortie->getDateHeureDebut()->format("Y-m-d H:i:s") < date("Y-m-d H:i:s")){
-                $sortie->setEtat($etatRepository->findOneBy(['libelle' => 'Activité en cours']));
-            }
-
-            $em->persist($sortie);
             $em->flush();
 
             $this->addFlash('success', 'La sortie a été créée avec succès.');
@@ -127,8 +122,10 @@ final class SortieController extends AbstractController
 
     #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
     #[IsGranted(new Expression('is_granted("ROLE_ADMIN") or is_granted("ROLE_ORGANISATEUR")'))]
-    public function edit(Request $request, Sortie $sortie, EntityManagerInterface $em): Response
+    public function edit(Request $request, Sortie $sortie, EntityManagerInterface $em, EtatRepository $etatRepository,GestionDateService $gestionDate): Response
     {
+        $gestionDate->GestionDate($em,$etatRepository,$sortie);
+
         // Bloquer l'édition si l'état n'est pas "Créée"
         if ($sortie->getEtat()->getLibelle() !== 'Créée') {
             $this->addFlash('danger', 'Vous ne pouvez modifier cette sortie que si elle est en création.');
@@ -152,8 +149,9 @@ final class SortieController extends AbstractController
 
     #[Route('/{id}/delete', name: 'delete', methods: ['POST'])]
     #[IsGranted(new Expression('is_granted("ROLE_ADMIN") or is_granted("ROLE_ORGANISATEUR")'))]
-    public function delete(Request $request, Sortie $sortie, EntityManagerInterface $em): Response
+    public function delete(Request $request, Sortie $sortie, EntityManagerInterface $em,EtatRepository $etatRepository,GestionDateService $gestionDate): Response
     {
+        $gestionDate->GestionDate($em,$etatRepository,$sortie);
         // Vérifier que l'état est "Créée" avant suppression
         if ($sortie->getEtat()->getLibelle() !== 'Créée') {
             $this->addFlash('danger', 'Impossible de supprimer une sortie publiée ou clôturée.');
@@ -173,7 +171,7 @@ final class SortieController extends AbstractController
 
     #[Route('/{id}/subscribe', name: 'subscribe', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
-    public function subscribe(Sortie $sortie, EntityManagerInterface $em, Request $request): Response
+    public function subscribe(Sortie $sortie, EntityManagerInterface $em, Request $request,GestionDateService $gestionDate, EtatRepository $etatRepository): Response
     {
         $participant = $this->getUser();
 
@@ -185,6 +183,8 @@ final class SortieController extends AbstractController
         if (!$this->isCsrfTokenValid('subscribe' . $sortie->getId(), $request->request->get('_token'))) {
             throw $this->createAccessDeniedException('Invalid CSRF token');
         }
+
+        $gestionDate->GestionDate($em,$etatRepository,$sortie);
 
         // Bloquer inscription si sortie non ouverte (Annulée, Clôturée, etc.)
         if ($sortie->getEtat()->getLibelle() !== 'Ouverte') {
@@ -206,7 +206,7 @@ final class SortieController extends AbstractController
 
     #[Route('/{id}/unsubscribe', name: 'unsubscribe', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
-    public function unsubscribe(Sortie $sortie, EntityManagerInterface $em, Request $request, EtatRepository $etatRepository): Response
+    public function unsubscribe(Sortie $sortie, EntityManagerInterface $em, Request $request, EtatRepository $etatRepository,GestionDateService $gestionDate): Response
     {
         $participant = $this->getUser();
 
@@ -220,6 +220,8 @@ final class SortieController extends AbstractController
             return $this->redirectToRoute('app_sortie_index');
         }
 
+        $gestionDate->GestionDate($em,$etatRepository,$sortie);
+
         // Autoriser désinscription si inscrit, même si la sortie est "Clôturée"
         if (!in_array($sortie->getEtat()->getLibelle(), ['Ouverte', 'Créée', 'Clôturée'])) {
             $this->addFlash('danger', 'Vous ne pouvez plus vous désinscrire de cette sortie.');
@@ -229,7 +231,7 @@ final class SortieController extends AbstractController
         // 🔒 Si la sortie est "Clôturée" ET que la date limite d’inscription est dépassée
         if (
             $sortie->getEtat()->getLibelle() === 'Clôturée' &&
-            $sortie->getDateLimiteInscription() < new \DateTime()
+            $sortie->getDateLimiteInscription()->format("Y-m-d H:i:s") < (new \DateTime('now', new \DateTimeZone('Europe/Paris')))->format("Y-m-d H:i:s")
         ) {
             $this->addFlash('danger', 'Vous ne pouvez plus vous désinscrire : la date limite est dépassée.');
 
@@ -260,8 +262,9 @@ final class SortieController extends AbstractController
 
     #[Route('/{id}/publish', name: 'publish', methods: ['POST'])]
     #[IsGranted(new Expression('is_granted("ROLE_ADMIN") or is_granted("ROLE_ORGANISATEUR")'))]
-    public function publish(Sortie $sortie, EtatRepository $etatRepository, EntityManagerInterface $em): Response
+    public function publish(Sortie $sortie, EtatRepository $etatRepository, EntityManagerInterface $em,GestionDateService $gestionDate): Response
     {
+        $gestionDate->GestionDate($em,$etatRepository,$sortie);
         if ($sortie->getEtat()->getLibelle() !== 'Créée') {
             $this->addFlash('warning', 'La sortie ne peut pas être publiée.');
             return $this->redirectToRoute('app_sortie_index');
@@ -277,9 +280,9 @@ final class SortieController extends AbstractController
 
     #[Route('/{id}/cancel', name: 'cancel', methods: ['POST'])]
     #[IsGranted(new Expression('is_granted("ROLE_ADMIN") or is_granted("ROLE_ORGANISATEUR")'))]
-    public function cancel(Sortie $sortie, EtatRepository $etatRepository, EntityManagerInterface $em): Response
+    public function cancel(Sortie $sortie, EtatRepository $etatRepository, EntityManagerInterface $em,GestionDateService $gestionDate): Response
     {
-
+        $gestionDate->GestionDate($em,$etatRepository,$sortie);
         // Seul l'organisateur peut annuler
         if ($this->getUser() !== $sortie->getOrganisateur()&&!(in_array($this->isGranted('ROLE_ADMIN'), $this->getUser()->getRoles()))) {
             $this->addFlash('danger', 'Seul l\'organisateur ou un admin peut annuler la sortie.');
