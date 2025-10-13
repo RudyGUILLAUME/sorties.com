@@ -5,14 +5,15 @@ namespace App\Controller;
 use App\Entity\Participant;
 use App\Form\ModifierProfilType;
 use App\Repository\ParticipantRepository;
-use App\Service\AzureBlobService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 final class ProfileController extends AbstractController
 {
@@ -37,8 +38,7 @@ final class ProfileController extends AbstractController
         Request $request,
         EntityManagerInterface $em,
         UserPasswordHasherInterface $passwordHasher,
-        AzureBlobService $azure
-    ): Response {
+        SluggerInterface $slugger): Response {
         // Access control: allow editing self or any participant if admin
         /** @var Participant $currentUser */
         $currentUser = $this->getUser();
@@ -59,26 +59,25 @@ final class ProfileController extends AbstractController
             $oldPassword = $form->get('oldPassword')->getData();
             $newPassword = $form->get('newPassword')->getData();
 
-            /** @var UploadedFile $imageFile */
-            $imageFile = $form->get('imageFile')->getData();
-
-            // ✅ Upload Azure
-            if ($imageFile) {
-
-                if ($participant->getImageProfil()) {
-                    $azure->deleteImage($participant->getImageProfil());
-                }
-
-                $blobName = uniqid() . '_' . $imageFile->getClientOriginalName();
-                $imagePath = $imageFile->getPathname();
+            $file = $form->get('image_profil')->getData();
+            if ($file) {
+                $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename.'-'.uniqid().'.'.$file->guessExtension();
 
                 try {
-                    $imageUrl = $azure->uploadImage($imagePath, $blobName);
-                    $participant->setImageProfil($imageUrl);
-                } catch (\Exception $e) {
-                    $this->addFlash('error', 'Erreur lors de l’envoi de l’image : ' . $e->getMessage());
+                    $file->move(
+                        $this->getParameter('uploads_directory'),
+                        $newFilename
+                    );
+                } catch (FileException $e) {
+                    // Gérer l’erreur
                 }
+
+                $participant->setImageProfil($newFilename);
+
             }
+
 
             // ✅ Gestion du mot de passe
             if ($newPassword) {
