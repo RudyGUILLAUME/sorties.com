@@ -55,6 +55,9 @@ class Sortie
     #[ORM\ManyToMany(targetEntity: Participant::class, inversedBy: 'sorties_inscrits')]
     private Collection $participants;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $image_principale = null;
+
     public function __construct()
     {
         $this->participants = new ArrayCollection();
@@ -205,6 +208,18 @@ class Sortie
     public function removeParticipant(Participant $participant): static
     {
         $this->participants->removeElement($participant);
+
+        return $this;
+    }
+
+    public function getImagePrincipale(): ?string
+    {
+        return $this->image_principale;
+    }
+
+    public function setImagePrincipale(?string $image_principale): static
+    {
+        $this->image_principale = $image_principale;
 
         return $this;
     }

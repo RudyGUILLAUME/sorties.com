@@ -6,8 +6,17 @@
 <div class="container mt-4">
     <h1 class="mb-4">{{ sortie.nom }}</h1>
 
+
+
     <div class="card shadow-sm">
         <div class="card-body">
+            {% if sortie.imagePrincipale %}
+                <div class="text-center mb-3">
+                    <img src="{{ asset('images/sorties/' ~ sortie.imagePrincipale) }}" alt="Image de {{ sortie.nom }}" class="img-fluid rounded shadow-sm" style="max-height: 300px;">
+                </div>
+            {% else %}
+                <p class="text-muted text-center">Aucune image disponible pour cette sortie.</p>
+            {% endif %}
             <dl class="row mb-0">
                 <dt class="col-sm-3">Date de début</dt>
                 <dd class="col-sm-9">{{ sortie.dateHeureDebut ? sortie.dateHeureDebut|date('d/m/Y H\\hi') : '' }}</dd>
