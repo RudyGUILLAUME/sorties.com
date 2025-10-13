@@ -70,7 +70,6 @@
                                 {{ s.organisateur.prenom }} {{ s.organisateur.nom }}
                             </a>
                         </td>
-                        {% if app.user %}
 
                         {% if app.user and (s.organisateur.id == app.user.id or 'ROLE_ADMIN' in app.user.roles) %}
                             <td class="text-end">
