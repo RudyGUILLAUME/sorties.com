@@ -116,9 +116,12 @@ class SortieRepository extends ServiceEntityRepository
     public function findDisponibles(\DateTimeInterface $now): array
     {
         return $this->createQueryBuilder('s')
+            ->join('s.etat', 'e')
             ->andWhere('s.dateHeureDebut > :now')
             ->andWhere('SIZE(s.participants) < s.nbInscriptionsMax')
+            ->andWhere('e.libelle = :etatLibelle')
             ->setParameter('now', $now)
+            ->setParameter('etatLibelle', 'Ouverte')
             ->orderBy('s.dateHeureDebut', 'DESC')
             ->getQuery()
             ->getResult();

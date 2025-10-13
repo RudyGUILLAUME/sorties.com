@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\EtatRepository;
 use App\Repository\SortieRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -20,6 +21,7 @@ final class SortieController extends AbstractController
     #[Route('/', name: 'index', methods: ['GET'])]
     public function index(SortieRepository $sortieRepository, EntityManagerInterface $em, EtatRepository $etatRepository, Request $request): Response
     {
+        $tab = $request->query->get('tab', 'toutes');
         $sorties = $sortieRepository->findBy([], ['dateHeureDebut' => 'DESC']);
         $participant = $this->getUser();
 
@@ -29,7 +31,7 @@ final class SortieController extends AbstractController
         $sortiesDisponibles = $sortieRepository->findDisponibles($now);
         $sortiesPleines = $sortieRepository->findPleines($now);
         $sortiesArchivees = $sortieRepository->findArchivees($archivageDate);
-        
+
         // Build and handle search form
         $form = $this->createForm(\App\Form\SortieSearchType::class, null, [
             'method' => 'GET'
@@ -63,11 +65,12 @@ final class SortieController extends AbstractController
             'sortiesDisponibles' => $sortiesDisponibles,
             'sortiesPleines' => $sortiesPleines,
             'sortiesArchivees' => $sortiesArchivees,
+            'activeTab' => $tab,
         ]);
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    #[IsGranted('ROLE_ORGANISATEUR')]
+    #[IsGranted(new Expression('is_granted("ROLE_ADMIN") or is_granted("ROLE_ORGANISATEUR")'))]
     public function new(Request $request, EntityManagerInterface $em, EtatRepository $etatRepository): Response
     {
         $participant = $this->getUser();
@@ -86,11 +89,20 @@ final class SortieController extends AbstractController
         $form = $this->createForm(SortieType::class, $sortie);
         $form->handleRequest($request);
 
+
         if ($form->isSubmitted() && $form->isValid()) {
             // Définir l’état par défaut à "En création"
-            $etat = $etatRepository->findOneBy(['libelle' => 'En création']) ?? $etatRepository->findOneBy([]);
+            $etat = $etatRepository->findOneBy(['libelle' => 'Créée']) ?? $etatRepository->findOneBy([]);
             if ($etat) {
                 $sortie->setEtat($etat);
+            }
+
+            if($sortie->getDateLimiteInscription()->format("Y-m-d H:i:s") < date("Y-m-d H:i:s")){
+                $sortie->setEtat($etatRepository->findOneBy(['libelle' => 'Clôturée']));
+            }
+
+            if($sortie->getDateHeureDebut()->format("Y-m-d H:i:s") < date("Y-m-d H:i:s")){
+                $sortie->setEtat($etatRepository->findOneBy(['libelle' => 'Activité en cours']));
             }
 
             $em->persist($sortie);
@@ -114,11 +126,11 @@ final class SortieController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
-    #[IsGranted('ROLE_ORGANISATEUR')]
+    #[IsGranted(new Expression('is_granted("ROLE_ADMIN") or is_granted("ROLE_ORGANISATEUR")'))]
     public function edit(Request $request, Sortie $sortie, EntityManagerInterface $em): Response
     {
-        // Bloquer l'édition si l'état n'est pas "En création"
-        if ($sortie->getEtat()->getLibelle() !== 'En création') {
+        // Bloquer l'édition si l'état n'est pas "Créée"
+        if ($sortie->getEtat()->getLibelle() !== 'Créée') {
             $this->addFlash('danger', 'Vous ne pouvez modifier cette sortie que si elle est en création.');
             return $this->redirectToRoute('app_sortie_index');
         }
@@ -139,11 +151,11 @@ final class SortieController extends AbstractController
     }
 
     #[Route('/{id}/delete', name: 'delete', methods: ['POST'])]
-    #[IsGranted('ROLE_ORGANISATEUR')]
+    #[IsGranted(new Expression('is_granted("ROLE_ADMIN") or is_granted("ROLE_ORGANISATEUR")'))]
     public function delete(Request $request, Sortie $sortie, EntityManagerInterface $em): Response
     {
-        // Vérifier que l'état est "En création" avant suppression
-        if ($sortie->getEtat()->getLibelle() !== 'En création') {
+        // Vérifier que l'état est "Créée" avant suppression
+        if ($sortie->getEtat()->getLibelle() !== 'Créée') {
             $this->addFlash('danger', 'Impossible de supprimer une sortie publiée ou clôturée.');
             return $this->redirectToRoute('app_sortie_index');
         }
@@ -186,7 +198,9 @@ final class SortieController extends AbstractController
             $this->addFlash('success', 'Inscription réussie !');
         }
 
-        return $this->redirectToRoute('app_sortie_index');
+        //Redirection vers onglet Disponibles
+        $tab = $request->query->get('tab', 'disponibles');
+        return $this->redirectToRoute('app_sortie_index', ['tab' => $tab]);
     }
 
 
@@ -207,10 +221,21 @@ final class SortieController extends AbstractController
         }
 
         // Autoriser désinscription si inscrit, même si la sortie est "Clôturée"
-        if (!in_array($sortie->getEtat()->getLibelle(), ['Ouverte', 'En création', 'Clôturée'])) {
+        if (!in_array($sortie->getEtat()->getLibelle(), ['Ouverte', 'Créée', 'Clôturée'])) {
             $this->addFlash('danger', 'Vous ne pouvez plus vous désinscrire de cette sortie.');
             return $this->redirectToRoute('app_sortie_index');
         }
+
+        // 🔒 Si la sortie est "Clôturée" ET que la date limite d’inscription est dépassée
+        if (
+            $sortie->getEtat()->getLibelle() === 'Clôturée' &&
+            $sortie->getDateLimiteInscription() < new \DateTime()
+        ) {
+            $this->addFlash('danger', 'Vous ne pouvez plus vous désinscrire : la date limite est dépassée.');
+
+            //Redirection vers onglet Disponibles
+            $tab = $request->query->get('tab', 'disponibles');
+            return $this->redirectToRoute('app_sortie_index', ['tab' => $tab]);        }
 
         // Désinscription
         $sortie->removeParticipant($participant);
@@ -234,10 +259,10 @@ final class SortieController extends AbstractController
 
 
     #[Route('/{id}/publish', name: 'publish', methods: ['POST'])]
-    #[IsGranted('ROLE_ORGANISATEUR')]
+    #[IsGranted(new Expression('is_granted("ROLE_ADMIN") or is_granted("ROLE_ORGANISATEUR")'))]
     public function publish(Sortie $sortie, EtatRepository $etatRepository, EntityManagerInterface $em): Response
     {
-        if ($sortie->getEtat()->getLibelle() !== 'En création') {
+        if ($sortie->getEtat()->getLibelle() !== 'Créée') {
             $this->addFlash('warning', 'La sortie ne peut pas être publiée.');
             return $this->redirectToRoute('app_sortie_index');
         }
@@ -251,18 +276,19 @@ final class SortieController extends AbstractController
     }
 
     #[Route('/{id}/cancel', name: 'cancel', methods: ['POST'])]
-    #[IsGranted('ROLE_ORGANISATEUR')]
+    #[IsGranted(new Expression('is_granted("ROLE_ADMIN") or is_granted("ROLE_ORGANISATEUR")'))]
     public function cancel(Sortie $sortie, EtatRepository $etatRepository, EntityManagerInterface $em): Response
     {
+
         // Seul l'organisateur peut annuler
-        if ($this->getUser() !== $sortie->getOrganisateur()) {
-            $this->addFlash('danger', 'Seul l\'organisateur peut annuler la sortie.');
+        if ($this->getUser() !== $sortie->getOrganisateur()&&!(in_array($this->isGranted('ROLE_ADMIN'), $this->getUser()->getRoles()))) {
+            $this->addFlash('danger', 'Seul l\'organisateur ou un admin peut annuler la sortie.');
             return $this->redirectToRoute('app_sortie_index');
         }
 
         // Si déjà annulée, ou clôturée, etc. on bloque
         $etat = $sortie->getEtat()->getLibelle();
-        if (in_array($etat, ['Annulée', 'Clôturée', 'Passée'])) {
+        if (in_array($etat, ['Annulée', 'Créée', 'Passée','Activité en cours'])) {
             $this->addFlash('warning', 'Cette sortie ne peut pas être annulée.');
             return $this->redirectToRoute('app_sortie_index');
         }
