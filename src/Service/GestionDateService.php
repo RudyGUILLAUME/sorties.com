@@ -25,6 +25,12 @@ class GestionDateService
         if($sortie->getDateHeureDebut()->format("Y-m-d H:i:s") < $now){
             $sortie->setEtat($etatRepository->findOneBy(['libelle' => 'Activité en cours']));
         }
+
+        $dateFin = (clone $sortie->getDateHeureDebut())->modify("+{$sortie->getDuree()} minutes");
+        if($dateFin->format("Y-m-d H:i:s") < $now){
+            $sortie->setEtat($etatRepository->findOneBy(['libelle' => 'Passée']));
+        }
+
         $em->persist($sortie);
     }
 }

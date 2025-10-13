@@ -26,8 +26,13 @@ class SortieType extends AbstractType
                 'label' => 'Date et heure de début',
                 'widget' => 'single_text',
             ])
-            ->add('duree', TextType::class, [
-                'label' => 'Durée',
+            ->add('duree', IntegerType::class, [
+                'label' => 'Durée (en minutes)',
+                'required' => true,
+                'attr' => [
+                    'min' => 1,
+                    'placeholder' => 'ex : 90',
+                ],
             ])
             ->add('dateLimiteInscription', DateTimeType::class, [
                 'label' => "Date limite d'inscription",
