@@ -161,13 +161,10 @@ final class SortieController extends AbstractController
             }
         }
 
-
-
-
         return $this->render('sortie/show.html.twig', [
             'sortie' => $sortie,
             'commentaireForm' => $form->createView(),
-            'noteMoyenne' =>$total / count($sortie->getCommentaires()),
+            'noteMoyenne' =>count($sortie->getCommentaires())!=0?$total / count($sortie->getCommentaires()):null,
         ]);
     }
 

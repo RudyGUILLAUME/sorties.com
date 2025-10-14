@@ -6,7 +6,7 @@
     <h2>Modifier ton commentaire</h2>
 
     {{ form_start(commentaireForm) }}
-    {{ form_row(commentaireForm.contenu) }}
+    {{ form_row(commentaireForm.message) }}
     {{ form_row(commentaireForm.note) }}
     <button class="btn btn-primary">💾 Enregistrer</button>
     <a href="{{ path('app_sortie_show', { id: commentaire.sortie.id }) }}" class="btn btn-secondary">↩️ Annuler</a>
