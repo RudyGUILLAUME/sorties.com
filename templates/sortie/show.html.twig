@@ -90,6 +90,25 @@
                 </div>
             </div>
 
+            <div class="card mt-4" style="width: 100%;">
+                <div class="card-body">
+                    <h5 class="card-title">💬 Chat des participants</h5>
+
+                    <div id="chat-messages"
+                         class="border rounded p-2 mb-3 bg-light"
+                         style="height: 250px; overflow-y: auto;"
+                         data-send-url="{{ path('chat_send', {id: sortie.id}) }}"
+                         data-fetch-url="{{ path('chat_fetch', {id: sortie.id}) }}">
+                    </div>
+
+
+                    <div class="input-group">
+                        <input type="text" id="chat-input" class="form-control" placeholder="Écrire un message...">
+                        <button id="chat-send" class="btn btn-primary">Envoyer</button>
+                    </div>
+                </div>
+            </div>
+
 
 
 
@@ -157,6 +176,8 @@
 </div>
 
     <script src="{{ asset('js/meteo.js') }}"></script>
+    <script src="{{ asset('js/chat.js') }}"></script>
+
 
 {% endblock %}
 

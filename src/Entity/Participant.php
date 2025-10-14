@@ -72,10 +72,17 @@ class Participant implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $image_profil = null;
 
+    /**
+     * @var Collection<int, Message>
+     */
+    #[ORM\OneToMany(targetEntity: Message::class, mappedBy: 'participant')]
+    private Collection $messages;
+
     public function __construct()
     {
         $this->sorties_organises = new ArrayCollection();
         $this->sorties_inscrits = new ArrayCollection();
+        $this->messages = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -321,6 +328,36 @@ class Participant implements UserInterface, PasswordAuthenticatedUserInterface
     public function setImageProfil(?string $image_profil): static
     {
         $this->image_profil = $image_profil;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Message>
+     */
+    public function getMessages(): Collection
+    {
+        return $this->messages;
+    }
+
+    public function addMessage(Message $message): static
+    {
+        if (!$this->messages->contains($message)) {
+            $this->messages->add($message);
+            $message->setParticipant($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMessage(Message $message): static
+    {
+        if ($this->messages->removeElement($message)) {
+            // set the owning side to null (unless already changed)
+            if ($message->getParticipant() === $this) {
+                $message->setParticipant(null);
+            }
+        }
 
         return $this;
     }
