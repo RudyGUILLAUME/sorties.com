@@ -7,6 +7,7 @@ use App\Entity\Participant;
 use App\Entity\Sortie;
 use App\Form\CommentaireType;
 use App\Form\SortieType;
+use App\Repository\MessageRepository;
 use App\Service\GestionDateService;
 use App\Service\MailService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -26,7 +27,7 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 final class SortieController extends AbstractController
 {
     #[Route('/', name: 'index', methods: ['GET'])]
-    public function index(SortieRepository $sortieRepository, EntityManagerInterface $em, EtatRepository $etatRepository, Request $request,GestionDateService $gestionDate): Response
+    public function index(SortieRepository $sortieRepository, EntityManagerInterface $em, EtatRepository $etatRepository, Request $request,GestionDateService $gestionDate, MessageRepository $messageRepository): Response
     {
         $tab = $request->query->get('tab', 'toutes');
         $sorties = $sortieRepository->findBy([], ['dateHeureDebut' => 'DESC']);
@@ -138,11 +139,16 @@ final class SortieController extends AbstractController
     }
 
     #[Route('/{id}', name: 'show', methods: ['GET','POST'])]
-    public function show(Request $request, EntityManagerInterface $em,Sortie $sortie): Response
+    public function show(Request $request, EntityManagerInterface $em,Sortie $sortie, MessageRepository $messageRepository): Response
     {
         $commentaire = new Commentaire();
         $form = $this->createForm(CommentaireType::class, $commentaire);
         $form->handleRequest($request);
+
+        $messages = $messageRepository->findBy(
+            ['sortie' => $sortie],
+            ['createdAt' => 'ASC']
+        );
 
         if ($form->isSubmitted() && $form->isValid()) {
             $commentaire->setAuteur($this->getUser());
@@ -166,6 +172,7 @@ final class SortieController extends AbstractController
             'sortie' => $sortie,
             'commentaireForm' => $form->createView(),
             'noteMoyenne' =>count($sortie->getCommentaires())!=0?$total / count($sortie->getCommentaires()):null,
+            'messages' => $messages,
         ]);
     }
 
