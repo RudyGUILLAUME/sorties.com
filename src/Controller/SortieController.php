@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\Commentaire;
 use App\Entity\Participant;
 use App\Entity\Sortie;
+use App\Form\CommentaireType;
 use App\Form\SortieType;
 use App\Service\GestionDateService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -134,11 +136,35 @@ final class SortieController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'show', methods: ['GET'])]
-    public function show(Sortie $sortie): Response
+    #[Route('/{id}', name: 'show', methods: ['GET','POST'])]
+    public function show(Request $request, EntityManagerInterface $em,Sortie $sortie): Response
     {
+        $commentaire = new Commentaire();
+        $form = $this->createForm(CommentaireType::class, $commentaire);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $commentaire->setAuteur($this->getUser());
+            $commentaire->setSortie($sortie);
+
+            $em->persist($commentaire);
+            $em->flush();
+
+            $this->addFlash('success', 'Commentaire ajouté avec succès !');
+            return $this->redirectToRoute('app_sortie_show', ['id' => $sortie->getId()]);
+        }
+
+        if (!$sortie->getCommentaires()->isEmpty()){
+            $total = 0;
+            foreach ($sortie->getCommentaires() as $c) {
+                $total += $c->getNote();
+            }
+        }
+
         return $this->render('sortie/show.html.twig', [
             'sortie' => $sortie,
+            'commentaireForm' => $form->createView(),
+            'noteMoyenne' =>count($sortie->getCommentaires())!=0?$total / count($sortie->getCommentaires()):null,
         ]);
     }
 
