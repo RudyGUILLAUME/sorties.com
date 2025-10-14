@@ -18,16 +18,16 @@ class GestionDateService
     public function GestionDate(EntityManagerInterface $em,EtatRepository $etatRepository, Sortie $sortie){
         $now=(new \DateTime('now', new \DateTimeZone('Europe/Paris')))->format('Y-m-d H:i:s');
 
-        if($sortie->getDateLimiteInscription()->format('Y-m-d H:i:s') < $now){
+        if(($sortie->getEtat()=="Créée"||$sortie->getEtat())=="Ouverte"&&$sortie->getDateLimiteInscription()->format('Y-m-d H:i:s') < $now){
             $sortie->setEtat($etatRepository->findOneBy(['libelle' => 'Clôturée']));
         }
 
-        if($sortie->getDateHeureDebut()->format("Y-m-d H:i:s") < $now){
+        if($sortie->getEtat()=="Cloturée"&&$sortie->getDateHeureDebut()->format("Y-m-d H:i:s") < $now){
             $sortie->setEtat($etatRepository->findOneBy(['libelle' => 'Activité en cours']));
         }
 
         $dateFin = (clone $sortie->getDateHeureDebut())->modify("+{$sortie->getDuree()} minutes");
-        if($dateFin->format("Y-m-d H:i:s") < $now){
+        if($sortie->getEtat()=="Activité en cours"&&$dateFin->format("Y-m-d H:i:s") < $now){
             $sortie->setEtat($etatRepository->findOneBy(['libelle' => 'Passée']));
         }
 
