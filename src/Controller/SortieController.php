@@ -8,6 +8,7 @@ use App\Entity\Sortie;
 use App\Form\CommentaireType;
 use App\Form\SortieType;
 use App\Service\GestionDateService;
+use App\Service\MailService;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\EtatRepository;
 use App\Repository\SortieRepository;
@@ -247,7 +248,7 @@ final class SortieController extends AbstractController
 
     #[Route('/{id}/subscribe', name: 'subscribe', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
-    public function subscribe(Sortie $sortie, EntityManagerInterface $em, Request $request,GestionDateService $gestionDate, EtatRepository $etatRepository): Response
+    public function subscribe(Sortie $sortie, EntityManagerInterface $em, Request $request,GestionDateService $gestionDate, EtatRepository $etatRepository,MailService $mailService): Response
     {
         $participant = $this->getUser();
 
@@ -274,6 +275,15 @@ final class SortieController extends AbstractController
             $this->addFlash('success', 'Inscription réussie !');
         }
 
+        $mailService->send($participant->getMail(), 'Inscription confirmée', sprintf(
+                '<p>Bonjour %s %s,</p><p>Tu es bien inscrit à la sortie <strong>%s</strong> prévue le <strong>%s</strong>.</p>',
+                $participant->getPrenom(),
+                $participant->getNom(),
+                $sortie->getNom(),
+                $sortie->getDateHeureDebut()->format('d/m/Y H:i:s')
+            )
+        );
+
         //Redirection vers onglet Disponibles
         $tab = $request->query->get('tab', 'disponibles');
         return $this->redirectToRoute('app_sortie_index', ['tab' => $tab]);
@@ -282,7 +292,7 @@ final class SortieController extends AbstractController
 
     #[Route('/{id}/unsubscribe', name: 'unsubscribe', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
-    public function unsubscribe(Sortie $sortie, EntityManagerInterface $em, Request $request, EtatRepository $etatRepository,GestionDateService $gestionDate): Response
+    public function unsubscribe(Sortie $sortie, EntityManagerInterface $em, Request $request, EtatRepository $etatRepository,GestionDateService $gestionDate,MailService $mailService): Response
     {
         $participant = $this->getUser();
 
@@ -331,6 +341,15 @@ final class SortieController extends AbstractController
 
         $em->flush();
         $this->addFlash('success', 'Désinscription réussie !');
+
+        $mailService->send($participant->getMail(), 'Désinscription confirmée', sprintf(
+                '<p>Bonjour %s %s,</p><p>Tu es bien désinscrit de la sortie <strong>%s</strong> prévue le <strong>%s</strong>.</p>',
+                $participant->getPrenom(),
+                $participant->getNom(),
+                $sortie->getNom(),
+                $sortie->getDateHeureDebut()->format('d/m/Y H:i:s')
+            )
+        );
 
         return $this->redirectToRoute('app_sortie_index');
     }
