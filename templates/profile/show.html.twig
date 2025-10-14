@@ -3,47 +3,62 @@
 {% block title %}Profil{% endblock %}
 
 {% block body %}
-
-    <div class="container rounded bg-white mt-5 mb-5">
+    <div class="container rounded bg-white mt-5 mb-5 shadow-sm p-4">
         <div class="row">
 
             {# --- COLONNE PHOTO --- #}
-            <div class="col-md-3 border-right">
-                <div class="d-flex flex-column align-items-center text-center p-3 py-5">
+            <div class="col-md-3 border-right text-center">
+                <div class="p-3">
                     {% if participant.imageProfil %}
                         <img src="{{ asset('images/uploads/' ~ participant.imageProfil) }}"
                              alt="Photo de profil"
-                             class="rounded-circle"
+                             class="rounded-circle mb-3 shadow-sm"
                              width="150">
                     {% else %}
                         <img src="{{ asset('images/default-profile.jpg') }}"
                              alt="Photo par défaut"
-                             class="rounded-circle"
+                             class="rounded-circle mb-3 shadow-sm"
                              width="150">
                     {% endif %}
 
-
-
-                    <span class="font-weight-bold">{{ participant.prenom ~ ' ' ~ participant.nom }}</span>
-                    <span class="text-black-50">{{ participant.mail }}</span>
+                    <h5 class="fw-bold">{{ participant.prenom ~ ' ' ~ participant.nom }}</h5>
+                    <p class="text-muted mb-1">{{ participant.mail }}</p>
                     {% if participant.site %}
-                        <span class="text-muted">{{ participant.site.nom }}</span>
+                        <p class="text-secondary small">{{ participant.site.nom }}</p>
                     {% endif %}
+                </div>
+
+                <hr>
+
+                {# --- STATISTIQUES --- #}
+                <div class="text-center mt-4">
+                    <h6 class="text-primary mb-3">Statistiques</h6>
+                    <div class="d-flex justify-content-around">
+                        {% if sortiesOrganiseesCount is not null %}
+                        <div>
+                            <h4 class="fw-bold text-dark mb-0">{{ sortiesOrganiseesCount }}</h4>
+                            <small class="text-muted">Sorties organisées</small>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <h4 class="fw-bold text-dark mb-0">{{ sortiesParticipeesCount }}</h4>
+                            <small class="text-muted">Sorties participées</small>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             {# --- COLONNE INFORMATIONS PRINCIPALES --- #}
             <div class="col-md-5 border-right">
-                <div class="p-3 py-5">
+                <div class="p-3">
 
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h4 class="text-right">Profil</h4>
+                        <h4>Profil</h4>
                         {% if app.user and app.user.id == participant.id %}
-                        <a href="{{ path('app_profile_edit', {'id': participant.id}) }}" class="btn btn-outline-primary btn-sm">
-                            Modifier
-                        </a>
+                            <a href="{{ path('app_profile_edit', {'id': participant.id}) }}" class="btn btn-outline-primary btn-sm">
+                                Modifier
+                            </a>
                         {% endif %}
-
                     </div>
 
                     <div class="row mt-2">
@@ -82,31 +97,23 @@
                                 {{ participant.site ? participant.site.nom : 'Non défini' }}
                             </p>
                         </div>
-
-                    </div>
-
-                    <hr>
-                    <div class="row mt-3">
-                        <div class="col-md-12">
-
-                        </div>
                     </div>
                 </div>
             </div>
 
             {# --- COLONNE DROITE --- #}
             <div class="col-md-4">
-                <div class="p-3 py-5">
-                    <div class="d-flex justify-content-between align-items-center experience">
-                        <span>Autres informations</span>
-                    </div><br>
+                <div class="p-3">
+                    <div class="d-flex justify-content-between align-items-center experience mb-3">
+                        <h5>Autres informations</h5>
+                    </div>
 
-                    <div class="col-md-12">
+                    <div class="mb-3">
                         <label class="labels">Centres d’intérêt</label>
                         <p class="form-control-plaintext text-muted">Non renseigné</p>
-                    </div><br>
+                    </div>
 
-                    <div class="col-md-12">
+                    <div class="mb-3">
                         <label class="labels">Rôle utilisateur</label>
                         <p class="form-control-plaintext">
                             {% if 'ROLE_ADMIN' in participant.roles %}
@@ -123,5 +130,4 @@
 
         </div>
     </div>
-
 {% endblock %}
