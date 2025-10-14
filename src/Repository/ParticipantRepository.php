@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Participant;
+use App\Entity\Sortie;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
@@ -42,6 +43,45 @@ class ParticipantRepository extends ServiceEntityRepository implements PasswordU
             ->getOneOrNullResult()
             ;
     }
+
+    public function countActive(): int
+    {
+        return $this->createQueryBuilder('p')
+            ->select('count(p.id)')
+            ->andWhere('p.actif = true')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function getParticipationRate(): float
+    {
+        $em = $this->getEntityManager();
+        $sortieRepo = $em->getRepository(Sortie::class);
+
+        // Récupérer toutes les sorties
+        $sorties = $sortieRepo->findAll();
+
+        if (empty($sorties)) {
+            return 0;
+        }
+
+        $totalPlaces = 0;
+        $totalParticipants = 0;
+
+        foreach ($sorties as $sortie) {
+            // Nombre maximum de places pour cette sortie
+            $maxPlaces = $sortie->getNbInscriptionsMax();
+            $totalPlaces += $maxPlaces;
+
+            // Nombre de participants inscrits
+            $participantsCount = $sortie->getParticipants()->count();
+            $totalParticipants += $participantsCount;
+        }
+
+        // 🔹 Taux = nombre de participants réels / nombre total de places disponibles
+        return $totalPlaces > 0 ? ($totalParticipants / $totalPlaces) * 100 : 0;
+    }
+
 
     //    /**
     //     * @return Participant[] Returns an array of Participant objects

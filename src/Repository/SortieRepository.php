@@ -222,6 +222,36 @@ class SortieRepository extends ServiceEntityRepository
 
         return $qb->getQuery()->getOneOrNullResult();
     }
+
+    /**
+     * Retourne le nombre de sorties par mois pour l'année en cours
+     *
+     * @return array ['month' => int, 'sorties_count' => int]
+     */
+    public function getSortiesCountPerMonth(): array
+    {
+        $year = (int) date('Y');
+        $sorties = $this->createQueryBuilder('s')
+            ->andWhere('s.dateHeureDebut >= :start AND s.dateHeureDebut < :end')
+            ->setParameter('start', new \DateTime("$year-01-01 00:00:00"))
+            ->setParameter('end', new \DateTime(($year+1)."-01-01 00:00:00"))
+            ->getQuery()
+            ->getResult();
+
+        $counts = array_fill(1, 12, 0); // mois 1 à 12
+        foreach ($sorties as $sortie) {
+            $month = (int) $sortie->getDateHeureDebut()->format('n');
+            $counts[$month]++;
+        }
+
+        $result = [];
+        foreach ($counts as $month => $count) {
+            $result[] = ['month' => $month, 'sorties_count' => $count];
+        }
+
+        return $result;
+    }
+
     //    /**
     //     * @return Sortie[] Returns an array of Sortie objects
     //     */
