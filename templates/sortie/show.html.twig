@@ -12,7 +12,10 @@
         <div class="card-body">
             {% if sortie.imagePrincipale %}
                 <div class="text-center mb-3">
-                    <img src="{{ asset('images/sorties/' ~ sortie.imagePrincipale) }}" alt="Image de {{ sortie.nom }}" class="img-fluid rounded shadow-sm" style="max-height: 300px;">
+                    <img src="{{ asset('images/sorties/' ~ (sortie.imagePrincipale ?: 'default.png')) }}"
+                         alt="Image de {{ sortie.nom }}"
+                         class="img-fluid rounded shadow-sm"
+                         style="max-height: 300px;">
                 </div>
             {% else %}
                 <p class="text-muted text-center">Aucune image disponible pour cette sortie.</p>
@@ -54,6 +57,42 @@
                     </div>
                 </div>
             </div>
+
+            <div class="card mt-4" style="width: 18rem;">
+                <div class="card-body">
+                    <h5 class="card-title">Participants</h5>
+                    <div>{{ sortie.participants|length }} participant(s)</div>
+
+                    <div class="mt-3" style="max-height: 200px; overflow-y: auto;">
+                        {% if sortie.participants is not empty %}
+                            <ul class="list-group list-group-flush small">
+                                {% for participant in sortie.participants %}
+                                    <li class="list-group-item d-flex align-items-center justify-content-between py-2">
+                                        <a href="{{ path('app_profile_show', {id: participant.id}) }}" class="text-decoration-none fw-semibold">
+                                            {{ participant.prenom }} {{ participant.nom }}
+                                        </a>
+                                        {% if participant.imageProfil %}
+                                            <img src="{{ asset('images/uploads/' ~ participant.imageProfil) }}"
+                                                 alt="Photo de {{ participant.prenom }}"
+                                                 class="rounded-circle" width="35" height="35">
+                                        {% else %}
+                                            <img src="{{ asset('images/default-profile.jpg') }}"
+                                                 alt="Photo de {{ participant.prenom }}"
+                                                 class="rounded-circle" width="35" height="35">
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted small">Aucun participant pour le moment.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+
+
+
 
             <div class="mt-3 d-flex gap-2">
                 <a href="{{ path('app_sortie_index') }}" class="btn btn-secondary">Retour</a>

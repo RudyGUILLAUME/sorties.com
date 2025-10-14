@@ -23,7 +23,10 @@
                 {% for s in sorties %}
                     <tr style="cursor: pointer;" onclick="window.location='{{ path('app_sortie_show', {id: s.id}) }}';">
                         <td>
-                            <img src="{{ asset('images/sorties/' ~ s.imagePrincipale) }}" alt="Image de {{ s.nom }}" class="img-fluid rounded shadow-sm" style="max-height: 80px;">
+                            <img src="{{ asset('images/sorties/' ~ (s.imagePrincipale ?: 'default.png')) }}"
+                                 alt="Image de {{ s.nom }}"
+                                 class="img-fluid rounded shadow-sm"
+                                 style="max-height: 100px;">
                         </td>
                         <td>{{ s.nom }}</td>
                         <td>{{ s.dateHeureDebut ? s.dateHeureDebut|date('d/m/Y H\\hi') : '' }}</td>
