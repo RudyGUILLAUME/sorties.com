@@ -128,10 +128,12 @@
                                 ✏️ Modifier
                             </a>
                         {% endif %}
-                        <form method="post" action="{{ path('commentaire_delete', {id: commentaire.id}) }}" onsubmit="return confirm('Supprimer ce commentaire ?');">
-                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ commentaire.id) }}">
-                            <button class="btn btn-danger" type="submit">Supprimer</button>
-                        </form>
+                        {% if app.user==commentaire.auteur or is_granted('ROLE_ADMIN') %}
+                            <form method="post" action="{{ path('commentaire_delete', {id: commentaire.id}) }}" onsubmit="return confirm('Supprimer ce commentaire ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ commentaire.id) }}">
+                                <button class="btn btn-danger" type="submit">Supprimer</button>
+                            </form>
+                        {% endif %}
                     </div>
                 {% else %}
                     <p>Aucun commentaire pour le moment.</p>
