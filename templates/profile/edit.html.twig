@@ -12,7 +12,7 @@
                 <div class="d-flex flex-column align-items-center text-center p-3 py-5">
                     {% set p = participant ?? app.user %}
                     {% if app.user.imageProfil %}
-                        <img src="{{ asset('images/uploads/' ~ app.user.imageProfil) }}"
+                        <img src="{{ asset('images/uploads/' ~ participant.imageProfil) }}"
                              alt="Photo de profil"
                              class="rounded-circle"
                              width="150">
