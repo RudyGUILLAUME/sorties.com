@@ -20,26 +20,36 @@ final class ProfileController extends AbstractController
     #[Route('/profil/{id}', name: 'app_profile_show', requirements: ['id' => '\d+'])]
     public function show(Participant $participant, SortieRepository $sortieRepository): Response
     {
-        // 🔹 Compte le nombre de sorties organisées (seulement si organisateur)
-        $sortiesOrganiseesCount = null;
+        $roles = $participant->getRoles();
 
-        if (in_array('ROLE_ORGANISATEUR', $participant->getRoles(), true)) {
-            $sortiesOrganiseesCount = $sortieRepository->count(['organisateur' => $participant]);
-        }
+        // 🔹 Nombre de sorties organisées (si ROLE_ORGANISATEUR)
+        $sortiesOrganiseesCount = in_array('ROLE_ORGANISATEUR', $roles, true)
+            ? $sortieRepository->countByOrganisateur($participant->getId())
+            : 0;
 
-        // 🔹 Compte le nombre de sorties auxquelles il a participé
-        $sortiesParticipeesCount = $sortieRepository->createQueryBuilder('s')
-            ->select('COUNT(s.id)')
-            ->join('s.participants', 'p')
-            ->where('p.id = :participantId')
-            ->setParameter('participantId', $participant->getId())
-            ->getQuery()
-            ->getSingleScalarResult();
+        // 🔹 Nombre de sorties auxquelles il a participé (si ROLE_USER)
+        $sortiesParticipeesCount = in_array('ROLE_USER', $roles, true)
+            ? $sortieRepository->countByParticipant($participant->getId())
+            : 0;
+
+        // 🔹 Taux de participation global
+        $totalSorties = $sortieRepository->count([]);
+        $tauxParticipationGlobal = $totalSorties > 0
+            ? ($sortiesParticipeesCount / $totalSorties) * 100
+            : 0;
+
+        // 🔹 Organisateur préféré
+        $organisateurPref = $sortieRepository->findOrganisateurPrefere($participant->getId());
+        // 🔹 Site préféré
+        $sitePref = $sortieRepository->findSitePrefere($participant->getId());
 
         return $this->render('profile/show.html.twig', [
             'participant' => $participant,
             'sortiesOrganiseesCount' => $sortiesOrganiseesCount,
             'sortiesParticipeesCount' => $sortiesParticipeesCount,
+            'tauxParticipationGlobal' => $tauxParticipationGlobal,
+            'organisateurPref' => $organisateurPref,
+            'sitePref' => $sitePref,
         ]);
     }
 

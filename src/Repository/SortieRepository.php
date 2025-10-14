@@ -159,6 +159,69 @@ class SortieRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * Compte le nombre de sorties organisées par un participant donné
+     */
+    public function countByOrganisateur(int $participantId): int
+    {
+        return (int) $this->createQueryBuilder('s')
+            ->select('COUNT(s.id)')
+            ->andWhere('s.organisateur = :pid')
+            ->setParameter('pid', $participantId)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * Compte le nombre de sorties auxquelles un participant a participé
+     */
+    public function countByParticipant(int $participantId): int
+    {
+        return (int) $this->createQueryBuilder('s')
+            ->select('COUNT(s.id)')
+            ->join('s.participants', 'p')
+            ->andWhere('p.id = :pid')
+            ->setParameter('pid', $participantId)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * Retourne l'organisateur préféré d'un participant (celui dont il a suivi le plus de sorties)
+     */
+    public function findOrganisateurPrefere(int $participantId): ?array
+    {
+        $qb = $this->createQueryBuilder('s')
+            ->select('o.id, o.prenom, o.nom, COUNT(s.id) AS sorties_count')
+            ->join('s.organisateur', 'o')
+            ->join('s.participants', 'p')
+            ->andWhere('p.id = :pid')
+            ->setParameter('pid', $participantId)
+            ->groupBy('o.id')
+            ->orderBy('sorties_count', 'DESC')
+            ->setMaxResults(1);
+
+        return $qb->getQuery()->getOneOrNullResult();
+    }
+
+    /**
+     * Retourne le site préféré d'un participant (le site où il a participé le plus)
+     */
+    public function findSitePrefere(int $participantId): ?array
+    {
+        $qb = $this->createQueryBuilder('s')
+            ->select('site.id, site.nom, COUNT(s.id) AS sorties_count')
+            ->join('s.site', 'site')
+            ->join('s.participants', 'p')
+            ->andWhere('p.id = :pid')
+            ->setParameter('pid', $participantId)
+            ->groupBy('site.id')
+            ->orderBy('sorties_count', 'DESC')
+            ->setMaxResults(1);
+
+        return $qb->getQuery()->getOneOrNullResult();
+    }
     //    /**
     //     * @return Sortie[] Returns an array of Sortie objects
     //     */
