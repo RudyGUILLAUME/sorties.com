@@ -10,7 +10,7 @@
             {# --- COLONNE PHOTO --- #}
             <div class="col-md-3 border-right">
                 <div class="d-flex flex-column align-items-center text-center p-3 py-5">
-                    {% if app.user.imageProfil %}
+                    {% if participant.imageProfil %}
                         <img src="{{ asset('images/uploads/' ~ participant.imageProfil) }}"
                              alt="Photo de profil"
                              class="rounded-circle"
