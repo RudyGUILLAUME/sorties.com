@@ -1,19 +1,95 @@
 {% extends 'base.html.twig' %}
 
+{% block title %}Admin Panel{% endblock %}
+
 {% block body %}
-    <h1>Panel Admin</h1>
+    <div class="container mt-5">
 
-    {% for label, messages in app.flashes %}
-        {% for message in messages %}
-            <div class="alert alert-{{ label }}">{{ message }}</div>
+        <h1 class="mb-4">Panel Admin</h1>
+
+        {# --- Flash Messages --- #}
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }}">{{ message }}</div>
+            {% endfor %}
         {% endfor %}
-    {% endfor %}
 
+        {# --- KPI Globaux --- #}
+        <div class="row text-center mb-4">
+            <div class="col-md-3">
+                <div class="card shadow-sm p-3">
+                    <h6>Participants actifs</h6>
+                    <h3>{{ kpi.activeParticipants }}</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm p-3">
+                    <h6>Sorties créées</h6>
+                    <h3>{{ kpi.sorties }}</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm p-3">
+                    <h6>Taux de participation</h6>
+                    <h3>{{ kpi.participationRate|number_format(2) }}%</h3>
+                </div>
+            </div>
+        </div>
 
+        {# --- Graphique --- #}
+        <div class="card mb-4 shadow-sm p-3">
+            <h5>Activité Sorties</h5>
+            <canvas id="adminChart" height="150"></canvas>
+        </div>
 
-    <ul>
-        <li><a class="btn btn-primary btn-lg me-3" href="{{ path('app_register') }}">Créer un compte</a></li>
-        <li><a class="btn btn-primary btn-lg me-3" href="{{path('admin_import_csv')}}">Ajout de compte par fichier</a></li>
-        <li><a class="btn btn-primary btn-lg me-3" href="{{path('admin_participants')}}">Liste participants</a></li>
-    </ul>
+        {# --- Actions / Batch Operations --- #}
+        <div class="card mb-4 shadow-sm p-3">
+            <h5>Gestion des participants</h5>
+            <div class="d-flex flex-wrap gap-2">
+                <a class="btn btn-primary" href="{{ path('app_register') }}">Créer un compte</a>
+                <a class="btn btn-primary" href="{{ path('admin_import_csv') }}">Ajout CSV</a>
+                <a class="btn btn-secondary" href="{{ path('admin_participants') }}">Liste participants</a>
+            </div>
+        </div>
+    </div>
+
+    {# --- Chart.js --- #}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const ctx = document.getElementById('adminChart').getContext('2d');
+
+            new Chart(ctx, {
+                type: 'line', // 🔹 Ligne au lieu de barres
+                data: {
+                    labels: {{ chart.labels|json_encode|raw }}, // ex: ["Jan", "Feb", "Mar", ...]
+                    datasets: [{
+                        label: 'Sorties par mois',
+                        data: {{ chart.data|json_encode|raw }}, // ex: [5, 12, 8, ...]
+                        borderColor: '#0d6efd', // couleur de la ligne
+                        backgroundColor: 'rgba(13, 110, 253, 0.2)', // couleur sous la ligne
+                        fill: true,
+                        tension: 0.3, // courbure de la ligne
+                        pointRadius: 5,
+                        pointBackgroundColor: '#0d6efd'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: true, position: 'top' },
+                        tooltip: { enabled: true }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 } // pour afficher des nombres entiers
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+
 {% endblock %}
