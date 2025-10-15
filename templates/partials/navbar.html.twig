@@ -25,9 +25,11 @@
             <a href="{{ path('app_ville_index') }}" class="text-text-light dark:text-text-dark text-sm font-medium hover:text-primary transition">Villes</a>
         </div>
 
+        {% if app.user and 'ROLE_ADMIN' in app.user.roles %}
         <div class="flex items-center gap-9">
             <a href="{{ path('admin_panel') }}" class="text-text-light dark:text-text-dark text-sm font-medium hover:text-primary transition">Dashboard Admin</a>
         </div>
+        {% endif %}
 
 
         {% if app.user %}
