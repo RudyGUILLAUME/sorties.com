@@ -19,13 +19,52 @@ use Symfony\Component\Routing\Attribute\Route;
 final class AdminController extends AbstractController
 {
     #[Route('', name: 'panel')]
-    public function index(): Response
+    public function index(
+        ParticipantRepository $participantRepo,
+        SortieRepository $sortieRepo,
+    ): Response
     {
         if (!$this->isGranted('ROLE_ADMIN')) {
             return $this->redirectToRoute('app_home');
         }
 
-        return $this->render('admin/index.html.twig');
+        // 🔹 KPI globaux
+        $kpi = [
+            'activeParticipants' => $participantRepo->countActive(), // nombre total d'utilisateurs
+            'sorties' => $sortieRepo->count([]), // nombre total de sorties
+            'participationRate' => $participantRepo->getParticipationRate(), // méthode custom à créer pour % de participation
+        ];
+
+        // 🔹 Données pour le graphique Chart.js
+        $result = $sortieRepo->getSortiesCountPerMonth();
+
+        $labels = [];
+        $data = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $labels[] = date('M', mktime(0, 0, 0, $m, 1));
+            $found = false;
+            foreach ($result as $row) {
+                if ((int)$row['month'] === $m) {
+                    $data[] = (int)$row['sorties_count'];
+                    $found = true;
+                    break;
+                }
+            }
+            if (!$found) {
+                $data[] = 0;
+            }
+        }
+
+        $chart = [
+            'labels' => $labels,
+            'data' => $data,
+        ];
+
+
+        return $this->render('admin/index.html.twig', [
+            'kpi' => $kpi,
+            'chart' => $chart,
+        ]);
     }
 
     #[Route('/import', name: 'import_csv')]
