@@ -72,8 +72,18 @@ class SortieType extends AbstractType
                         'mimeTypesMessage' => 'Veuillez uploader une image valide (JPEG, PNG, WEBP)',
                     ])
                 ],
+            ])
+            ->add('privee', CheckboxType::class, [
+                'label' => 'Sortie privée ?',
+                'required' => false,
+            ])
+            ->add('invites', EntityType::class, [
+                'class' => Participant::class,
+                'choice_label' => fn($p) => $p->getPrenom().' '.$p->getNom(),
+                'multiple' => true,
+                'expanded' => true, // pour afficher des checkboxes
+                'required' => false,
             ]);
-        ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void

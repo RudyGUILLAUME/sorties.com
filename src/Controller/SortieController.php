@@ -49,7 +49,13 @@ final class SortieController extends AbstractController
 
         $sorties = $sortieRepository->search($criteria, $participant?->getId());
 
-        foreach ($sorties as $sortie) {
+        $sorties_visibles = array_filter($sorties, function ($sortie) use ($participant) {
+            if (!$sortie->isPrivee()) return true;
+            if ($sortie->getOrganisateur() === $participant) return true;
+            return $sortie->getInvites()->contains($participant);
+        });
+
+        foreach ($sorties_visibles as $sortie) {
             $gestionDate->GestionDate($em,$etatRepository,$sortie);
             $etatActuel = $sortie->getEtat()->getLibelle();
 
@@ -68,7 +74,7 @@ final class SortieController extends AbstractController
         $em->flush();
 
         return $this->render('sortie/index.html.twig', [
-            'sorties' => $sorties,
+            'sorties' => $sorties_visibles,
             'participant' => $participant,
             'searchForm' => $form->createView(),
             'sortiesDisponibles' => $sortiesDisponibles,
@@ -141,6 +147,14 @@ final class SortieController extends AbstractController
     #[Route('/{id}', name: 'show', methods: ['GET','POST'])]
     public function show(Request $request, EntityManagerInterface $em,Sortie $sortie, MessageRepository $messageRepository): Response
     {
+        if ($sortie->isPrivee() &&
+            $sortie->getOrganisateur() !== $this->getUser() &&
+            !$sortie->getInvites()->contains($this->getUser())) {
+
+            $this->addFlash('error', 'Tu n’as pas accès à cette sortie');
+            return $this->redirectToRoute('app_sortie_index');
+        }
+
         $commentaire = new Commentaire();
         $form = $this->createForm(CommentaireType::class, $commentaire);
         $form->handleRequest($request);
