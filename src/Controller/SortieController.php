@@ -8,6 +8,7 @@ use App\Entity\Sortie;
 use App\Form\CommentaireType;
 use App\Form\SortieType;
 use App\Repository\MessageRepository;
+use App\Repository\ParticipantRepository;
 use App\Service\GestionDateService;
 use App\Service\MailService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -17,6 +18,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -86,7 +88,7 @@ final class SortieController extends AbstractController
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     #[IsGranted(new Expression('is_granted("ROLE_ADMIN") or is_granted("ROLE_ORGANISATEUR")'))]
-    public function new(Request $request, EntityManagerInterface $em, EtatRepository $etatRepository,GestionDateService $gestionDate, SluggerInterface $slugger): Response
+    public function new(Request $request, EntityManagerInterface $em, EtatRepository $etatRepository,GestionDateService $gestionDate, SluggerInterface $slugger, ParticipantRepository $participantRepository): Response
     {
         $participant = $this->getUser();
         $sortie = new Sortie();
@@ -103,6 +105,15 @@ final class SortieController extends AbstractController
 
         $form = $this->createForm(SortieType::class, $sortie);
         $form->handleRequest($request);
+
+        $invitesIds = explode(',', $form->get('invites')->getData() ?? '');
+        foreach ($invitesIds as $id) {
+            $participant = $participantRepository->find($id);
+            if ($participant) {
+                $sortie->addInvite($participant);
+            }
+        }
+
 
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -192,7 +203,7 @@ final class SortieController extends AbstractController
 
     #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
     #[IsGranted(new Expression('is_granted("ROLE_ADMIN") or is_granted("ROLE_ORGANISATEUR")'))]
-    public function edit(Request $request, Sortie $sortie, EntityManagerInterface $em, EtatRepository $etatRepository,GestionDateService $gestionDate, SluggerInterface $slugger): Response
+    public function edit(Request $request, Sortie $sortie, EntityManagerInterface $em, EtatRepository $etatRepository,GestionDateService $gestionDate, SluggerInterface $slugger, ParticipantRepository $participantRepository): Response
     {
         $gestionDate->GestionDate($em,$etatRepository,$sortie);
 
@@ -201,11 +212,28 @@ final class SortieController extends AbstractController
             $this->addFlash('danger', 'Vous ne pouvez modifier cette sortie que si elle est en création.');
             return $this->redirectToRoute('app_sortie_index');
         }
-
         $form = $this->createForm(SortieType::class, $sortie);
+
+        $invitesIds = array_map(fn($p) => $p->getId(), $sortie->getInvites()->toArray());
+        $form->get('invites')->setData(implode(',', $invitesIds));
+
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+            $submittedIds = array_filter(explode(',', $form->get('invites')->getData() ?? ''));
+
+            foreach ($sortie->getInvites() as $invite) {
+                $sortie->removeInvite($invite);
+            }
+
+            // Ajouter les nouveaux invités
+            foreach ($submittedIds as $id) {
+                $participant = $participantRepository->find($id);
+                if ($participant) {
+                    $sortie->addInvite($participant);
+                }
+            }
 
             $imageFile = $form->get('image_principale')->getData();
 
@@ -242,6 +270,7 @@ final class SortieController extends AbstractController
         return $this->render('sortie/edit.html.twig', [
             'form' => $form->createView(),
             'sortie' => $sortie,
+            'participantRepository'=>$participantRepository,
         ]);
     }
 

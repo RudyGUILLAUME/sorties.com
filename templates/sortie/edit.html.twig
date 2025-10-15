@@ -29,6 +29,12 @@
                     <div class="col-md-12">{{ form_row(form.lieu) }}</div>
                     <div class="col-12">{{ form_row(form.infosSortie) }}</div>
                 </div>
+
+            {{ include('sortie/_form.html.twig') }}
+
+            <div id="selected-invites" class="mb-3"></div>
+            <input type="hidden" id="sortie_invites" name="sortie[invites]" value="{{ form.invites.vars.value }}">
+
                 <div class="mt-3 d-flex gap-2">
                     <a href="{{ path('app_sortie_index') }}" class="btn btn-secondary">Annuler</a>
                     <button type="submit" class="btn btn-primary">Enregistrer</button>

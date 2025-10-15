@@ -84,6 +84,7 @@ class Sortie
         $this->participants = new ArrayCollection();
         $this->commentaires = new ArrayCollection();
         $this->messages = new ArrayCollection();
+        $this->invites = new ArrayCollection();
     }
 
     public function getId(): ?int

@@ -22,7 +22,7 @@ class GestionDateService
             $sortie->setEtat($etatRepository->findOneBy(['libelle' => 'Clôturée']));
         }
 
-        if($sortie->getEtat()=="Cloturée"&&$sortie->getDateHeureDebut()->format("Y-m-d H:i:s") < $now){
+        if($sortie->getEtat()=="Clôturée"&&$sortie->getDateHeureDebut()->format("Y-m-d H:i:s") > $now){
             $sortie->setEtat($etatRepository->findOneBy(['libelle' => 'Activité en cours']));
         }
 

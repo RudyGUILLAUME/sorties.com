@@ -31,24 +31,10 @@
                     <div class="col-md-6">{{ form_row(form.site) }}</div>
                     <div class="col-12">{{ form_row(form.lieu) }}</div>
                     <div class="col-12">{{ form_row(form.infosSortie) }}</div>
-                    <div class="col-12 sortie_privee">{{ form_row(form.privee) }}</div>
-                    <div class="col-12 form-row-invites">{{ form_row(form.invites) }}</div>
                 </div>
 
-                <script>
-                    document.addEventListener('DOMContentLoaded', () => {
-                        const priveeCheckbox = document.querySelector('.sortie_privee');
-                        const invitesField = document.querySelector('.form-row-invites');
-                        if (!priveeCheckbox || !invitesField) return;
+                {{ include('sortie/_form.html.twig') }}
 
-                        const toggleInvites = () => {
-                            invitesField.style.display = priveeCheckbox.checked ? 'block' : 'none';
-                        };
-
-                        priveeCheckbox.addEventListener('change', toggleInvites);
-                        toggleInvites();
-                    });
-                </script>
 
                 <div class="mt-4 d-flex justify-content-end gap-3">
                     <a href="{{ path('app_home') }}" class="btn btn-outline-secondary px-4">Annuler</a>

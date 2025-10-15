@@ -1,0 +1,105 @@
+<div id="invites-container">
+    <label for="invite-search">Inviter des participants :</label>
+    <div style="display: flex; gap: .5rem; align-items: center;">
+        <input id="invite-search" type="text" class="form-control" placeholder="Rechercher un participant...">
+        <button id="search-btn" type="button" class="btn btn-primary">🔍</button>
+    </div>
+    <div id="invite-results" class="dropdown"></div>
+    <div id="selected-invites" class="mt-2"></div>
+</div>
+
+{{ form_row(form.privee) }}
+{{ form_widget(form.invites) }}
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const priveeCheckbox = document.querySelector('#sortie_privee');
+        const invitesContainer = document.querySelector('#invites-container');
+        const searchInput = document.querySelector('#invite-search');
+        const resultsDiv = document.querySelector('#invite-results');
+        const selectedDiv = document.querySelector('#selected-invites');
+        const hiddenField = document.querySelector('#sortie_invites');
+
+        const selected = new Map();
+
+        {% if form.invites.vars.value %}
+            {% for id in form.invites.vars.value|split(',') %}
+                {% set participant = participantRepository.find(id) %}
+                {% if participant %}
+                    const id = '{{ participant.id }}';
+                    const name = '{{ participant.prenom }} {{ participant.nom }}';
+                    selected.set(id, name);
+                    addInviteTag(id, name);
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+
+        function addInviteTag(id, name) {
+            const tag = document.createElement('span');
+            tag.textContent = name + ' ✖';
+            tag.classList.add('badge', 'bg-primary', 'm-1', 'p-2');
+            tag.style.cursor = 'pointer';
+            tag.dataset.id = id;
+            selectedDiv.appendChild(tag);
+            updateHidden();
+        }
+
+        function updateHidden() {
+            hiddenField.value = Array.from(selected.keys()).join(',');
+        }
+
+        
+        const toggleInvites = () => {
+            invitesContainer.style.display = priveeCheckbox.checked ? 'block' : 'none';
+        };
+        priveeCheckbox.addEventListener('change', toggleInvites);
+        toggleInvites();
+
+        // Recherche dynamique
+        let timeout;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(timeout);
+            const query = searchInput.value.trim();
+            if (query.length < 2) {
+                resultsDiv.innerHTML = '';
+                return;
+            }
+            timeout = setTimeout(() => {
+                fetch(`/participants/search?q=${encodeURIComponent(query)}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        resultsDiv.innerHTML = data.map(p =>
+                            `<div class="result" data-id="${p.id}" style="cursor:pointer; padding:4px;">${p.text}</div>`
+                        ).join('');
+                    });
+            }, 300);
+        });
+
+        // Ajouter un invité
+        resultsDiv.addEventListener('click', e => {
+            const div = e.target.closest('.result');
+            if (!div) return;
+            const id = div.dataset.id;
+            const name = div.textContent;
+            if (selected.has(id)) return;
+            selected.set(id, name);
+            addInviteTag(id, name);
+            resultsDiv.innerHTML = '';
+            searchInput.value = '';
+        });
+
+        // Supprimer un invité
+        selectedDiv.addEventListener('click', e => {
+            if (e.target.tagName === 'SPAN') {
+                selected.delete(e.target.dataset.id);
+                e.target.remove();
+                updateHidden();
+            }
+        });
+
+        // Bloquer enter dans recherche
+        searchInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter') e.preventDefault();
+        });
+    });
+</script>
