@@ -3,185 +3,155 @@
 {% block title %}Profil de {{ participant.prenom }}{% endblock %}
 
 {% block body %}
-    <div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
-        <div class="layout-container flex h-full grow flex-col">
-            <div class="px-4 md:px-10 lg:px-20 xl:px-40 flex flex-1 justify-center py-5">
-                <div class="layout-content-container flex flex-col w-full max-w-6xl flex-1">
-
-                    <!-- Fil d’Ariane -->
-                    <div class="flex flex-wrap gap-2 p-4">
-                        <a class="text-primary text-base font-medium" href="{{ path('app_sortie_index') }}">Accueil</a>
-                        <span class="text-gray-500 dark:text-white/60">/</span>
-                        <span class="text-text-light dark:text-text-dark">Profil</span>
-                    </div>
-
-                    <!-- En-tête -->
-                    <div class="flex flex-wrap justify-between gap-3 p-4">
-                        <p class="text-text-light dark:text-text-dark text-4xl font-black leading-tight tracking-[-0.033em]">
-                            Profil de {{ participant.prenom }}
-                        </p>
-
-                        {% if app.user and app.user.id == participant.id %}
-                            <a href="{{ path('app_profile_edit', {'id': participant.id}) }}"
-                               class="flex items-center gap-2 rounded-lg bg-primary text-text-light px-4 py-2 font-semibold text-sm hover:opacity-90 transition">
-                                <span class="material-symbols-outlined text-base">edit</span> Modifier
-    <div class="container rounded bg-white mt-5 mb-5 shadow-sm p-4">
-        <div class="row">
-
-            {# --- COLONNE PHOTO --- #}
-            <div class="col-md-3 border-right text-center">
-                <div class="p-3">
-                    {% if participant.imageProfil %}
-                        <img src="{{ asset('images/uploads/' ~ participant.imageProfil) }}"
-                             alt="Photo de profil"
-                             class="rounded-circle mb-3 shadow-sm"
-                             width="150">
-                    {% else %}
-                        <img src="{{ asset('images/default-profile.jpg') }}"
-                             alt="Photo par défaut"
-                             class="rounded-circle mb-3 shadow-sm"
-                             width="150">
-                    {% endif %}
-
-                    <h5 class="fw-bold">{{ participant.prenom ~ ' ' ~ participant.nom }}</h5>
-                    <p class="text-muted mb-1">{{ participant.mail }}</p>
-                    {% if participant.site %}
-                        <p class="text-secondary small">{{ participant.site.nom }}</p>
-                    {% endif %}
-                </div>
-
-                <hr>
-
-                {# --- STATISTIQUES --- #}
-                <div class="text-center mt-4">
-                    <div class="text-center mt-4">
-                        <div class="d-flex justify-content-center align-items-center mb-3">
-                            <h6 class="fw-bold mb-0" style="color: #343a40;">Statistiques</h6>
-                            <button id="btnShowChart" class="btn btn-outline-secondary btn-sm ms-2 p-1"
-                                    title="Voir graphique"
-                                    style="height: 28px; width: 28px; display: flex; align-items: center; justify-content: center;">
-                                <i class="bi bi-bar-chart" style="font-size: 1rem; color: #0d6efd;"></i>
-                            </button>
-                        </div>
-                    </div>
-
-
-                    <div class="d-flex justify-content-around">
-                        {% if sortiesOrganiseesCount is not null and sortiesOrganiseesCount > 0 %}
-                            <div>
-                                <h4 class="fw-bold text-dark mb-0">{{ sortiesOrganiseesCount }}</h4>
-                                <small class="text-muted">Sorties organisées</small>
-                            </div>
-                        {% endif %}
-                        <div>
-                            <h4 class="fw-bold text-dark mb-0">{{ sortiesParticipeesCount }}</h4>
-                            <small class="text-muted">Sorties participées</small>
-                        </div>
-                    </div>
-
-                    <div class="mt-2">
-                        {% if organisateurPref %}
-                            <p class="mb-0"><strong>Organisateur préféré :</strong> {{ organisateurPref.prenom ~ ' ' ~ organisateurPref.nom }}</p>
-                        {% endif %}
-                        {% if sitePref %}
-                            <p class="mb-0"><strong>Site préféré :</strong> {{ sitePref.nom }}</p>
-                        {% endif %}
-                    </div>
-
-                    {# Div cachée pour le graphique #}
-                    <div id="chartContainer" class="mt-3" style="display: none;">
-                        <canvas id="profilStatsChart" height="150"></canvas>
-                    </div>
-                </div>
-
+    <main class="flex-grow p-6 md:p-10 bg-background-light dark:bg-background-dark min-h-screen">
+        <div class="max-w-6xl mx-auto">
+            <!-- Fil d’Ariane -->
+            <div class="flex flex-wrap gap-2 mb-6">
+                <a class="text-primary text-base font-medium" href="{{ path('app_sortie_index') }}">Accueil</a>
+                <span class="text-gray-500 dark:text-white/60">/</span>
+                <span class="text-text-light dark:text-text-dark">Profil</span>
             </div>
 
-            {# --- COLONNE INFORMATIONS PRINCIPALES --- #}
-            <div class="col-md-5 border-right">
-                <div class="p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h4>Profil</h4>
-                        {% if app.user and app.user.id == participant.id %}
-                            <a href="{{ path('app_profile_edit', {'id': participant.id}) }}" class="btn btn-outline-primary btn-sm">
-                                Modifier
-                            </a>
-                        {% endif %}
-                    </div>
+            <!-- En-tête -->
+            <div class="flex flex-wrap justify-between items-center gap-4 mb-8">
+                <h1 class="text-4xl font-black text-text-light dark:text-text-dark">
+                    Profil de {{ participant.prenom }}
+                </h1>
 
-                    <!-- Contenu principal -->
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 p-4 mt-4">
-                        <!-- Colonne gauche -->
-                        <div class="lg:col-span-2 flex flex-col gap-8">
-                            <!-- Infos personnelles -->
-                            <div class="bg-white dark:bg-secondary-dark p-6 rounded-xl shadow-sm">
-                                <h2 class="text-xl font-bold mb-6 text-text-light dark:text-text-dark">Informations personnelles</h2>
+                {% if app.user and app.user.id == participant.id %}
+                    <a href="{{ path('app_profile_edit', {'id': participant.id}) }}"
+                       class="flex items-center gap-2 rounded-lg bg-primary text-text-light px-4 py-2 font-semibold text-sm hover:opacity-90 transition">
+                        <span class="material-symbols-outlined text-base">edit</span> Modifier
+                    </a>
+                {% endif %}
+            </div>
 
-                                <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
-                                    <!-- Photo -->
-                                    <div class="relative group">
-                                        <div class="bg-center bg-no-repeat bg-cover rounded-full h-24 w-24 border border-gray-300 dark:border-gray-600"
-                                             style="background-image: url('{{ asset(participant.imageProfil
-                                                 ? 'images/uploads/' ~ participant.imageProfil
-                                                 : 'images/default-profile.jpg') }}');">
-                                        </div>
-                                    </div>
+            <!-- Contenu principal -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Colonne gauche -->
+                <div class="lg:col-span-2 flex flex-col gap-8">
+                    <!-- Informations personnelles -->
+                    <div class="p-6 rounded-xl bg-white dark:bg-secondary-dark shadow-sm">
+                        <h2 class="text-xl font-bold mb-6 text-text-light dark:text-text-dark">
+                            Informations personnelles
+                        </h2>
 
-                                    <!-- Nom + Email -->
-                                    <div>
-                                        <p class="text-text-light dark:text-text-dark text-[22px] font-bold">{{ participant.prenom }} {{ participant.nom }}</p>
-                                        <p class="text-subtle-light dark:text-subtle-dark">{{ participant.mail }}</p>
-                                        {% if participant.site %}
-                                            <p class="text-sm text-subtle-light dark:text-subtle-dark">{{ participant.site.nom }}</p>
-                                        {% endif %}
-                                    </div>
-                                </div>
-
-                                <!-- Détails -->
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <p class="text-sm font-medium text-subtle-light dark:text-subtle-dark pb-1">Téléphone</p>
-                                        <p class="text-text-light dark:text-text-dark">
-                                            {{ participant.telephone ?: 'Non renseigné' }}
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-medium text-subtle-light dark:text-subtle-dark pb-1">Rôle utilisateur</p>
-                                        <p class="text-text-light dark:text-text-dark">
-                                            {% if 'ROLE_ADMIN' in participant.roles %}
-                                                Administrateur
-                                            {% elseif 'ROLE_USER' in participant.roles %}
-                                                Utilisateur
-                                            {% else %}
-                                                Non défini
-                                            {% endif %}
-                                        </p>
-                                    </div>
-
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-6 mb-6">
+                            <!-- Photo -->
+                            <div class="relative group">
+                                <div class="bg-center bg-no-repeat bg-cover rounded-full h-28 w-28 border border-subtle-light dark:border-subtle-dark"
+                                     style="background-image: url('{{ asset(participant.imageProfil
+                                         ? 'images/uploads/' ~ participant.imageProfil
+                                         : 'images/default-profile.jpg') }}');">
                                 </div>
                             </div>
 
+                            <!-- Nom + Email -->
+                            <div>
+                                <p class="text-text-light dark:text-text-dark text-[22px] font-bold">
+                                    {{ participant.prenom }} {{ participant.nom }}
+                                </p>
+                                <p class="text-subtle-light dark:text-subtle-dark">{{ participant.mail }}</p>
+                                {% if participant.site %}
+                                    <p class="text-sm text-subtle-light dark:text-subtle-dark">
+                                        {{ participant.site.nom }}
+                                    </p>
+                                {% endif %}
+                            </div>
                         </div>
 
-                        <!-- Colonne droite -->
-                        <div class="flex flex-col gap-8">
-                            <!-- Statistiques -->
-                            <div class="bg-white dark:bg-secondary-dark p-6 rounded-xl shadow-sm">
-                                <h2 class="text-xl font-bold mb-4 text-text-light dark:text-text-dark">Mon activité</h2>
-
-
-
+                        <!-- Détails -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <p class="text-sm font-medium text-subtle-light dark:text-subtle-dark pb-1">
+                                    Téléphone
+                                </p>
+                                <p class="text-text-light dark:text-text-dark">
+                                    {{ participant.telephone ?: 'Non renseigné' }}
+                                </p>
                             </div>
-
+                            <div>
+                                <p class="text-sm font-medium text-subtle-light dark:text-subtle-dark pb-1">
+                                    Rôle utilisateur
+                                </p>
+                                <p class="text-text-light dark:text-text-dark">
+                                    {% if 'ROLE_ADMIN' in participant.roles %}
+                                        Administrateur
+                                    {% elseif 'ROLE_USER' in participant.roles %}
+                                        Utilisateur
+                                    {% else %}
+                                        Non défini
+                                    {% endif %}
+                                </p>
+                            </div>
                         </div>
                     </div>
 
+                    <!-- Statistiques -->
+                    <div class="p-6 rounded-xl bg-white dark:bg-secondary-dark shadow-sm">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-xl font-bold text-text-light dark:text-text-dark">Statistiques</h2>
+                            <button id="btnShowChart"
+                                    class="flex items-center gap-1 bg-transparent border border-subtle-light dark:border-subtle-dark rounded-lg px-3 py-1 text-sm text-text-light dark:text-text-dark hover:bg-secondary-light dark:hover:bg-secondary-dark transition">
+                                <span class="material-symbols-outlined text-base">bar_chart</span>
+                                Voir graphique
+                            </button>
+                        </div>
+
+                        <!-- Données -->
+                        <div class="flex flex-wrap justify-around text-center gap-6">
+                            {% if sortiesOrganiseesCount is not null and sortiesOrganiseesCount > 0 %}
+                                <div>
+                                    <p class="text-3xl font-bold text-primary">{{ sortiesOrganiseesCount }}</p>
+                                    <p class="text-subtle-light dark:text-subtle-dark text-sm">Sorties organisées</p>
+                                </div>
+                            {% endif %}
+                            <div>
+                                <p class="text-3xl font-bold text-primary">{{ sortiesParticipeesCount }}</p>
+                                <p class="text-subtle-light dark:text-subtle-dark text-sm">Sorties participées</p>
+                            </div>
+                            <div>
+                                <p class="text-3xl font-bold text-primary">
+                                    {{ tauxParticipationGlobal|round(1) }}%
+                                </p>
+                                <p class="text-subtle-light dark:text-subtle-dark text-sm">Taux de participation</p>
+                            </div>
+                        </div>
+
+                        <!-- Organisateur préféré -->
+                        <div class="mt-8 space-y-2">
+                            {% if organisateurPref %}
+                                <p class="text-text-light dark:text-text-dark">
+                                    <strong>Organisateur préféré :</strong> {{ organisateurPref.prenom }} {{ organisateurPref.nom }}
+                                </p>
+                            {% endif %}
+                            {% if sitePref %}
+                                <p class="text-text-light dark:text-text-dark">
+                                    <strong>Site préféré :</strong> {{ sitePref.nom }}
+                                </p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Graphique -->
+                        <div id="chartContainer" class="mt-6 hidden">
+                            <canvas id="profilStatsChart" height="150"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Colonne droite -->
+                <div class="flex flex-col gap-8">
+                    <div class="p-6 rounded-xl bg-white dark:bg-secondary-dark shadow-sm">
+                        <h2 class="text-xl font-bold mb-4 text-text-light dark:text-text-dark">Autres informations</h2>
+                        <p class="text-subtle-light dark:text-subtle-dark">Centres d’intérêt : <span class="italic">Non renseigné</span></p>
+                    </div>
 
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 
-    {# --- Chart.js Script --- #}
+    <!-- Script du graphique -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -191,7 +161,7 @@
             let myChart = null;
 
             btn.addEventListener('click', () => {
-                chartContainer.style.display = chartContainer.style.display === 'none' ? 'block' : 'none';
+                chartContainer.classList.toggle('hidden');
 
                 if (!chartDisplayed) {
                     const ctx = document.getElementById('profilStatsChart').getContext('2d');
@@ -204,7 +174,7 @@
                     const data = [
                         {% if sortiesOrganiseesCount is not null and sortiesOrganiseesCount > 0 %}{{ sortiesOrganiseesCount }},{% endif %}
                         {% if sortiesParticipeesCount is not null %}{{ sortiesParticipeesCount }},{% endif %}
-                        {{ tauxParticipationGlobal|round(2) }}
+                        {{ tauxParticipationGlobal|round(1) }}
                     ];
 
                     myChart = new Chart(ctx, {
@@ -212,24 +182,18 @@
                         data: {
                             labels: labels,
                             datasets: [{
-                                label: 'Stats Profil',
+                                label: 'Statistiques',
                                 data: data,
-                                backgroundColor: ['#0d6efd','#198754','#ffc107'],
+                                backgroundColor: ['#f4c652', '#198754', '#ffc107'],
                                 borderColor: '#fff',
                                 borderWidth: 1
                             }]
                         },
                         options: {
                             responsive: true,
-                            plugins: {
-                                legend: { display: false },
-                                tooltip: { enabled: true }
-                            },
+                            plugins: { legend: { display: false } },
                             scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    suggestedMax: 100
-                                }
+                                y: { beginAtZero: true, suggestedMax: 100 }
                             }
                         }
                     });
