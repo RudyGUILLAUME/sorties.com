@@ -1,114 +1,150 @@
-<div class="card shadow-sm">
-    <div class="table-responsive">
-        {% if sorties is empty %}
-            <p class="text-center py-4 text-muted">Aucune sortie à afficher.</p>
-        {% else %}
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                <tr>
-                    <th></th>
-                    <th>Nom de la sortie</th>
-                    <th>Date de la sortie</th>
-                    <th>Clôture inscriptions</th>
-                    <th>Places max</th>
-                    <th>Etat</th>
-                    <th>Inscription</th>
-                    <th>Organisateur</th>
-                    {% if app.user %}
-                        <th class="text-end">Actions</th>
-                    {% endif %}
-                </tr>
-                </thead>
-                <tbody>
-                {% for s in sorties %}
-                    <tr style="cursor: pointer;" onclick="window.location='{{ path('app_sortie_show', {id: s.id}) }}';">
-                        <td>
-                            <img src="{{ asset('images/sorties/' ~ (s.imagePrincipale ?: 'default.png')) }}"
-                                 alt="Image de {{ s.nom }}"
-                                 class="img-fluid rounded shadow-sm"
-                                 style="max-height: 100px;">
-                        </td>
-                        <td>{{ s.nom }}</td>
-                        <td>{{ s.dateHeureDebut ? s.dateHeureDebut|date('d/m/Y H\\hi') : '' }}</td>
-                        <td>{{ s.dateLimiteInscription ? s.dateLimiteInscription|date('d/m/Y H\\hi') : '' }}</td>
-                        <td>{{ s.participants|length }} / {{ s.nbInscriptionsMax }}</td>
-                        <td>{{ s.etat.libelle }}</td>
-                        <td>
-                            {% if app.user %}
-                                {% set etat = s.etat.libelle %}
-                                {% set maintenant = "now"|date('U') %}
-                                {% set dateLimiteInscription = s.dateLimiteInscription ? s.dateLimiteInscription|date('U') : 0 %}
-                                {% set placesDisponibles = (s.nbInscriptionsMax - s.participants|length) > 0 %}
-                                {% set inscrit = s.participants.contains(app.user) %}
-                                {% set dateLimiteAtteinte = dateLimiteInscription and dateLimiteInscription < maintenant %}
+{% if sorties is empty %}
+    <div class="text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-md">
+        <span class="material-symbols-outlined text-5xl text-gray-400 dark:text-gray-500">sentiment_dissatisfied</span>
+        <p class="mt-4 text-lg font-medium text-text-light dark:text-text-dark">Aucune sortie à afficher</p>
+        <p class="text-gray-500 dark:text-gray-400">Ajuste tes filtres ou crée une nouvelle sortie !</p>
+    </div>
+{% else %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for s in sorties %}
+            <div class="p-4 @container bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+                 onclick="window.location='{{ path('app_sortie_show', {id: s.id}) }}';">
 
-                                {% if inscrit %}
-                                    {# Bouton Désinscription actif ou désactivé avec tooltip #}
-                                    {% set canUnsubscribe = etat in ['Ouverte', 'Créée'] or (etat == 'Clôturée' and not dateLimiteAtteinte) %}
-                                    <form method="post" action="{{ path('app_sortie_unsubscribe', {'id': s.id}) }}?tab=disponibles" onclick="event.stopPropagation();">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('unsubscribe' ~ s.id) }}">
-                                        <button
-                                                class="btn btn-warning btn-sm"
-                                                type="submit"
-                                                {% if not canUnsubscribe %}disabled aria-disabled="true" title="Désinscription fermée : date limite dépassée ou sortie clôturée"{% endif %}
-                                        >
-                                            Se désinscrire
-                                        </button>
-                                    </form>
+                <!-- IMAGE -->
+                <div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-lg"
+                     style="background-image: url('{{ asset('images/sorties/' ~ (s.imagePrincipale ?: 'default.png')) }}');">
+                </div>
 
-                                {% else %}
-                                    {# Bouton Inscription visible uniquement si ouvert et places dispos #}
-                                    {% if etat == 'Ouverte' and placesDisponibles and not dateLimiteAtteinte %}
-                                        <form method="post" action="{{ path('app_sortie_subscribe', {'id': s.id}) }}?tab=disponibles" onclick="event.stopPropagation();">
-                                            <input type="hidden" name="_token" value="{{ csrf_token('subscribe' ~ s.id) }}">
-                                            <button class="btn btn-success btn-sm">S'inscrire</button>
-                                        </form>
-                                    {% else %}
-                                        <span class="badge bg-danger" title="Inscription fermée">Inscription fermée</span>
-                                    {% endif %}
-                                {% endif %}
-                            {% else %}
-                                <a class="btn btn-primary btn-sm" href="#" data-bs-toggle="modal" data-bs-target="#loginModal" onclick="event.stopPropagation();">Se connecter</a>
-                            {% endif %}
-                        </td>
-
-                        <td>
-                            <a href="{{ path('app_profile_show', {id: s.organisateur.id}) }}" onclick="event.stopPropagation();">
+                <!-- INFOS -->
+                <div class="flex flex-col gap-2 mt-4">
+                    <div class="flex justify-between items-start">
+                        <p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">
+                            Organisé par
+                            <a href="{{ path('app_profile_show', {id: s.organisateur.id}) }}"
+                               class="font-semibold text-primary hover:underline"
+                               onclick="event.stopPropagation();">
                                 {{ s.organisateur.prenom }} {{ s.organisateur.nom }}
                             </a>
-                        </td>
+                        </p>
+                        <span class="text-xs font-bold px-2 py-1 rounded-full
+                            {% if s.etat.libelle == 'Ouverte' %}bg-green-200 text-green-800
+                            {% elseif s.etat.libelle == 'Clôturée' %}bg-yellow-200 text-yellow-800
+                            {% elseif s.etat.libelle == 'Annulée' %}bg-red-200 text-red-800
+                            {% elseif s.etat.libelle == 'Passée' %}bg-gray-300 text-gray-700
+                            {% else %}bg-primary/20 text-primary{% endif %}">
+                            {{ s.etat.libelle }}
+                        </span>
+                    </div>
 
-                        {% if app.user and (s.organisateur.id == app.user.id or 'ROLE_ADMIN' in app.user.roles) %}
-                            <td class="text-end">
-                                <div class="btn-group btn-group-sm" role="group" onclick="event.stopPropagation();">
-                                    {% if s.etat.libelle == 'Créée' %}
-                                        <a class="btn btn-outline-secondary" href="{{ path('app_sortie_edit', {id: s.id}) }}">Modifier</a>
-                                    {% endif %}
-                                    {% if (s.organisateur == app.user or 'ROLE_ADMIN') and s.etat.libelle == 'Créée' %}
-                                        <form method="post" action="{{ path('app_sortie_delete', {id: s.id}) }}" onsubmit="return confirm('Supprimer cette sortie ?');">
-                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ s.id) }}">
-                                            <button class="btn btn-outline-danger" type="submit">Supprimer</button>
-                                        </form>
-                                    {% endif %}
-                                    {% if (s.organisateur == app.user or 'ROLE_ADMIN') and s.etat.libelle not in ['Annulée', 'Passée','Créée','Activité en cours'] %}
-                                        <form method="post" action="{{ path('app_sortie_cancel', {'id': s.id}) }}" onsubmit="return confirm('Confirmer l\'annulation ?');">
-                                            <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ s.id) }}">
-                                            <button class="btn btn-outline-danger">Annuler la sortie</button>
-                                        </form>
-                                    {% endif %}
-                                    {% if s.etat.libelle == 'Créée' %}
-                                        <form method="post" action="{{ path('app_sortie_publish', {'id': s.id}) }}">
-                                            <input type="hidden" name="_token" value="{{ csrf_token('publish' ~ s.id) }}">
-                                            <button class="btn btn-primary">Publier la sortie</button>
-                                        </form>
-                                    {% endif %}
-                                </div>
-                            </td>
+                    <h3 class="text-xl font-bold leading-tight tracking-[-0.015em] text-text-light dark:text-text-dark">
+                        {{ s.nom }}
+                    </h3>
+
+                    <div class="flex flex-col gap-1 text-gray-600 dark:text-gray-300 mt-1">
+                        {% if s.dateHeureDebut %}
+                            <p class="flex items-center gap-2 text-sm">
+                                <span class="material-symbols-outlined text-base">calendar_today</span>
+                                {{ s.dateHeureDebut|date('d/m/Y H\\hi') }}
+                            </p>
                         {% endif %}
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        {% endif %}
+                        {% if s.dateLimiteInscription %}
+                            <p class="flex items-center gap-2 text-sm">
+                                <span class="material-symbols-outlined text-base">event_busy</span>
+                                Clôture le {{ s.dateLimiteInscription|date('d/m/Y H\\hi') }}
+                            </p>
+                        {% endif %}
+                        <p class="flex items-center gap-2 text-sm">
+                            <span class="material-symbols-outlined text-base">group</span>
+                            {{ s.participants|length }} / {{ s.nbInscriptionsMax }} participants
+                        </p>
+                    </div>
+
+                    <!-- BOUTONS INSCRIPTION / DESINSCRIPTION -->
+                    <div class="flex flex-wrap items-center gap-2 mt-3" onclick="event.stopPropagation();">
+                        {% if app.user %}
+                            {% set etat = s.etat.libelle %}
+                            {% set maintenant = "now"|date('U') %}
+                            {% set dateLimiteInscription = s.dateLimiteInscription ? s.dateLimiteInscription|date('U') : 0 %}
+                            {% set placesDisponibles = (s.nbInscriptionsMax - s.participants|length) > 0 %}
+                            {% set inscrit = s.participants.contains(app.user) %}
+                            {% set dateLimiteAtteinte = dateLimiteInscription and dateLimiteInscription < maintenant %}
+
+                            {% if inscrit %}
+                                {% set canUnsubscribe = etat in ['Ouverte', 'Créée'] or (etat == 'Clôturée' and not dateLimiteAtteinte) %}
+                                <form method="post" action="{{ path('app_sortie_unsubscribe', {'id': s.id}) }}?tab=disponibles">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('unsubscribe' ~ s.id) }}">
+                                    <button
+                                            type="submit"
+                                            class="flex items-center justify-center h-9 px-3 text-sm rounded-lg font-semibold
+                                               {% if canUnsubscribe %}bg-yellow-400 text-text-light hover:bg-yellow-500{% else %}bg-gray-400 text-gray-800 cursor-not-allowed{% endif %}"
+                                            {% if not canUnsubscribe %}disabled title="Désinscription fermée"{% endif %}>
+                                        Se désinscrire
+                                    </button>
+                                </form>
+                            {% else %}
+                                {% if etat == 'Ouverte' and placesDisponibles and not dateLimiteAtteinte %}
+                                    <form method="post" action="{{ path('app_sortie_subscribe', {'id': s.id}) }}?tab=disponibles">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('subscribe' ~ s.id) }}">
+                                        <button
+                                                type="submit"
+                                                class="flex items-center justify-center h-9 px-3 rounded-lg text-sm font-semibold bg-green-500 text-white hover:bg-green-600 transition">
+                                            S'inscrire
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <span class="text-xs font-medium bg-red-200 text-red-800 px-2 py-1 rounded-full">
+                                        Inscription fermée
+                                    </span>
+                                {% endif %}
+                            {% endif %}
+                        {% else %}
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#loginModal"
+                               class="flex items-center justify-center h-9 px-3 rounded-lg bg-primary text-white text-sm font-semibold hover:opacity-90 transition">
+                                Se connecter
+                            </a>
+                        {% endif %}
+                    </div>
+
+                    <!-- ACTIONS ORGANISATEUR -->
+                    {% if app.user and (s.organisateur.id == app.user.id or 'ROLE_ADMIN' in app.user.roles) %}
+                        <div class="flex flex-wrap gap-2 mt-3" onclick="event.stopPropagation();">
+                            {% if s.etat.libelle == 'Créée' %}
+                                <a href="{{ path('app_sortie_edit', {id: s.id}) }}"
+                                   class="px-3 py-1 text-sm rounded-lg border border-gray-400 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                                    Modifier
+                                </a>
+                            {% endif %}
+
+                            {% if s.etat.libelle == 'Créée' %}
+                                <form method="post" action="{{ path('app_sortie_publish', {'id': s.id}) }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('publish' ~ s.id) }}">
+                                    <button type="submit" class="px-3 py-1 text-sm rounded-lg bg-primary text-white hover:opacity-90 transition">
+                                        Publier
+                                    </button>
+                                </form>
+                            {% endif %}
+
+                            {% if (s.organisateur == app.user or 'ROLE_ADMIN') and s.etat.libelle == 'Créée' %}
+                                <form method="post" action="{{ path('app_sortie_delete', {id: s.id}) }}" onsubmit="return confirm('Supprimer cette sortie ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ s.id) }}">
+                                    <button type="submit" class="px-3 py-1 text-sm rounded-lg bg-red-500 text-white hover:bg-red-600 transition">
+                                        Supprimer
+                                    </button>
+                                </form>
+                            {% endif %}
+
+                            {% if (s.organisateur == app.user or 'ROLE_ADMIN') and s.etat.libelle not in ['Annulée', 'Passée','Créée','Activité en cours'] %}
+                                <form method="post" action="{{ path('app_sortie_cancel', {'id': s.id}) }}" onsubmit="return confirm('Confirmer l\'annulation ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ s.id) }}">
+                                    <button type="submit" class="px-3 py-1 text-sm rounded-lg bg-red-200 text-red-800 hover:bg-red-300 transition">
+                                        Annuler
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
     </div>
-</div>
+{% endif %}

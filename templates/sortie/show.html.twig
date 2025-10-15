@@ -1,193 +1,303 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Détail de la sortie{% endblock %}
+{% block title %}Détail du lieu{% endblock %}
 
 {% block body %}
-<div class="container mt-4">
-    <h1 class="mb-4">{{ sortie.nom }}</h1>
 
-    <div class="card shadow-sm">
-        <div class="card-body">
-            {% if sortie.imagePrincipale %}
-                <div class="text-center mb-3">
-                    <img src="{{ asset('images/sorties/' ~ (sortie.imagePrincipale ?: 'default.png')) }}"
-                         alt="Image de {{ sortie.nom }}"
-                         class="img-fluid rounded shadow-sm"
-                         style="max-height: 300px;">
+
+            <button class="md:hidden flex items-center justify-center size-10 rounded-lg bg-secondary-light dark:bg-secondary-dark">
+                <span class="material-symbols-outlined text-text-light dark:text-text-dark">menu</span>
+            </button>
+        <main class="flex flex-1 justify-center py-8 px-4 sm:px-8 md:px-10">
+            <div class="layout-content-container flex flex-col max-w-6xl flex-1 gap-8">
+                <div class="flex flex-wrap gap-2 px-4">
+                    <a class="text-subtle-light dark:text-subtle-dark text-sm font-medium leading-normal" href="{{ path('app_sortie_index') }}">Sorties</a>
+                    <span class="text-subtle-light dark:text-subtle-dark text-sm font-medium leading-normal">/</span>
+                    <span class="text-text-light dark:text-text-dark text-sm font-medium leading-normal">{{ sortie.nom }}</span>
                 </div>
-            {% else %}
-                <p class="text-muted text-center">Aucune image disponible pour cette sortie.</p>
-            {% endif %}
-            <dl class="row mb-0">
-                <dt class="col-sm-3">Date de début</dt>
-                <dd class="col-sm-9">{{ sortie.dateHeureDebut ? sortie.dateHeureDebut|date('d/m/Y H\\hi') : '' }}</dd>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 px-4">
+                    <div class="lg:col-span-2 flex flex-col gap-8">
+                        <div class="flex flex-col gap-3">
+                            <p class="text-text-light dark:text-text-dark text-4xl md:text-5xl font-black leading-tight tracking-[-0.033em]">{{ sortie.nom }}</p>
+                            <p class="text-subtle-light dark:text-subtle-dark text-base md:text-lg font-normal leading-normal">{{ sortie.dateHeureDebut ? sortie.dateHeureDebut|date('d/m/Y H\\hi') : '' }}</p>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            {% if app.user %}
+                                {% set etat = sortie.etat.libelle %}
+                                {% set maintenant = "now"|date('U') %}
+                                {% set dateLimiteInscription = sortie.dateLimiteInscription ? sortie.dateLimiteInscription|date('U') : 0 %}
+                                {% set placesDisponibles = (sortie.nbInscriptionsMax - sortie.participants|length) > 0 %}
+                                {% set inscrit = sortie.participants.contains(app.user) %}
+                                {% set dateLimiteAtteinte = dateLimiteInscription and dateLimiteInscription < maintenant %}
 
-                <dt class="col-sm-3">Clôture inscriptions</dt>
-                <dd class="col-sm-9">{{ sortie.dateLimiteInscription ? sortie.dateLimiteInscription|date('d/m/Y H\\hi') : '' }}</dd>
+                                {% if inscrit %}
+                                    {# Bouton Désinscription actif ou désactivé avec tooltip #}
+                                    {% set canUnsubscribe = etat in ['Ouverte', 'Créée'] or (etat == 'Clôturée' and not dateLimiteAtteinte) %}
+                                    <form method="post" action="{{ path('app_sortie_unsubscribe', {'id': sortie.id}) }}?tab=disponibles" onclick="event.stopPropagation();">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('unsubscribe' ~ sortie.id) }}">
+                                        <button
+                                                class="flex w-full sm:w-auto min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-12 px-6 bg-primary text-text-light text-base font-bold leading-normal tracking-[0.015em]"
+                                                type="submit"
+                                                {% if not canUnsubscribe %}disabled aria-disabled="true" title="Désinscription fermée : date limite dépassée ou sortie clôturée"{% endif %}
+                                        >
+                                            <span class="material-symbols-outlined mr-2">add_circle</span>
+                                            Se désinscrire
+                                        </button>
+                                    </form>
 
-                <dt class="col-sm-3">Durée</dt>
-                <dd class="col-sm-9">{{ sortie.duree }}</dd>
+                                {% else %}
+                                    {# Bouton Inscription visible uniquement si ouvert et places dispos #}
+                                    {% if etat == 'Ouverte' and placesDisponibles and not dateLimiteAtteinte %}
+                                        <form method="post" action="{{ path('app_sortie_subscribe', {'id': sortie.id}) }}?tab=disponibles" onclick="event.stopPropagation();">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('subscribe' ~ sortie.id) }}">
+                                            <button class="flex w-full sm:w-auto min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-12 px-6 bg-primary text-text-light text-base font-bold leading-normal tracking-[0.015em]">
+                                                <span class="material-symbols-outlined mr-2">add_circle</span>
+                                                S'inscrire
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <span class="flex w-full sm:w-auto min-w-[84px] items-center justify-center overflow-hidden rounded-xl h-12 px-6 bg-primary text-text-light text-base font-bold leading-normal tracking-[0.015em]" title="Inscription fermée">Inscription fermée</span>
+                                    {% endif %}
+                                {% endif %}
+                            {% else %}
+                                <a class="flex w-full sm:w-auto min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-12 px-6 bg-primary text-text-light text-base font-bold leading-normal tracking-[0.015em]" href="#" data-bs-toggle="modal" data-bs-target="#loginModal" onclick="event.stopPropagation();">Se connecter</a>
+                            {% endif %}
 
-                <dt class="col-sm-3">Places max</dt>
-                <dd class="col-sm-9">{{ sortie.nbInscriptionsMax }}</dd>
+                            <button class="flex w-full sm:w-auto min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-12 px-6 border border-primary text-primary text-base font-bold leading-normal tracking-[0.015em]">
+                                <span class="material-symbols-outlined mr-2">edit</span>
+                                <span class="truncate">Modifier</span>
+                            </button>
+                        </div>
+                        <div class="border-t border-secondary-light dark:border-secondary-dark pt-8 flex flex-col gap-6">
+                            <div class="flex items-center gap-4 bg-background-light dark:bg-background-dark min-h-14 justify-between">
+                                <div class="flex items-center gap-4">
+                                    <div class="text-text-light dark:text-text-dark flex items-center justify-center rounded-lg bg-secondary-light dark:bg-secondary-dark shrink-0 size-12">
+                                        <span class="material-symbols-outlined">location_on</span>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <p class="text-text-light dark:text-text-dark text-base font-bold leading-normal flex-1">Lieu</p>
+                                        <p class="text-subtle-light dark:text-subtle-dark text-base font-normal leading-normal flex-1 truncate">{{ sortie.lieu.nom }},<br> {{ sortie.lieu.rue }}, {{ sortie.lieu.ville.nom }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-4">
+                                <div class="text-text-light dark:text-text-dark flex items-center justify-center rounded-lg bg-secondary-light dark:bg-secondary-dark shrink-0 size-12 mt-1">
+                                    <span class="material-symbols-outlined">description</span>
+                                </div>
+                                <div class="flex flex-col gap-2">
+                                    <p class="text-text-light dark:text-text-dark text-base font-bold leading-normal">Informations diverses</p>
+                                    <p class="text-subtle-light dark:text-subtle-dark text-base font-normal leading-relaxed">{{ sortie.infosSortie }}</p>
+                                </div>
+                            </div>
+                            <div class="p-6 rounded-xl bg-secondary-light dark:bg-secondary-dark flex flex-col gap-4">
+                                <h3 class="text-text-light dark:text-text-dark text-xl font-bold">
+                                    💬 Chat des participants
+                                </h3>
 
-                <dt class="col-sm-3">Lieu</dt>
-                <dd class="col-sm-9">{{ sortie.lieu ? sortie.lieu.nom : '' }}</dd>
+                                <div
+                                        id="chat-messages"
+                                        class="flex flex-col gap-3 h-64 overflow-y-auto pr-2 bg-background-light dark:bg-background-dark rounded-lg p-3 border border-subtle-light/20 dark:border-subtle-dark/20"
+                                        data-send-url="{{ path('chat_send', {id: sortie.id}) }}"
+                                        data-fetch-url="{{ path('chat_fetch', {id: sortie.id}) }}"
+                                >
+                                    <!-- Messages chargés dynamiquement -->
+                                    <p class="text-subtle-light dark:text-subtle-dark text-sm text-center">Chargement du chat...</p>
+                                </div>
 
-                <dt class="col-sm-3">Site</dt>
-                <dd class="col-sm-9">{{ sortie.site ? sortie.site.nom : '' }}</dd>
+                                <div class="flex items-center gap-2 pt-4 border-t border-subtle-light/20 dark:border-subtle-dark/20">
+                                    <input
+                                            id="chat-input"
+                                            type="text"
+                                            placeholder="Écrire un message..."
+                                            class="flex-1 bg-background-light dark:bg-background-dark rounded-lg p-3 text-sm border-none focus:ring-2 focus:ring-primary focus:outline-none"
+                                    />
+                                    <button
+                                            id="chat-send"
+                                            class="bg-primary text-text-light rounded-lg p-3 flex items-center justify-center hover:opacity-90 transition"
+                                    >
+                                        <span class="material-symbols-outlined">send</span>
+                                    </button>
+                                </div>
+                            </div>
 
-                <dt class="col-sm-3">Informations</dt>
-                <dd class="col-sm-9">{{ sortie.infosSortie }}</dd>
-                <dd class="col-sm-9">
-                    <a href="{{ path('app_sortie_pdf', {id: sortie.id}) }}" class="btn btn-primary">
-                        🧾 Exporter en PDF
-                    </a>
-                </dd>
-            </dl>
+                            <div>
+                                {% if sortie.etat.libelle == 'Passée' and app.user in sortie.participants %}
+                                    <div class="p-6 rounded-xl bg-secondary-light dark:bg-secondary-dark flex flex-col gap-6">
+                                        <h3 class="text-text-light dark:text-text-dark text-xl font-bold">
+                                            💬 Commentaires & Notes
+                                        </h3>
 
-            <div class="card mt-4">
-                <div class="card-body text-center">
-                    <h5 class="card-title">
-                        Météo prévue à {{ sortie.lieu.ville.nom }} le {{ sortie.dateHeureDebut|date('d/m/Y') }}
-                    </h5>
-                    <div
-                            id="meteo-widget"
-                            data-ville="{{ sortie.lieu.ville.nom }}"
-                            data-date="{{ sortie.dateHeureDebut|date('Y-m-d') }}"
-                    >
-                        <p>Chargement de la météo...</p>
-                    </div>
-                </div>
-            </div>
+                                        <p class="text-subtle-light dark:text-subtle-dark text-sm">
+                                            Note moyenne :
+                                            <span class="font-semibold">
+                {{ noteMoyenne ? noteMoyenne|number_format(1, ',', ' ') ~ '/5' : 'Pas encore notée' }}
+            </span>
+                                        </p>
 
-            <div class="card mt-4" style="width: 18rem;">
-                <div class="card-body">
-                    <h5 class="card-title">Participants</h5>
-                    <div>{{ sortie.participants|length }} participant(s)</div>
+                                        {# 💬 Liste des commentaires #}
+                                        <div class="border-t border-subtle-light/20 dark:border-subtle-dark/20 pt-4 flex flex-col gap-6">
+                                            {% for commentaire in sortie.commentaires %}
+                                                <div class="flex items-start gap-4">
+                                                    {# Avatar (profil ou image par défaut) #}
+                                                    <div
+                                                            class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
+                                                            style="background-image: url('{{ commentaire.auteur.imageProfil
+                                                            ? asset('images/uploads/' ~ commentaire.auteur.imageProfil)
+                                                            : asset('images/default-avatar.png') }}');">
+                                                    </div>
 
-                    <div class="mt-3" style="max-height: 200px; overflow-y: auto;">
-                        {% if sortie.participants is not empty %}
-                            <ul class="list-group list-group-flush small">
-                                {% for participant in sortie.participants %}
-                                    <li class="list-group-item d-flex align-items-center justify-content-between py-2">
-                                        <a href="{{ path('app_profile_show', {id: participant.id}) }}" class="text-decoration-none fw-semibold">
-                                            {{ participant.prenom }} {{ participant.nom }}
-                                        </a>
-                                        {% if participant.imageProfil %}
-                                            <img src="{{ asset('images/uploads/' ~ participant.imageProfil) }}"
-                                                 alt="Photo de {{ participant.prenom }}"
-                                                 class="rounded-circle" width="35" height="35">
+                                                    <div class="flex flex-col flex-1">
+                                                        <div class="flex items-center justify-between">
+                                                            <p class="text-text-light dark:text-text-dark font-bold text-sm">
+                                                                {{ commentaire.auteur.prenom }}
+                                                            </p>
+                                                            <p class="text-subtle-light dark:text-subtle-dark text-xs">
+                                                                {{ commentaire.createdAt|date('d/m/Y H:i') }}
+                                                            </p>
+                                                        </div>
+
+                                                        <div class="mt-1">
+                                                            <p class="text-text-light dark:text-text-dark text-sm">
+                                                                {{ commentaire.message }}
+                                                            </p>
+                                                        </div>
+
+                                                        <div class="mt-2 flex items-center gap-1">
+                                                            {% for i in 1..commentaire.note %}
+                                                                <span class="text-yellow-400 text-base">⭐</span>
+                                                            {% endfor %}
+                                                            {% if commentaire.note is empty %}
+                                                                <span class="text-subtle-light dark:text-subtle-dark text-xs italic">Pas de note</span>
+                                                            {% endif %}
+                                                        </div>
+
+                                                        {# Boutons modifier/supprimer #}
+                                                        {% if app.user and (commentaire.auteur == app.user or is_granted('ROLE_ADMIN')) %}
+                                                            <div class="mt-2 flex gap-2">
+                                                                <a href="{{ path('commentaire_edit', { id: commentaire.id }) }}"
+                                                                   class="text-xs bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded transition">
+                                                                    ✏️ Modifier
+                                                                </a>
+                                                                <form method="post" action="{{ path('commentaire_delete', {id: commentaire.id}) }}"
+                                                                      onsubmit="return confirm('Supprimer ce commentaire ?');">
+                                                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ commentaire.id) }}">
+                                                                    <button type="submit"
+                                                                            class="text-xs bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded transition">
+                                                                        🗑️ Supprimer
+                                                                    </button>
+                                                                </form>
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            {% else %}
+                                                <p class="text-subtle-light dark:text-subtle-dark italic text-sm">
+                                                    Aucun commentaire pour le moment.
+                                                </p>
+                                            {% endfor %}
+                                        </div>
+
+                                        {# 💬 Formulaire pour laisser un commentaire #}
+                                        {% set dejaCommente = sortie.commentaires|filter(c => c.auteur == app.user)|length == 0 %}
+                                        {% if app.user %}
+                                            {% if dejaCommente %}
+                                                <div class="mt-6 border-t border-subtle-light/20 dark:border-subtle-dark/20 pt-4">
+                                                    <h4 class="text-text-light dark:text-text-dark text-lg font-semibold mb-2">
+                                                        Laisser un commentaire
+                                                    </h4>
+                                                    {{ form_start(commentaireForm, {'attr': {'class': 'flex flex-col gap-4'}}) }}
+                                                    {{ form_row(commentaireForm.message, {'attr': {'class': 'w-full bg-background-light dark:bg-background-dark rounded-lg p-3 text-sm'}}) }}
+                                                    {{ form_row(commentaireForm.note, {'attr': {'class': 'w-24'}}) }}
+                                                    <button class="self-start mt-2 px-4 py-2 bg-primary text-text-light rounded-lg text-sm font-bold hover:opacity-90 transition">
+                                                        Envoyer
+                                                    </button>
+                                                    {{ form_end(commentaireForm) }}
+                                                </div>
+                                            {% endif %}
                                         {% else %}
-                                            <img src="{{ asset('images/default-profile.jpg') }}"
-                                                 alt="Photo de {{ participant.prenom }}"
-                                                 class="rounded-circle" width="35" height="35">
+                                            <p class="text-subtle-light dark:text-subtle-dark text-sm">
+                                                <a href="{{ path('app_login') }}" class="text-primary hover:underline">Connecte-toi</a>
+                                                pour laisser un commentaire.
+                                            </p>
                                         {% endif %}
-                                    </li>
-                                {% endfor %}
-                            </ul>
+                                    </div>
+                                {% endif %}
+
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col gap-6">
+                        <div class="lg:col-span-1">
+                            <div class="p-6 rounded-xl bg-secondary-light dark:bg-secondary-dark flex flex-col gap-4 items-center text-center">
+                                <h3 class="text-text-light dark:text-text-dark text-xl font-bold">
+                                    Météo de {{ sortie.lieu.ville.nom }} <br>
+                                    le {{ sortie.dateHeureDebut|date('d/m/Y') }}
+                                </h3>
+
+                                <div id="meteo-widget" class="flex flex-col items-center gap-2" data-ville="{{ sortie.lieu.ville.nom }}" data-date="{{ sortie.dateHeureDebut|date('Y-m-d') }}">
+                                    <!-- Contenu chargé dynamiquement -->
+                                    <p class="text-subtle-light dark:text-subtle-dark">Chargement de la météo...</p>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!-- Image principale -->
+                        {% if sortie.imagePrincipale %}
+                            <div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-xl object-cover shadow"
+                                 style="background-image: url('{{ asset('images/sorties/' ~ sortie.imagePrincipale) }}');"
+                                 data-alt="Image principale de la sortie"></div>
                         {% else %}
-                            <p class="text-muted small">Aucun participant pour le moment.</p>
+                            <div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-xl object-cover shadow"
+                                 style="background-image: url('{{ asset('images/sorties/default.png') }}');"
+                                 data-alt="Image par défaut"></div>
                         {% endif %}
+
+                        <!-- Bloc participants -->
+                        <div class="flex flex-col gap-4 p-6 rounded-xl bg-secondary-light dark:bg-secondary-dark">
+                            <h3 class="text-text-light dark:text-text-dark text-xl font-bold">
+                                Participants ({{ sortie.participants|length }})
+                            </h3>
+
+                            {% if sortie.participants is not empty %}
+                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 gap-4">
+                                    {% for participant in sortie.participants %}
+                                        <div class="flex flex-col items-center gap-2 text-center">
+                                            <div class="rounded-full overflow-hidden size-16 border-2 border-primary shadow-sm">
+                                                <img
+                                                        src="{{ participant.imageProfil
+                                                        ? asset('images/uploads/' ~ participant.imageProfil)
+                                                        : asset('images/default-profile.jpg') }}"
+                                                        alt="Photo de {{ participant.prenom }}"
+                                                        class="w-full h-full object-cover"
+                                                >
+                                            </div>
+                                            <a href="{{ path('app_profile_show', {id: participant.id}) }}"
+                                               class="text-text-light dark:text-text-dark text-sm font-medium leading-normal truncate hover:underline">
+                                                {{ participant.prenom }} {{ participant.nom }}
+                                            </a>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-subtle-light dark:text-subtle-dark text-sm italic">
+                                    Aucun participant pour le moment.
+                                </p>
+                            {% endif %}
+                        </div>
                     </div>
+
+
+
+
                 </div>
-            </div>
-
-            <div class="card mt-4" style="width: 100%;">
-                <div class="card-body">
-                    <h5 class="card-title">💬 Chat des participants</h5>
-
-                    <div id="chat-messages"
-                         class="border rounded p-2 mb-3 bg-light"
-                         style="height: 250px; overflow-y: auto;"
-                         data-send-url="{{ path('chat_send', {id: sortie.id}) }}"
-                         data-fetch-url="{{ path('chat_fetch', {id: sortie.id}) }}">
-                    </div>
-
-
-                    <div class="input-group">
-                        <input type="text" id="chat-input" class="form-control" placeholder="Écrire un message...">
-                        <button id="chat-send" class="btn btn-primary">Envoyer</button>
-                    </div>
                 </div>
-            </div>
-
-
-
-
-
-            <div class="mt-3 d-flex gap-2">
-                <a href="{{ path('app_sortie_index') }}" class="btn btn-secondary">Retour</a>
-                <a href="{{ path('app_sortie_edit', {id: sortie.id}) }}" class="btn btn-primary">Modifier</a>
-                <form method="post" action="{{ path('app_sortie_delete', {id: sortie.id}) }}" onsubmit="return confirm('Supprimer cette sortie ?');">
-                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ sortie.id) }}">
-                    <button class="btn btn-outline-danger" type="submit">Supprimer</button>
-                </form>
-                {% if sortie.etat.libelle == 'Créée' %}
-                    <form method="post" action="{{ path('app_sortie_publish', {'id': sortie.id}) }}">
-                        <input type="hidden" name="_token" value="{{ csrf_token('publish' ~ sortie.id) }}">
-                        <button class="btn btn-primary">Publier la sortie</button>
-                    </form>
-                {% endif %}
-            </div>
-            {% if sortie.etat.libelle == 'Passée' and app.user in sortie.participants  %}
-                <h2>Commentaires</h2>
-                <p>Note moyenne : {{ noteMoyenne ? noteMoyenne|number_format(1, ',', ' ') ~ '/5' : 'Pas encore notée' }}</p>
-
-                {% for commentaire in sortie.commentaires %}
-                    <div class="comment">
-                        <p><strong>{{ commentaire.auteur.prenom }} :</strong></p>
-                        <p>{{ commentaire.message }}</p>
-                        <p>Note :
-                            {% for i in 1..commentaire.note %}
-                                ⭐
-                            {% endfor %}
-                        </p>
-                        <small>Posté le {{ commentaire.createdAt|date('d-m-Y H:i:s') }}</small>
-
-                        {% if app.user and (commentaire.auteur == app.user or is_granted('ROLE_ADMIN')) %}
-                            <a href="{{ path('commentaire_edit', { id: commentaire.id }) }}" class="btn btn-sm btn-outline-warning">
-                                ✏️ Modifier
-                            </a>
-                        {% endif %}
-                        {% if app.user==commentaire.auteur or is_granted('ROLE_ADMIN') %}
-                            <form method="post" action="{{ path('commentaire_delete', {id: commentaire.id}) }}" onsubmit="return confirm('Supprimer ce commentaire ?');">
-                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ commentaire.id) }}">
-                                <button class="btn btn-danger" type="submit">Supprimer</button>
-                            </form>
-                        {% endif %}
-                    </div>
-                {% else %}
-                    <p>Aucun commentaire pour le moment.</p>
-                {% endfor %}
-
-                {% set dejaCommente = sortie.commentaires|filter(c => c.auteur == app.user)|length == 0 %}
-
-                {% if app.user%}
-                    {% if dejaCommente %}
-                        <h3>Laisser un commentaire</h3>
-                        {{ form_start(commentaireForm) }}
-                        {{ form_row(commentaireForm.message) }}
-                        {{ form_row(commentaireForm.note) }}
-                        <button class="btn btn-primary">Envoyer</button>
-                        {{ form_end(commentaireForm) }}
-                    {% endif %}
-                {% else %}
-                    <p><a href="{{ path('app_login') }}">Connecte-toi</a> pour laisser un commentaire.</p>
-                {% endif %}
-            {% endif %}
-        </div>
-    </div>
-</div>
-
-    <script src="{{ asset('js/meteo.js') }}"></script>
-    <script src="{{ asset('js/chat.js') }}"></script>
-
 
 {% endblock %}
 
-
-
-
-
+{% block javascripts %}
+    <script src="{{ asset('js/meteo.js') }}"></script>
+    <script src="{{ asset('js/chat.js') }}"></script>
+{% endblock %}
 

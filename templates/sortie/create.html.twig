@@ -3,42 +3,156 @@
 {% block title %}Créer une sortie{% endblock %}
 
 {% block body %}
-    <div class="container mt-5 mb-5" style="max-width: 900px;">
-
-        <div class="d-flex align-items-center mb-4 gap-3">
-            <img src="{{ asset('images/logo.png') }}" alt="Créer sortie" style="width: 50px; height: 50px; object-fit: contain;">
-            <h1 class="fw-bold mb-0">Créer une sortie</h1>
+    <main class="flex-1 p-4 sm:p-6 md:p-8 max-w-6xl mx-auto">
+        <!-- HEADER -->
+        <div class="flex flex-wrap justify-between gap-4 mb-8">
+            <div class="flex min-w-72 flex-col gap-2">
+                <p class="text-text-light dark:text-text-dark text-4xl font-black leading-tight tracking-[-0.033em]">
+                    Créer une sortie
+                </p>
+                <p class="text-subtle-light dark:text-subtle-dark text-base font-normal">
+                    Remplis les informations ci-dessous pour créer ta nouvelle sortie.
+                </p>
+            </div>
+            <img src="{{ asset('images/logo.png') }}" alt="Créer sortie" class="w-16 h-16 object-contain rounded-full shadow-sm">
         </div>
 
+        <!-- ALERTES -->
         {% for label, messages in app.flashes %}
             {% for message in messages %}
-                <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                <div class="mb-4 p-4 rounded-lg border
+                        {% if label == 'success' %}border-green-400 bg-green-100 text-green-800
+                        {% elseif label == 'error' %}border-red-400 bg-red-100 text-red-800
+                        {% else %}border-yellow-400 bg-yellow-100 text-yellow-800{% endif %}">
                     {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
                 </div>
             {% endfor %}
         {% endfor %}
 
-        <div class="card shadow border-0">
-            <div class="card-body p-4">
-                {{ form_start(form) }}
-                <div class="row g-4">
-                    <div class="col-md-6">{{ form_row(form.nom) }}</div>
-                    <div class="col-md-6">{{ form_row(form.nbInscriptionsMax) }}</div>
-                    <div class="col-md-6">{{ form_row(form.dateHeureDebut) }}</div>
-                    <div class="col-md-6">{{ form_row(form.dateLimiteInscription) }}</div>
-                    <div class="col-md-6">{{ form_row(form.duree) }}</div>
-                    <div class="col-md-6">{{ form_row(form.site) }}</div>
-                    <div class="col-12">{{ form_row(form.lieu) }}</div>
-                    <div class="col-12">{{ form_row(form.infosSortie) }}</div>
-                </div>
+        <!-- FORMULAIRE -->
+        <div class="rounded-xl bg-secondary-light dark:bg-secondary-dark border border-subtle-light/20 dark:border-subtle-dark/20 shadow-md p-6">
+            {{ form_start(form, {'attr': {'class': 'space-y-8', 'enctype': 'multipart/form-data'}}) }}
 
-                <div class="mt-4 d-flex justify-content-end gap-3">
-                    <a href="{{ path('app_home') }}" class="btn btn-outline-secondary px-4">Annuler</a>
-                    <button type="submit" class="btn btn-primary px-4 fw-semibold shadow-sm">Créer</button>
+            <div class="grid grid-cols-1 gap-x-12 gap-y-8 lg:grid-cols-1">
+                <div class="lg:col-span-3 space-y-6">
+                    <!-- Nom -->
+                    <div>
+                        <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Nom de la sortie</p>
+                        {{ form_widget(form.nom, {'attr': {
+                            'class': 'w-full rounded-lg border border-subtle-light/30 dark:border-subtle-dark/30 bg-background-light dark:bg-background-dark p-3 text-text-light dark:text-text-dark focus:ring-2 focus:ring-primary/50 focus:outline-none'
+                        }}) }}
+                    </div>
+
+                    <!-- Description -->
+                    <div>
+                        <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Informations</p>
+                        {{ form_widget(form.infosSortie, {'attr': {
+                            'class': 'w-full rounded-lg border border-subtle-light/30 dark:border-subtle-dark/30 bg-background-light dark:bg-background-dark p-3 text-text-light dark:text-text-dark min-h-[120px] focus:ring-2 focus:ring-primary/50 focus:outline-none'
+                        }}) }}
+                    </div>
+
+                    <!-- Image de couverture -->
+                    <div>
+                        <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Image de couverture</p>
+                        <div class="flex items-center gap-4">
+                            <div class="flex-1">
+                                {{ form_widget(form.image_principale, {'attr': {
+                                    'class': 'block w-full text-sm text-gray-700 dark:text-gray-300 border border-subtle-light/30 dark:border-subtle-dark/30 rounded-lg cursor-pointer bg-background-light dark:bg-background-dark focus:ring-2 focus:ring-primary/50 focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-text-light hover:file:bg-primary/90'
+                                }}) }}
+                            </div>
+                            <div id="preview" class="w-24 h-24 rounded-lg bg-center bg-cover bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600"></div>
+                        </div>
+                        <p class="text-xs text-subtle-light dark:text-subtle-dark mt-1">Formats acceptés : JPG, PNG (max 2 Mo)</p>
+                    </div>
+
+                    <!-- Dates -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                        <div>
+                            <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Date de début</p>
+                            {{ form_widget(form.dateHeureDebut, {'attr': {
+                                'class': 'w-full rounded-lg border border-subtle-light/30 dark:border-subtle-dark/30 bg-background-light dark:bg-background-dark p-3 focus:ring-2 focus:ring-primary/50 focus:outline-none'
+                            }}) }}
+                        </div>
+
+                        <div>
+                            <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Clôture des inscriptions</p>
+                            {{ form_widget(form.dateLimiteInscription, {'attr': {
+                                'class': 'w-full rounded-lg border border-subtle-light/30 dark:border-subtle-dark/30 bg-background-light dark:bg-background-dark p-3 focus:ring-2 focus:ring-primary/50 focus:outline-none'
+                            }}) }}
+                        </div>
+                    </div>
+
+                    <!-- Duree et places -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                        <div>
+                            <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Durée (minutes)</p>
+                            {{ form_widget(form.duree, {'attr': {
+                                'class': 'w-full rounded-lg border border-subtle-light/30 dark:border-subtle-dark/30 bg-background-light dark:bg-background-dark p-3 focus:ring-2 focus:ring-primary/50 focus:outline-none'
+                            }}) }}
+                        </div>
+
+                        <div>
+                            <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Places disponibles</p>
+                            {{ form_widget(form.nbInscriptionsMax, {'attr': {
+                                'class': 'w-full rounded-lg border border-subtle-light/30 dark:border-subtle-dark/30 bg-background-light dark:bg-background-dark p-3 focus:ring-2 focus:ring-primary/50 focus:outline-none'
+                            }}) }}
+                        </div>
+                    </div>
+
+                    <!-- Site -->
+                    <div>
+                        <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Site</p>
+                        {{ form_widget(form.site, {'attr': {
+                            'class': 'w-full rounded-lg border border-subtle-light/30 dark:border-subtle-dark/30 bg-background-light dark:bg-background-dark p-3 focus:ring-2 focus:ring-primary/50 focus:outline-none'
+                        }}) }}
+                    </div>
+
+                    <!-- Lieu -->
+                    <div>
+                        <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Lieu</p>
+                        {{ form_widget(form.lieu, {'attr': {
+                            'class': 'w-full rounded-lg border border-subtle-light/30 dark:border-subtle-dark/30 bg-background-light dark:bg-background-dark p-3 focus:ring-2 focus:ring-primary/50 focus:outline-none'
+                        }}) }}
+                    </div>
                 </div>
-                {{ form_end(form) }}
             </div>
+
+            <!-- BOUTONS -->
+            <div class="mt-12 flex justify-end border-t border-subtle-light/30 dark:border-subtle-dark/30 pt-8 gap-4">
+                <a href="{{ path('app_home') }}"
+                   class="flex items-center justify-center min-w-[160px] rounded-lg h-12 px-6 border border-gray-400 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                    Annuler
+                </a>
+
+                <button type="submit"
+                        class="flex items-center justify-center min-w-[180px] rounded-lg h-12 px-6 bg-primary text-text-light text-base font-bold hover:opacity-90 transition">
+                    Créer la sortie
+                </button>
+            </div>
+
+            {{ form_end(form) }}
         </div>
-    </div>
+    </main>
+
+    <!-- Aperçu d'image JS -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const input = document.querySelector('input[type="file"]');
+            const preview = document.getElementById('preview');
+            if (!input || !preview) return;
+
+            input.addEventListener('change', e => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = ev => {
+                        preview.style.backgroundImage = `url('${ev.target.result}')`;
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    preview.style.backgroundImage = 'none';
+                }
+            });
+        });
+    </script>
 {% endblock %}

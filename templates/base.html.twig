@@ -5,32 +5,73 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Sorties.com{% endblock %}</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    {# --- STYLES --- #}
+
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('css/login-form.css') }}">
     <link rel="stylesheet" href="{{ asset('css/register-form.css') }}">
 
+    {# --- Tailwind + Fonts --- #}
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
 
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f4c652",
+                        "background-light": "#f8f7f6",
+                        "background-dark": "#221d10",
+                        "text-light": "#1c170d",
+                        "text-dark": "#fcfbf8",
+                        "secondary-light": "#f3f0e7",
+                        "secondary-dark": "#3a342a",
+                        "subtle-light": "#9b844b",
+                        "subtle-dark": "#a1998a"
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "Noto Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
 </head>
-<body>
-<div id="main-content">
 
-    {% include 'partials/navbar.html.twig' %}
+<body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
+
+{# ✅ NAVBAR incluse #}
+{% include 'partials/navbar.html.twig' %}
+
+{# ✅ CONTENU PRINCIPAL avec marge top pour la navbar fixe #}
+<div id="main-content" class="pt-20">
     <main>
-        <div class="container">
+        <div class="container my-4">
             {% for label, messages in app.flashes %}
                 {% for message in messages %}
                     <div class="alert alert-{{ label }}">{{ message }}</div>
                 {% endfor %}
             {% endfor %}
         </div>
+
         {% block body %}{% endblock %}
     </main>
 </div>
 
-{% include 'partials/modal_connexion.html.twig' %}
+{% if not app.user %}
+    {% include 'partials/modal_connexion.html.twig' %}
+{% endif %}
 
+{# --- SCRIPTS --- #}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script>
@@ -42,5 +83,7 @@
         }
     });
 </script>
+
+{% block javascripts %}{% endblock %}
 </body>
 </html>

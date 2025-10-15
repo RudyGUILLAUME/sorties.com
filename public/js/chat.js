@@ -1,101 +1,102 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const chatBox = document.getElementById('chat-messages');
-    const input = document.getElementById('chat-input');
-    const sendBtn = document.getElementById('chat-send');
+    const chatMessages = document.getElementById('chat-messages');
+    const chatInput = document.getElementById('chat-input');
+    const chatSend = document.getElementById('chat-send');
 
-    // ⚠️ Ces valeurs seront injectées depuis Twig (voir étape 3)
-    const sendUrl = chatBox.dataset.sendUrl;
-    const fetchUrl = chatBox.dataset.fetchUrl;
+    if (!chatMessages || !chatInput || !chatSend) return;
 
-    let lastMessageId = 0;
+    const sendUrl = chatMessages.dataset.sendUrl;
+    const fetchUrl = chatMessages.dataset.fetchUrl;
     let isSending = false;
-    let isFetching = false;
-    const displayedIds = new Set();
+
+    // 🔁 Récupération initiale
+    fetchMessages();
+
+    // ⏳ Rafraîchissement auto toutes les 5 secondes
+    setInterval(fetchMessages, 5000);
+
+    // 📨 Envoi d’un message
+    chatSend.addEventListener('click', sendMessage);
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
 
     async function sendMessage() {
-        const content = input.value.trim();
-        if (!content || isSending) return;
+        const message = chatInput.value.trim();
+        if (!message || isSending) return;
+
         isSending = true;
 
         try {
             const res = await fetch(sendUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ content })
+                body: JSON.stringify({ message })
             });
 
             if (!res.ok) {
-                console.error('Erreur envoi message :', await res.text());
+                console.error('Erreur lors de l’envoi du message.');
                 return;
             }
 
-            const data = await res.json();
-            addMessageToChat(data, true);
-
-            if (data.id) {
-                displayedIds.add(data.id);
-                lastMessageId = Math.max(lastMessageId, data.id);
-            }
-
-            input.value = '';
-        } catch (e) {
-            console.error('Erreur réseau :', e);
+            chatInput.value = '';
+            await fetchMessages(); // Recharge les messages confirmés par le backend
+        } catch (error) {
+            console.error('Erreur réseau :', error);
         } finally {
             isSending = false;
         }
     }
 
-    function addMessageToChat(msg, isMine = false) {
-        if (!msg.id) return;
-        if (displayedIds.has(msg.id)) return;
-
-        const div = document.createElement('div');
-        div.classList.add('mb-2', 'chat-message');
-        if (isMine) div.classList.add('my-message');
-
-        div.innerHTML = `<strong>${msg.participant}</strong> : ${msg.content}
-                         <small class="text-muted">${msg.createdAt}</small>`;
-
-        chatBox.appendChild(div);
-        chatBox.scrollTop = chatBox.scrollHeight;
-        displayedIds.add(msg.id);
-    }
-
-    async function fetchMessages(playAnimation = false) {
-        if (isFetching) return;
-        isFetching = true;
-
+    async function fetchMessages() {
         try {
-            const res = await fetch(`${fetchUrl}?lastId=${lastMessageId}`);
-            if (!res.ok) return;
-
-            const newMessages = await res.json();
-
-            if (newMessages.length > 0) {
-                newMessages.forEach(msg => addMessageToChat(msg));
-                const last = newMessages[newMessages.length - 1];
-                lastMessageId = Math.max(lastMessageId, last.id);
-
-                if (playAnimation) {
-                    chatBox.classList.add('highlight');
-                    setTimeout(() => chatBox.classList.remove('highlight'), 800);
-                }
+            const res = await fetch(fetchUrl);
+            if (!res.ok) {
+                console.error('Erreur lors de la récupération des messages.');
+                return;
             }
-        } catch (e) {
-            console.error('Erreur fetch messages :', e);
-        } finally {
-            isFetching = false;
+
+            const messages = await res.json();
+            renderMessages(messages);
+        } catch (error) {
+            console.error('Erreur réseau :', error);
         }
     }
 
-    sendBtn.addEventListener('click', sendMessage);
-    input.addEventListener('keypress', e => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            sendMessage();
-        }
-    });
+    function renderMessages(messages) {
+        chatMessages.innerHTML = '';
 
-    fetchMessages(false);
-    setInterval(() => fetchMessages(true), 3000);
+        messages.forEach(msg => {
+            const div = document.createElement('div');
+            div.className = msg.isMine ? 'flex justify-end' : 'flex justify-start';
+            div.innerHTML = `
+                <div class="${msg.isMine
+                ? 'bg-primary text-text-light'
+                : 'bg-background-light dark:bg-background-dark'} p-3 rounded-lg max-w-xs">
+                    
+                    <p class="text-xs text-subtle-light dark:text-subtle-dark mb-1">
+                        ${escapeHtml(msg.participant)} ${msg.isMine ? '(vous)' : ''}
+                    </p>
+                    
+                    <p class="text-sm mb-1">${escapeHtml(msg.content)}</p>
+                    
+                    <p class="text-xs text-subtle-light dark:text-subtle-dark text-right opacity-70">
+                        ${escapeHtml(msg.createdAt || '')}
+                    </p>
+                </div>
+            `;
+            chatMessages.appendChild(div);
+        });
+
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function escapeHtml(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
 });
