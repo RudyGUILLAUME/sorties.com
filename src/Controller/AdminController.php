@@ -21,21 +21,20 @@ final class AdminController extends AbstractController
     #[Route('', name: 'panel')]
     public function index(
         ParticipantRepository $participantRepo,
-        SortieRepository $sortieRepo,
-    ): Response
-    {
+        SortieRepository $sortieRepo
+    ): Response {
         if (!$this->isGranted('ROLE_ADMIN')) {
             return $this->redirectToRoute('app_home');
         }
 
         // 🔹 KPI globaux
         $kpi = [
-            'activeParticipants' => $participantRepo->countActive(), // nombre total d'utilisateurs
-            'sorties' => $sortieRepo->count([]), // nombre total de sorties
-            'participationRate' => $participantRepo->getParticipationRate(), // méthode custom à créer pour % de participation
+            'activeParticipants' => $participantRepo->countActive(),
+            'sorties' => $sortieRepo->count([]),
+            'participationRate' => $participantRepo->getParticipationRate(),
         ];
 
-        // 🔹 Données pour le graphique Chart.js
+        // 🔹 Données pour le graphique
         $result = $sortieRepo->getSortiesCountPerMonth();
 
         $labels = [];
@@ -60,12 +59,22 @@ final class AdminController extends AbstractController
             'data' => $data,
         ];
 
+        // 🔹 Derniers inscrits (tri par ID décroissant)
+        $latestUsers = $participantRepo->createQueryBuilder('p')
+            ->orderBy('p.id', 'DESC')
+            ->setMaxResults(5)
+            ->getQuery()
+            ->getResult();
 
+        // 🔹 Rendu
         return $this->render('admin/index.html.twig', [
             'kpi' => $kpi,
             'chart' => $chart,
+            'latestUsers' => $latestUsers, // ✅ Ajout essentiel
         ]);
     }
+
+
 
     #[Route('/import', name: 'import_csv')]
     public function importCsv(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher,FichierCSVService $csv): Response

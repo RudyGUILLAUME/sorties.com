@@ -1,70 +1,157 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Participants{% endblock %}
+{% block title %}Gestion des participants{% endblock %}
 
 {% block body %}
-    <div class="container mt-4">
-        <div class="d-flex align-items-center justify-content-between mb-3">
-            <h1 class="h4 mb-0">Participants</h1>
-            <a class="btn btn-primary" href="{{ path('app_register') }}">Nouveau participant</a>
-        </div>
+    <div class="flex min-h-screen bg-background-light dark:bg-background-dark">
 
-        <div class="card shadow-sm">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                    <tr>
-                        <th>ID</th>
-                        <th>Nom</th>
-                        <th>Prénom</th>
-                        <th>Mail</th>
-                        <th>Site</th>
-                        <th>Roles</th>
-                        <th class="text-end">Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for participant in participants %}
-                        <tr>
-                            <td>{{ participant.id }}</td>
-                            <td>{{ participant.nom }}</td>
-                            <td>{{ participant.prenom }}</td>
-                            <td>{{ participant.mail }}</td>
-                            <td>{{ participant.site.nom }}</td>
-                            <td>
-                                {% for role in participant.roles %}
-                                    {{ role }}
-                                {% endfor %}
-                            </td>
-                            <td class="text-end">
-                                <div class="btn-group btn-group-sm">
-                                    <a class="btn btn-outline-secondary" href="{{ path('app_profile_edit', {id: participant.id}) }}">Modifier</a>
-                                    <a class="btn btn-primary" href="{{ path('app_profile_show', {id: participant.id}) }}">Afficher</a>
-                                    <form method="post" action="{{ path('admin_toggle', {id: participant.id}) }}" {% if participant.actif %}onsubmit="return confirm('Désactiver ce participant ? Cela supprimera les sorties dont il est le créateur.');"{% endif %}>
-                                        <input type="hidden" name="_token" value="{{ csrf_token('toggle' ~ participant.id) }}">
-                                        {%  if participant.actif %}
-                                            <button class="btn btn-outline-danger" type="submit">Désactiver</button>
+        <!-- Sidebar -->
+        {% include 'partials/sidebar.html.twig' %}
+
+        <!-- Contenu principal -->
+        <main class="flex-1 p-8 overflow-y-auto">
+            <div class="max-w-7xl mx-auto">
+
+                <!-- Titre de la page -->
+                <div class="flex flex-wrap justify-between items-center gap-4 mb-8">
+                    <div>
+                        <h1 class="text-3xl font-extrabold text-text-light dark:text-text-dark">Gestion des utilisateurs</h1>
+                        <p class="text-subtext-light dark:text-subtext-dark mt-1">
+                            Gérez tous les participants inscrits sur la plateforme.
+                        </p>
+                    </div>
+                    <a href="{{ path('app_register') }}"
+                       class="flex items-center justify-center gap-2 h-10 px-5 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors">
+                        <span class="material-symbols-outlined">add</span>
+                        Ajouter un utilisateur
+                    </a>
+                </div>
+
+                <!-- Tableau des utilisateurs -->
+                <div class="bg-white dark:bg-[#192633] rounded-xl shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-subtext-light dark:text-subtext-dark">
+                            <thead class="text-xs text-text-light dark:text-text-dark uppercase bg-gray-50 dark:bg-[#101922]">
+                            <tr>
+                                <th class="p-4"></th>
+                                <th class="px-6 py-3">Utilisateur</th>
+                                <th class="px-6 py-3">Email</th>
+                                <th class="px-6 py-3">Site</th>
+                                <th class="px-6 py-3">Rôle</th>
+                                <th class="px-6 py-3">Statut</th>
+                                <th class="px-6 py-3 text-right">Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody id="participantsTable">
+                            {% for participant in participants %}
+                                <tr class="border-b dark:border-border-dark hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+                                    <td class="w-4 p-4">
+                                        <input type="checkbox"
+                                               class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary dark:focus:ring-primary focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                                    </td>
+
+                                    <!-- Avatar + Nom -->
+                                    <th scope="row" class="flex items-center px-6 py-4 text-text-light dark:text-white whitespace-nowrap">
+                                        <img class="w-10 h-10 rounded-full object-cover"
+                                             src="{{ asset('images/uploads/' ~ (participant.imageProfil ?: 'default-profile.jpg')) }}"
+                                             alt="Avatar de {{ participant.prenom }}">
+                                        <div class="pl-3">
+                                            <div class="text-base font-semibold">{{ participant.prenom }} {{ participant.nom }}</div>
+                                        </div>
+                                    </th>
+
+                                    <!-- Email -->
+                                    <td class="px-6 py-4">{{ participant.mail }}</td>
+
+                                    <!-- Site -->
+                                    <td class="px-6 py-4">{{ participant.site ? participant.site.nom : '—' }}</td>
+
+                                    <!-- Rôle -->
+                                    <td class="px-6 py-4">
+                                        {% if 'ROLE_ADMIN' in participant.roles %}
+                                            <span class="bg-primary/20 text-primary px-2 py-1 rounded-full text-xs font-semibold">Admin</span>
                                         {% else %}
-                                            <button class="btn btn-outline-primary" type="submit">Activer</button>
+                                            <span class="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-2 py-1 rounded-full text-xs font-semibold">Utilisateur</span>
                                         {% endif %}
-                                    </form>
-                                    <form method="post" action="{{ path('admin_delete', {id: participant.id}) }}" onsubmit="return confirm('Supprimer ce participant ?');">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ participant.id) }}">
-                                        <button class="btn btn-danger" type="submit">Supprimer</button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="4" class="text-center text-muted py-4">Aucun participant.</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+                                    </td>
+
+                                    <!-- Statut -->
+                                    <td class="px-6 py-4">
+                                        {% if participant.actif %}
+                                            <div class="flex items-center">
+                                                <div class="h-2.5 w-2.5 rounded-full bg-secondary mr-2"></div> Actif
+                                            </div>
+                                        {% else %}
+                                            <div class="flex items-center">
+                                                <div class="h-2.5 w-2.5 rounded-full bg-danger mr-2"></div> Inactif
+                                            </div>
+                                        {% endif %}
+                                    </td>
+
+                                    <!-- Actions -->
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="flex justify-end items-center gap-2">
+                                            <a href="{{ path('app_profile_show', {id: participant.id}) }}"
+                                               class="p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700"
+                                               title="Voir profil">
+                                                <span class="material-symbols-outlined text-base">visibility</span>
+                                            </a>
+
+                                            <a href="{{ path('app_profile_edit', {id: participant.id}) }}"
+                                               class="p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700"
+                                               title="Modifier">
+                                                <span class="material-symbols-outlined text-base">edit</span>
+                                            </a>
+
+                                            <form method="post"
+                                                  action="{{ path('admin_toggle', {id: participant.id}) }}"
+                                                  class="inline"
+                                                  {% if participant.actif %}onsubmit="return confirm('Désactiver ce participant ? Cela supprimera les sorties dont il est le créateur.');"{% endif %}>
+                                                <input type="hidden" name="_token" value="{{ csrf_token('toggle' ~ participant.id) }}">
+                                                <button type="submit" class="p-1.5 rounded-md hover:bg-danger/20" title="{{ participant.actif ? 'Désactiver' : 'Activer' }}">
+                                                <span class="material-symbols-outlined text-base {{ participant.actif ? 'text-danger' : 'text-secondary' }}">
+                                                    {{ participant.actif ? 'block' : 'check_circle' }}
+                                                </span>
+                                                </button>
+                                            </form>
+
+                                            <form method="post"
+                                                  action="{{ path('admin_delete', {id: participant.id}) }}"
+                                                  onsubmit="return confirm('Supprimer ce participant ?');"
+                                                  class="inline">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ participant.id) }}">
+                                                <button class="p-1.5 rounded-md hover:bg-danger/20" title="Supprimer">
+                                                    <span class="material-symbols-outlined text-base text-danger">delete</span>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="7" class="text-center py-6 text-subtext-light dark:text-subtext-dark">
+                                        Aucun participant trouvé.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-        </div>
+        </main>
     </div>
+
+    <script>
+        // 🔍 Filtrage client simple
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('keyup', function() {
+                const filter = this.value.toLowerCase();
+                document.querySelectorAll('#participantsTable tr').forEach(row => {
+                    row.style.display = row.textContent.toLowerCase().includes(filter) ? '' : 'none';
+                });
+            });
+        }
+    </script>
 {% endblock %}
-
-

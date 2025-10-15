@@ -1,52 +1,86 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Villes{% endblock %}
+{% block title %}Gestion des villes{% endblock %}
 
 {% block body %}
-<div class="container mt-4">
-    <div class="d-flex align-items-center justify-content-between mb-3">
-        <h1 class="h4 mb-0">Villes</h1>
-        <a class="btn btn-primary" href="{{ path('app_ville_new') }}">Nouvelle ville</a>
-    </div>
+    <div class="flex min-h-screen bg-background-light dark:bg-background-dark">
 
-    <div class="card shadow-sm">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>ID</th>
-                        <th>Nom</th>
-                        <th>Code postal</th>
-                        <th class="text-end">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for ville in villes %}
-                        <tr>
-                            <td>{{ ville.id }}</td>
-                            <td>{{ ville.nom }}</td>
-                            <td>{{ ville.codePostal }}</td>
-                            <td class="text-end">
-                                <div class="btn-group btn-group-sm">
-                                    <a class="btn btn-outline-secondary" href="{{ path('app_ville_edit', {id: ville.id}) }}">Modifier</a>
-                                    <a class="btn btn-primary" href="{{ path('app_ville_show', {id: ville.id}) }}">Afficher</a>
-                                    <form method="post" action="{{ path('app_ville_delete', {id: ville.id}) }}" onsubmit="return confirm('Supprimer cette ville ?');">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ ville.id) }}">
-                                        <button class="btn btn-outline-danger" type="submit">Supprimer</button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="4" class="text-center text-muted py-4">Aucune ville.</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+        <!-- Sidebar -->
+        {% include 'partials/sidebar.html.twig' %}
+
+        <!-- Contenu principal -->
+        <main class="flex-1 p-8 overflow-y-auto">
+            <div class="max-w-7xl mx-auto">
+
+                <!-- En-tête -->
+                <div class="flex flex-wrap justify-between items-center gap-4 mb-8">
+                    <div>
+                        <h1 class="text-3xl font-extrabold text-text-light dark:text-text-dark">Gestion des villes</h1>
+                        <p class="text-subtext-light dark:text-subtext-dark mt-1">
+                            Consultez, modifiez ou ajoutez les villes enregistrées dans la plateforme.
+                        </p>
+                    </div>
+                    <a href="{{ path('app_ville_new') }}"
+                       class="flex items-center justify-center gap-2 h-10 px-5 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors">
+                        <span class="material-symbols-outlined">add</span>
+                        Nouvelle ville
+                    </a>
+                </div>
+
+                <!-- Tableau des villes -->
+                <div class="bg-white dark:bg-[#192633] rounded-xl shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-subtext-light dark:text-subtext-dark">
+                            <thead class="text-xs text-text-light dark:text-text-dark uppercase bg-gray-50 dark:bg-[#101922]">
+                            <tr>
+                                <th class="px-6 py-3">ID</th>
+                                <th class="px-6 py-3">Nom</th>
+                                <th class="px-6 py-3">Code postal</th>
+                                <th class="px-6 py-3 text-right">Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for ville in villes %}
+                                <tr class="border-b dark:border-border-dark hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+                                    <td class="px-6 py-4 font-medium text-text-light dark:text-text-dark">{{ ville.id }}</td>
+                                    <td class="px-6 py-4">{{ ville.nom }}</td>
+                                    <td class="px-6 py-4">{{ ville.codePostal }}</td>
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="flex justify-end items-center gap-2">
+                                            <a href="{{ path('app_ville_show', {id: ville.id}) }}"
+                                               class="p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700"
+                                               title="Afficher">
+                                                <span class="material-symbols-outlined text-base">visibility</span>
+                                            </a>
+                                            <a href="{{ path('app_ville_edit', {id: ville.id}) }}"
+                                               class="p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700"
+                                               title="Modifier">
+                                                <span class="material-symbols-outlined text-base">edit</span>
+                                            </a>
+                                            <form method="post"
+                                                  action="{{ path('app_ville_delete', {id: ville.id}) }}"
+                                                  onsubmit="return confirm('Supprimer cette ville ?');"
+                                                  class="inline">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ ville.id) }}">
+                                                <button type="submit" class="p-1.5 rounded-md hover:bg-danger/20" title="Supprimer">
+                                                    <span class="material-symbols-outlined text-base text-danger">delete</span>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-6 text-subtext-light dark:text-subtext-dark">
+                                        Aucune ville enregistrée.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
-</div>
 {% endblock %}
-
-
