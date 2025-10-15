@@ -1,127 +1,108 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Profil{% endblock %}
+{% block title %}Profil de {{ participant.prenom }}{% endblock %}
 
 {% block body %}
+    <div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
+        <div class="layout-container flex h-full grow flex-col">
+            <div class="px-4 md:px-10 lg:px-20 xl:px-40 flex flex-1 justify-center py-5">
+                <div class="layout-content-container flex flex-col w-full max-w-6xl flex-1">
 
-    <div class="container rounded bg-white mt-5 mb-5">
-        <div class="row">
-
-            {# --- COLONNE PHOTO --- #}
-            <div class="col-md-3 border-right">
-                <div class="d-flex flex-column align-items-center text-center p-3 py-5">
-                    {% if participant.imageProfil %}
-                        <img src="{{ asset('images/uploads/' ~ participant.imageProfil) }}"
-                             alt="Photo de profil"
-                             class="rounded-circle"
-                             width="150">
-                    {% else %}
-                        <img src="{{ asset('images/default-profile.jpg') }}"
-                             alt="Photo par défaut"
-                             class="rounded-circle"
-                             width="150">
-                    {% endif %}
-
-
-
-                    <span class="font-weight-bold">{{ participant.prenom ~ ' ' ~ participant.nom }}</span>
-                    <span class="text-black-50">{{ participant.mail }}</span>
-                    {% if participant.site %}
-                        <span class="text-muted">{{ participant.site.nom }}</span>
-                    {% endif %}
-                </div>
-            </div>
-
-            {# --- COLONNE INFORMATIONS PRINCIPALES --- #}
-            <div class="col-md-5 border-right">
-                <div class="p-3 py-5">
-
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h4 class="text-right">Profil</h4>
-                        {% if app.user and app.user.id == participant.id %}
-                        <a href="{{ path('app_profile_edit', {'id': participant.id}) }}" class="btn btn-outline-primary btn-sm">
-                            Modifier
-                        </a>
-                        {% endif %}
-
+                    <!-- Fil d’Ariane -->
+                    <div class="flex flex-wrap gap-2 p-4">
+                        <a class="text-primary text-base font-medium" href="{{ path('app_sortie_index') }}">Accueil</a>
+                        <span class="text-gray-500 dark:text-white/60">/</span>
+                        <span class="text-text-light dark:text-text-dark">Profil</span>
                     </div>
 
-                    <div class="row mt-2">
-                        <div class="col-md-6">
-                            <label class="labels">Prénom</label>
-                            <p class="form-control-plaintext">{{ participant.prenom }}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="labels">Nom</label>
-                            <p class="form-control-plaintext">{{ participant.nom }}</p>
-                        </div>
-                    </div>
-
-                    <hr>
-
-                    <div class="row mt-3">
-                        <div class="col-md-12">
-                            <label class="labels">Téléphone</label>
-                            <p class="form-control-plaintext">
-                                {{ participant.telephone is not empty ? participant.telephone : 'Non renseigné' }}
-                            </p>
-                        </div>
-
-                        <hr>
-
-                        <div class="col-md-12 mt-3">
-                            <label class="labels">Email</label>
-                            <p class="form-control-plaintext">{{ participant.mail }}</p>
-                        </div>
-
-                        <hr>
-
-                        <div class="col-md-12 mt-3">
-                            <label class="labels">Site</label>
-                            <p class="form-control-plaintext">
-                                {{ participant.site ? participant.site.nom : 'Non défini' }}
-                            </p>
-                        </div>
-
-                    </div>
-
-                    <hr>
-                    <div class="row mt-3">
-                        <div class="col-md-12">
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {# --- COLONNE DROITE --- #}
-            <div class="col-md-4">
-                <div class="p-3 py-5">
-                    <div class="d-flex justify-content-between align-items-center experience">
-                        <span>Autres informations</span>
-                    </div><br>
-
-                    <div class="col-md-12">
-                        <label class="labels">Centres d’intérêt</label>
-                        <p class="form-control-plaintext text-muted">Non renseigné</p>
-                    </div><br>
-
-                    <div class="col-md-12">
-                        <label class="labels">Rôle utilisateur</label>
-                        <p class="form-control-plaintext">
-                            {% if 'ROLE_ADMIN' in participant.roles %}
-                                Administrateur
-                            {% elseif 'ROLE_USER' in participant.roles %}
-                                Utilisateur
-                            {% else %}
-                                Non défini
-                            {% endif %}
+                    <!-- En-tête -->
+                    <div class="flex flex-wrap justify-between gap-3 p-4">
+                        <p class="text-text-light dark:text-text-dark text-4xl font-black leading-tight tracking-[-0.033em]">
+                            Profil de {{ participant.prenom }}
                         </p>
+
+                        {% if app.user and app.user.id == participant.id %}
+                            <a href="{{ path('app_profile_edit', {'id': participant.id}) }}"
+                               class="flex items-center gap-2 rounded-lg bg-primary text-text-light px-4 py-2 font-semibold text-sm hover:opacity-90 transition">
+                                <span class="material-symbols-outlined text-base">edit</span> Modifier
+                            </a>
+                        {% endif %}
                     </div>
+
+                    <!-- Contenu principal -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 p-4 mt-4">
+                        <!-- Colonne gauche -->
+                        <div class="lg:col-span-2 flex flex-col gap-8">
+                            <!-- Infos personnelles -->
+                            <div class="bg-white dark:bg-secondary-dark p-6 rounded-xl shadow-sm">
+                                <h2 class="text-xl font-bold mb-6 text-text-light dark:text-text-dark">Informations personnelles</h2>
+
+                                <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
+                                    <!-- Photo -->
+                                    <div class="relative group">
+                                        <div class="bg-center bg-no-repeat bg-cover rounded-full h-24 w-24 border border-gray-300 dark:border-gray-600"
+                                             style="background-image: url('{{ asset(participant.imageProfil
+                                                 ? 'images/uploads/' ~ participant.imageProfil
+                                                 : 'images/default-profile.jpg') }}');">
+                                        </div>
+                                    </div>
+
+                                    <!-- Nom + Email -->
+                                    <div>
+                                        <p class="text-text-light dark:text-text-dark text-[22px] font-bold">{{ participant.prenom }} {{ participant.nom }}</p>
+                                        <p class="text-subtle-light dark:text-subtle-dark">{{ participant.mail }}</p>
+                                        {% if participant.site %}
+                                            <p class="text-sm text-subtle-light dark:text-subtle-dark">{{ participant.site.nom }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Détails -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <p class="text-sm font-medium text-subtle-light dark:text-subtle-dark pb-1">Téléphone</p>
+                                        <p class="text-text-light dark:text-text-dark">
+                                            {{ participant.telephone ?: 'Non renseigné' }}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-subtle-light dark:text-subtle-dark pb-1">Rôle utilisateur</p>
+                                        <p class="text-text-light dark:text-text-dark">
+                                            {% if 'ROLE_ADMIN' in participant.roles %}
+                                                Administrateur
+                                            {% elseif 'ROLE_USER' in participant.roles %}
+                                                Utilisateur
+                                            {% else %}
+                                                Non défini
+                                            {% endif %}
+                                        </p>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Colonne droite -->
+                        <div class="flex flex-col gap-8">
+                            <!-- Statistiques -->
+                            <div class="bg-white dark:bg-secondary-dark p-6 rounded-xl shadow-sm">
+                                <h2 class="text-xl font-bold mb-4 text-text-light dark:text-text-dark">Mon activité</h2>
+
+
+
+                            </div>
+
+                        </div>
+                    </div>
+
+
                 </div>
             </div>
-
         </div>
     </div>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 {% endblock %}

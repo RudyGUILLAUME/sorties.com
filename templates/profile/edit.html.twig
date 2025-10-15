@@ -3,115 +3,158 @@
 {% block title %}Modifier le profil{% endblock %}
 
 {% block body %}
-
-    <div class="container rounded bg-white mt-5 mb-5">
-        <div class="row">
-
-            {# --- COLONNE PHOTO --- #}
-            <div class="col-md-3 border-right">
-                <div class="d-flex flex-column align-items-center text-center p-3 py-5">
-                    {% set p = participant ?? app.user %}
-                    {% if p.imageProfil %}
-                        <img src="{{ asset('images/uploads/' ~ p.imageProfil) }}"
-                             alt="Photo de profil"
-                             class="rounded-circle"
-                             width="150">
-                    {% else %}
-                        <img src="{{ asset('images/default-profile.jpg') }}"
-                             alt="Photo par défaut"
-                             class="rounded-circle"
-                             width="150">
-                    {% endif %}
-
-
-
-                    {# p already set above #}
-                    <span class="font-weight-bold">{{ p.prenom ~ ' ' ~ p.nom }}</span>
-                    <span class="text-black-50">{{ p.mail }}</span>
-                </div>
+    <main class="flex-grow p-6 md:p-10">
+        <div class="max-w-4xl mx-auto">
+            <!-- En-tête -->
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-3xl font-bold text-text-light dark:text-text-dark">Modifier mon profil</h1>
             </div>
 
-            {# --- COLONNE FORMULAIRE --- #}
-            <div class="col-md-5 border-right">
-                <div class="p-3 py-5">
-
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h4 class="text-right">Modifier le profil</h4>
-                    </div>
-
-                    {% for message in app.flashes('success') %}
-                        <div class="alert alert-success">{{ message }}</div>
-                    {% endfor %}
-                    {% for message in app.flashes('error') %}
-                        <div class="alert alert-danger">{{ message }}</div>
-                    {% endfor %}
-
-                    {{ form_start(form) }}
-
-                    <div class="row mt-2">
-                        <div class="col-md-6">
-                            <label class="labels">Prénom</label>
-                            {{ form_widget(form.prenom, {'attr': {'class': 'form-control'}}) }}
-                        </div>
-                        <div class="col-md-6">
-                            <label class="labels">Nom</label>
-                            {{ form_widget(form.nom, {'attr': {'class': 'form-control'}}) }}
-                        </div>
-                    </div>
-
-                    <div class="row mt-3">
-                        <div class="col-md-12">
-                            <label class="labels">Téléphone</label>
-                            {{ form_widget(form.telephone, {'attr': {'class': 'form-control'}}) }}
-                        </div>
-                        <div class="col-md-12 mt-3">
-                            <label class="labels">Email</label>
-                            {{ form_widget(form.mail, {'attr': {'class': 'form-control'}}) }}
-                        </div>
-                        <div class="col-md-12 mt-3">
-                            <label class="labels">Site</label>
-                            {{ form_widget(form.site, {'attr': {'class': 'form-control'}}) }}
-                        </div>
-                    </div>
-
-                    <hr>
-                    <h5 class="mt-3">Changer le mot de passe</h5>
-
-                    <div class="row mt-2">
-                        <div class="col-md-12">
-                            <label class="labels">Ancien mot de passe</label>
-                            {{ form_widget(form.oldPassword, {'attr': {'class': 'form-control'}}) }}
-                        </div>
-                        <div class="col-md-12 mt-3">
-                            <label class="labels">Nouveau mot de passe</label>
-                            {{ form_widget(form.newPassword, {'attr': {'class': 'form-control'}}) }}
-                        </div>
-                    </div>
-
-                    <div class="mt-5 text-center">
-                        <button class="btn btn-primary profile-button" type="submit">Sauvegarder</button>
-                    </div>
-
-                    {{ form_rest(form) }}
-                    {{ form_end(form) }}
+            <!-- Messages Flash -->
+            {% for message in app.flashes('success') %}
+                <div class="mb-4 p-4 rounded-lg bg-green-100 border border-green-400 text-green-800">
+                    {{ message }}
                 </div>
-            </div>
+            {% endfor %}
+            {% for message in app.flashes('error') %}
+                <div class="mb-4 p-4 rounded-lg bg-red-100 border border-red-400 text-red-800">
+                    {{ message }}
+                </div>
+            {% endfor %}
 
-            {# --- COLONNE DROITE --- #}
-            <div class="col-md-4">
-                <div class="p-3 py-5">
-                    <div class="d-flex justify-content-between align-items-center experience">
-                        <span>Informations supplémentaires</span>
-                    </div><br>
+            <!-- Formulaire -->
+            <div class="bg-white dark:bg-background-dark rounded-xl shadow-lg p-8">
+                {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
 
-                    <div class="col-md-12">
-                        <label class="labels">Autres informations</label>
-                        <input type="text" class="form-control" placeholder="ex: centre d'intérêt, rôle, etc.">
+                {% set p = participant ?? app.user %}
+
+                <!-- PHOTO DE PROFIL -->
+                <div class="flex flex-col md:flex-row items-center gap-8 mb-10">
+                    <div class="relative inline-block">
+                        <!-- Aperçu de l’image -->
+                        <div id="imagePreview"
+                             class="bg-center bg-no-repeat bg-cover rounded-full size-32 border border-subtle-light dark:border-subtle-dark"
+                             style="background-image: url('{{ asset('images/uploads/' ~ (p.imageProfil ?: 'default-profile.jpg')) }}');">
+                        </div>
+
+                        <!-- Label avec stylo par-dessus -->
+                        <label for="imageProfilInput"
+                               class="absolute bottom-1 right-1 z-10 bg-primary text-white rounded-full p-2 cursor-pointer hover:bg-primary/90 transition focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background-light dark:focus:ring-offset-background-dark">
+                            <span class="material-symbols-outlined text-sm">edit</span>
+                        </label>
+
+                        <!-- Champ d’upload caché -->
+                        {{ form_widget(form.image_profil, {
+                            'attr': {
+                                'id': 'imageProfilInput',
+                                'class': 'hidden',
+                                'accept': 'image/png, image/jpeg, image/jpg'
+                            }
+                        }) }}
+                    </div>
+
+
+
+                    <div class="text-center md:text-left">
+                        <p class="text-lg font-semibold text-text-light dark:text-text-dark">{{ p.prenom }} {{ p.nom }}</p>
+                        <p class="text-subtle-light dark:text-subtle-dark text-sm">{{ p.mail }}</p>
+                        <p class="text-xs text-subtle-light dark:text-subtle-dark mt-1">Formats : JPG, PNG (max 2 Mo)</p>
                     </div>
                 </div>
-            </div>
 
+                <!-- CHAMPS PRINCIPAUX -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Prénom</label>
+                        {{ form_widget(form.prenom, {
+                            'attr': {'class': 'w-full rounded-lg border border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark h-12 px-4 focus:ring-2 focus:ring-primary/50 focus:outline-none'}
+                        }) }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Nom</label>
+                        {{ form_widget(form.nom, {
+                            'attr': {'class': 'w-full rounded-lg border border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark h-12 px-4 focus:ring-2 focus:ring-primary/50 focus:outline-none'}
+                        }) }}
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Téléphone</label>
+                    {{ form_widget(form.telephone, {
+                        'attr': {'class': 'w-full rounded-lg border border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark h-12 px-4 focus:ring-2 focus:ring-primary/50 focus:outline-none'}
+                    }) }}
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Email</label>
+                    {{ form_widget(form.mail, {
+                        'attr': {'class': 'w-full rounded-lg border border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark h-12 px-4 focus:ring-2 focus:ring-primary/50 focus:outline-none'}
+                    }) }}
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Site</label>
+                    {{ form_widget(form.site, {
+                        'attr': {'class': 'w-full rounded-lg border border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark h-12 px-4 focus:ring-2 focus:ring-primary/50 focus:outline-none'}
+                    }) }}
+                </div>
+
+                <!-- CHANGEMENT MOT DE PASSE -->
+                <hr class="my-8 border-subtle-light/40 dark:border-subtle-dark/40">
+                <h2 class="text-xl font-semibold text-text-light dark:text-text-dark mb-4">Changer le mot de passe</h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Ancien mot de passe</label>
+                        {{ form_widget(form.oldPassword, {
+                            'attr': {'class': 'w-full rounded-lg border border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark h-12 px-4 focus:ring-2 focus:ring-primary/50 focus:outline-none'}
+                        }) }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Nouveau mot de passe</label>
+                        {{ form_widget(form.newPassword, {
+                            'attr': {'class': 'w-full rounded-lg border border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark h-12 px-4 focus:ring-2 focus:ring-primary/50 focus:outline-none'}
+                        }) }}
+                    </div>
+                </div>
+
+                <!-- BOUTONS -->
+                <div class="flex justify-end gap-4 mt-10">
+                    <a href="{{ path('app_profile_show', {'id': p.id}) }}"
+                       class="flex items-center justify-center rounded-lg h-12 px-6 bg-secondary-light dark:bg-secondary-dark text-text-light dark:text-text-dark text-base font-bold hover:bg-secondary-light/80 dark:hover:bg-secondary-dark/80 transition">
+                        Annuler
+                    </a>
+                    <button type="submit"
+                            class="flex items-center justify-center rounded-lg h-12 px-6 bg-primary text-text-light text-base font-bold hover:bg-primary/90 transition">
+                        Sauvegarder
+                    </button>
+                </div>
+
+                {{ form_end(form) }}
+            </div>
         </div>
-    </div>
+    </main>
+
+    <!-- Aperçu de l’image -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const input = document.getElementById('imageProfilInput');
+            const preview = document.getElementById('imagePreview');
+
+            if (input && preview) {
+                input.addEventListener('change', e => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = ev => {
+                            preview.style.backgroundImage = `url('${ev.target.result}')`;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+        });
+    </script>
+
 
 {% endblock %}
