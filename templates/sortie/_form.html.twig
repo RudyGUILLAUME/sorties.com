@@ -1,0 +1,267 @@
+<!-- FORMULAIRE -->
+{{ form_start(form,{'attr': {'class': 'space-y-8', 'enctype': 'multipart/form-data'}}) }}
+
+    <div class="grid grid-cols-1 gap-x-12 gap-y-8 lg:grid-cols-1">
+        <div class="lg:col-span-3 space-y-6">
+            <!-- Nom -->
+
+            <div>
+                <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Nom de la sortie</p>
+                {{ form_widget(form.nom, {'attr': {
+                    'class': 'w-full rounded-lg border border-subtle-light/30 dark:border-subtle-dark/30 bg-background-light dark:bg-background-dark p-3 text-text-light dark:text-text-dark focus:ring-2 focus:ring-primary/50 focus:outline-none'
+                }}) }}
+            </div>
+
+            <!-- Description -->
+            <div>
+                <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Informations</p>
+                {{ form_widget(form.infosSortie, {'attr': {
+                    'class': 'w-full rounded-lg border border-subtle-light/30 dark:border-subtle-dark/30 bg-background-light dark:bg-background-dark p-3 text-text-light dark:text-text-dark min-h-[120px] focus:ring-2 focus:ring-primary/50 focus:outline-none'
+                }}) }}
+            </div>
+
+            <!-- Image de couverture -->
+            <div>
+                <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Image de couverture</p>
+                <div class="flex items-center gap-4">
+                    <div class="flex-1">
+                        {{ form_widget(form.image_principale, {'attr': {
+                            'class': 'block w-full text-sm text-gray-700 dark:text-gray-300 border border-subtle-light/30 dark:border-subtle-dark/30 rounded-lg cursor-pointer bg-background-light dark:bg-background-dark focus:ring-2 focus:ring-primary/50 focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-text-light hover:file:bg-primary/90'
+                        }}) }}
+                    </div>
+                    <div id="preview" class="w-24 h-24 rounded-lg bg-center bg-cover bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600"></div>
+                </div>
+                <p class="text-xs text-subtle-light dark:text-subtle-dark mt-1">Formats acceptés : JPG, PNG (max 2 Mo)</p>
+            </div>
+
+            <!-- Dates -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                <div>
+                    <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Date de début</p>
+                    {{ form_widget(form.dateHeureDebut, {'attr': {
+                        'class': 'w-full rounded-lg border border-subtle-light/30 dark:border-subtle-dark/30 bg-background-light dark:bg-background-dark p-3 focus:ring-2 focus:ring-primary/50 focus:outline-none'
+                    }}) }}
+                </div>
+
+                <div>
+                    <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Clôture des inscriptions</p>
+                    {{ form_widget(form.dateLimiteInscription, {'attr': {
+                        'class': 'w-full rounded-lg border border-subtle-light/30 dark:border-subtle-dark/30 bg-background-light dark:bg-background-dark p-3 focus:ring-2 focus:ring-primary/50 focus:outline-none'
+                    }}) }}
+                </div>
+            </div>
+
+            <!-- Duree et places -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                <div>
+                    <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Durée (minutes)</p>
+                    {{ form_widget(form.duree, {'attr': {
+                        'class': 'w-full rounded-lg border border-subtle-light/30 dark:border-subtle-dark/30 bg-background-light dark:bg-background-dark p-3 focus:ring-2 focus:ring-primary/50 focus:outline-none'
+                    }}) }}
+                </div>
+
+                <div>
+                    <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Places disponibles</p>
+                    {{ form_widget(form.nbInscriptionsMax, {'attr': {
+                        'class': 'w-full rounded-lg border border-subtle-light/30 dark:border-subtle-dark/30 bg-background-light dark:bg-background-dark p-3 focus:ring-2 focus:ring-primary/50 focus:outline-none'
+                    }}) }}
+                </div>
+            </div>
+
+            <!-- Site -->
+            <div>
+                <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Site</p>
+                {{ form_widget(form.site, {'attr': {
+                    'class': 'w-full rounded-lg border border-subtle-light/30 dark:border-subtle-dark/30 bg-background-light dark:bg-background-dark p-3 focus:ring-2 focus:ring-primary/50 focus:outline-none'
+                }}) }}
+            </div>
+
+            <!-- Lieu -->
+            <div>
+                <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Lieu</p>
+                {{ form_widget(form.lieu, {'attr': {
+                    'class': 'w-full rounded-lg border border-subtle-light/30 dark:border-subtle-dark/30 bg-background-light dark:bg-background-dark p-3 focus:ring-2 focus:ring-primary/50 focus:outline-none'
+                }}) }}
+            </div>
+        </div>
+
+        <!-- Groupe privé -->
+        {{ form_row(form.privee) }}
+
+        <div id="invites-container" style="display:none;">
+            <label for="invite-search">Inviter des participants :</label>
+            <div style="display:flex; gap:.5rem; align-items:center;">
+                <input id="invite-search" type="text" class="form-control" placeholder="Rechercher un participant...">
+                <button id="search-btn" type="button" class="btn btn-primary">🔍</button>
+            </div>
+            <div id="invite-results" class="dropdown"></div>
+            <div id="selected-invites" class="mt-2"></div>
+        </div>
+        <input type="hidden" id="sortie_invites" name="sortie[invites]" value="{{ form.invites.vars.value|default('') }}">
+
+        <!-- BOUTONS -->
+        <div class="mt-12 flex justify-end border-t border-subtle-light/30 dark:border-subtle-dark/30 pt-8 gap-4">
+            <a href="{{ path('app_home') }}"
+               class="flex items-center justify-center min-w-[160px] rounded-lg h-12 px-6 border border-gray-400 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                Annuler
+            </a>
+
+            {% if sortie is defined %}
+                <button type="submit"
+                        class="flex items-center justify-center min-w-[180px] rounded-lg h-12 px-6 bg-primary text-text-light text-base font-bold hover:opacity-90 transition">
+                    Enregistrer
+                </button>
+            {% else %}
+                <button type="submit"
+                        class="flex items-center justify-center min-w-[180px] rounded-lg h-12 px-6 bg-primary text-text-light text-base font-bold hover:opacity-90 transition">
+                    Créer la sortie
+                </button>
+            {% endif %}
+        </div>
+    </div>
+
+<input type="hidden" name="{{ form._token.vars.full_name }}" value="{{ form._token.vars.value }}">
+
+{{ form_end(form, {'render_rest': false}) }}
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const input = document.querySelector('input[type="file"]');
+        const preview = document.getElementById('preview');
+        if (!input || !preview) return;
+
+        input.addEventListener('change', e => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = ev => {
+                    preview.style.backgroundImage = `url('${ev.target.result}')`;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.backgroundImage = 'none';
+            }
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const priveeCheckbox = document.querySelector('#sortie_privee');
+        const invitesContainer = document.querySelector('#invites-container');
+        const searchInput = document.querySelector('#invite-search');
+        const resultsDiv = document.querySelector('#invite-results');
+        const selectedDiv = document.querySelector('#selected-invites');
+        const hiddenField = document.querySelector('#sortie_invites');
+
+        const selected = new Map();
+
+        function updateHidden() {
+            const ids = Array.from(selected.keys()).filter(id => id !== '' && id !== null);
+            hiddenField.value = ids.join(',');
+        }
+
+        function createTagElement(id, name) {
+            const tag = document.createElement('span');
+            tag.textContent = name + ' ✖';
+            tag.classList.add('badge', 'bg-primary', 'm-1', 'p-2');
+            tag.style.cursor = 'pointer';
+            tag.dataset.id = id;
+            return tag;
+        }
+
+        function addInvite(id, name, update=true) {
+            id = String(id);
+            if (selected.has(id)) return;
+            selected.set(id, name);
+            const tag = createTagElement(id, name);
+            selectedDiv.appendChild(tag);
+            if (update) updateHidden();
+        }
+
+        function removeInvite(id) {
+            id = String(id);
+            selected.delete(id);
+
+            const tag = selectedDiv.querySelector(`span[data-id="${id}"]`);
+            if (tag) tag.remove();
+            updateHidden();
+        }
+
+        const preload = {{ (sortie is defined and sortie.invites|length > 0) ? sortie.invites|map(p => {'id': p.id, 'text': (p.prenom ~ ' ' ~ p.nom)})|json_encode|raw : '[]' }};
+
+        if (Array.isArray(preload) && preload.length > 0) {
+            preload.forEach(p => {
+                addInvite(p.id, p.text, false);
+            });
+            updateHidden();
+
+            if (priveeCheckbox) priveeCheckbox.checked = true;
+        }
+
+        const toggleInvites = () => {
+            invitesContainer.style.display = (priveeCheckbox && priveeCheckbox.checked) ? 'block' : 'none';
+        };
+        if (priveeCheckbox) {
+            toggleInvites();
+            priveeCheckbox.addEventListener('change', toggleInvites);
+        } else {
+            invitesContainer.style.display = 'block';
+        }
+
+        let timeout;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(timeout);
+            const query = searchInput.value.trim();
+            if (query.length < 2) {
+                resultsDiv.innerHTML = '';
+                return;
+            }
+            timeout = setTimeout(() => {
+                fetch('{{ path("participants_search") }}?q=' + encodeURIComponent(query))
+                    .then(r => {
+                        if (!r.ok) throw new Error('Network error');
+                        return r.json();
+                    })
+                    .then(data => {
+                        resultsDiv.innerHTML = data.map(p =>
+                            `<div class="result" data-id="${p.id}" style="cursor:pointer;padding:6px 8px;">${p.text}</div>`
+                        ).join('');
+                    })
+                    .catch(e => {
+                        console.error('Recherche participants failed', e);
+                        resultsDiv.innerHTML = '';
+                    });
+            }, 230);
+        });
+
+        const searchBtn = document.querySelector('#search-btn');
+        if (searchBtn) {
+            searchBtn.addEventListener('click', () => {
+                const evt = new Event('input');
+                searchInput.dispatchEvent(evt);
+            });
+        }
+
+        resultsDiv.addEventListener('click', e => {
+            const div = e.target.closest('.result');
+            if (!div) return;
+            const id = div.dataset.id;
+            const name = div.textContent.trim();
+            addInvite(id, name);
+            resultsDiv.innerHTML = '';
+            searchInput.value = '';
+        });
+
+        selectedDiv.addEventListener('click', e => {
+            const tag = e.target.closest('span[data-id]');
+            if (!tag) return;
+            const id = tag.dataset.id;
+            removeInvite(id);
+        });
+
+        searchInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter') e.preventDefault();
+        });
+    });
+</script>

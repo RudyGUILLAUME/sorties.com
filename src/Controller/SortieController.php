@@ -9,6 +9,7 @@ use App\Entity\Sortie;
 use App\Form\CommentaireType;
 use App\Form\SortieType;
 use App\Repository\MessageRepository;
+use App\Repository\ParticipantRepository;
 use App\Service\GestionDateService;
 use App\Service\MailService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -18,6 +19,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -50,7 +52,13 @@ final class SortieController extends AbstractController
 
         $sorties = $sortieRepository->search($criteria, $participant?->getId());
 
-        foreach ($sorties as $sortie) {
+        $sorties_visibles = array_filter($sorties, function ($sortie) use ($participant) {
+            if (!$sortie->isPrivee()) return true;
+            if ($sortie->getOrganisateur() === $participant) return true;
+            return $sortie->getInvites()->contains($participant);
+        });
+
+        foreach ($sorties_visibles as $sortie) {
             $gestionDate->GestionDate($em,$etatRepository,$sortie);
             $etatActuel = $sortie->getEtat()->getLibelle();
 
@@ -69,7 +77,7 @@ final class SortieController extends AbstractController
         $em->flush();
 
         return $this->render('sortie/index.html.twig', [
-            'sorties' => $sorties,
+            'sorties' => $sorties_visibles,
             'participant' => $participant,
             'searchForm' => $form->createView(),
             'sortiesDisponibles' => $sortiesDisponibles,
@@ -81,7 +89,7 @@ final class SortieController extends AbstractController
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     #[IsGranted(new Expression('is_granted("ROLE_ADMIN") or is_granted("ROLE_ORGANISATEUR")'))]
-    public function new(Request $request, EntityManagerInterface $em, EtatRepository $etatRepository,GestionDateService $gestionDate, SluggerInterface $slugger): Response
+    public function new(Request $request, EntityManagerInterface $em, EtatRepository $etatRepository,GestionDateService $gestionDate, SluggerInterface $slugger, ParticipantRepository $participantRepository): Response
     {
         $participant = $this->getUser();
         $sortie = new Sortie();
@@ -98,6 +106,15 @@ final class SortieController extends AbstractController
 
         $form = $this->createForm(SortieType::class, $sortie);
         $form->handleRequest($request);
+
+        $invitesIds = explode(',', $form->get('invites')->getData() ?? '');
+        foreach ($invitesIds as $id) {
+            $participant = $participantRepository->find($id);
+            if ($participant) {
+                $sortie->addInvite($participant);
+            }
+        }
+
 
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -140,8 +157,16 @@ final class SortieController extends AbstractController
     }
 
     #[Route('/{id}', name: 'show', methods: ['GET','POST'])]
-    public function show(Request $request, EntityManagerInterface $em, Sortie $sortie, MessageRepository $messageRepository, Participant $participant): Response
+    public function show(Request $request, EntityManagerInterface $em, Sortie $sortie, MessageRepository $messageRepository): Response
     {
+        if ($sortie->isPrivee() &&
+            $sortie->getOrganisateur() !== $this->getUser() &&
+            !$sortie->getInvites()->contains($this->getUser())) {
+
+            $this->addFlash('error', 'Tu n’as pas accès à cette sortie');
+            return $this->redirectToRoute('app_sortie_index');
+        }
+
         $commentaire = new Commentaire();
         $form = $this->createForm(CommentaireType::class, $commentaire);
         $form->handleRequest($request);
@@ -184,7 +209,7 @@ final class SortieController extends AbstractController
 
     #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
     #[IsGranted(new Expression('is_granted("ROLE_ADMIN") or is_granted("ROLE_ORGANISATEUR")'))]
-    public function edit(Request $request, Sortie $sortie, EntityManagerInterface $em, EtatRepository $etatRepository,GestionDateService $gestionDate, SluggerInterface $slugger): Response
+    public function edit(Request $request, Sortie $sortie, EntityManagerInterface $em, EtatRepository $etatRepository,GestionDateService $gestionDate, SluggerInterface $slugger, ParticipantRepository $participantRepository): Response
     {
         $gestionDate->GestionDate($em,$etatRepository,$sortie);
 
@@ -193,11 +218,28 @@ final class SortieController extends AbstractController
             $this->addFlash('danger', 'Vous ne pouvez modifier cette sortie que si elle est en création.');
             return $this->redirectToRoute('app_sortie_index');
         }
-
         $form = $this->createForm(SortieType::class, $sortie);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+            $raw = (string) $form->get('invites')->getData();
+            $ids = array_filter(array_map('trim', explode(',', $raw)), fn($v) => $v !== '');
+
+            // optional: cast to int and unique
+            $ids = array_values(array_unique(array_map('intval', $ids)));
+
+            foreach ($sortie->getInvites() as $invite) {
+                $sortie->removeInvite($invite);
+            }
+
+            // Ajouter les nouveaux invités
+            foreach ($ids as $id) {
+                $participant = $participantRepository->find($id);
+                if ($participant) {
+                    $sortie->addInvite($participant);
+                }
+            }
 
             $imageFile = $form->get('image_principale')->getData();
 
@@ -225,7 +267,7 @@ final class SortieController extends AbstractController
 
                 $sortie->setImagePrincipale($newFilename);
             }
-
+            $em->persist($sortie);
             $em->flush();
             $this->addFlash('success', 'La sortie a été mise à jour.');
             return $this->redirectToRoute('app_sortie_index');
@@ -279,6 +321,11 @@ final class SortieController extends AbstractController
         // Bloquer inscription si sortie non ouverte (Annulée, Clôturée, etc.)
         if ($sortie->getEtat()->getLibelle() !== 'Ouverte') {
             $this->addFlash('danger', 'Vous ne pouvez pas vous inscrire à une sortie qui n’est pas ouverte.');
+            return $this->redirectToRoute('app_sortie_index');
+        }
+
+        if($sortie->isPrivee()&&!$sortie->getInvites()->contains($participant)){
+            $this->addFlash('danger', "Vous ne pouvez pas vous inscrire à une sortie privée à laquelle vous n'êtes pas invités.");
             return $this->redirectToRoute('app_sortie_index');
         }
 
