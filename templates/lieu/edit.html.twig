@@ -6,7 +6,6 @@
     <main class="flex-1 p-8 overflow-y-auto">
         <div class="max-w-4xl mx-auto">
 
-            <!-- 🧭 Fil d’Ariane -->
             <div class="flex flex-wrap gap-2 mb-6 text-sm">
                 <a href="{{ path('app_home') }}" class="text-primary hover:underline">Accueil</a>
                 <span class="text-subtext-light dark:text-subtext-dark">/</span>
@@ -15,23 +14,15 @@
                 <span class="text-text-light dark:text-text-dark">Modifier le lieu</span>
             </div>
 
-            <!-- 🏙️ Titre -->
             <div class="flex items-center justify-between mb-6">
                 <h1 class="text-3xl font-extrabold text-text-light dark:text-text-dark">Modifier le lieu</h1>
-                <a href="{{ path('app_lieu_index') }}"
-                   class="flex items-center gap-2 text-sm font-medium text-primary hover:underline">
-                    <span class="material-symbols-outlined text-base">arrow_back</span>
-                    Retour
-                </a>
             </div>
 
-            <!-- 🧩 Formulaire -->
             <div class="bg-white dark:bg-[#192633] rounded-xl border border-border-light dark:border-border-dark shadow-sm p-8">
                 {{ form_start(form) }}
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                    <!-- 🏷️ Nom -->
                     <div>
                         <label for="{{ form.nom.vars.id }}"
                                class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
@@ -45,7 +36,6 @@
                         {{ form_errors(form.nom) }}
                     </div>
 
-                    <!-- 🏠 Rue -->
                     <div>
                         <label for="{{ form.rue.vars.id }}"
                                class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
@@ -59,7 +49,6 @@
                         {{ form_errors(form.rue) }}
                     </div>
 
-                    <!-- 📍 Latitude -->
                     <div>
                         <label for="{{ form.latitude.vars.id }}"
                                class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
@@ -73,7 +62,6 @@
                         {{ form_errors(form.latitude) }}
                     </div>
 
-                    <!-- 🌍 Longitude -->
                     <div>
                         <label for="{{ form.longitude.vars.id }}"
                                class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
@@ -87,7 +75,6 @@
                         {{ form_errors(form.longitude) }}
                     </div>
 
-                    <!-- 🏙️ Ville -->
                     <div class="md:col-span-2">
                         <label for="{{ form.ville.vars.id }}"
                                class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
@@ -102,7 +89,6 @@
                     </div>
                 </div>
 
-                <!-- 🧭 Boutons -->
                 <div class="flex justify-end gap-3 mt-8">
                     <a href="{{ path('app_lieu_index') }}"
                        class="h-11 px-6 flex items-center justify-center rounded-lg border border-border-light dark:border-border-dark text-text-light dark:text-text-dark bg-background-light dark:bg-background-dark text-sm font-semibold hover:bg-secondary-light/70 dark:hover:bg-secondary-dark/60 transition">

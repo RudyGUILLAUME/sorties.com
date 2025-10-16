@@ -1,11 +1,7 @@
 <header class="fixed top-0 left-0 w-full flex items-center justify-between whitespace-nowrap border-b border-solid border-secondary-light dark:border-secondary-dark px-10 py-3 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md shadow-md z-50">
     <!-- LOGO -->
-    <div class="flex items-center gap-4">
-        <div class="size-6">
-            <svg class="text-text-light dark:text-text-dark" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                <path fill="currentColor" d="M24 0.757L47.243 24 24 47.243 0.757 24 24 0.757ZM21 35.757V12.243L9.243 24 21 35.757Z" />
-            </svg>
-        </div>
+    <div class="flex items-center gap-4" onclick="window.location.href='{{ path('app_sortie_index') }}'" style="cursor: pointer;">
+        <img src="{{ asset('images/logo.png') }}" alt="Sorties" class="rounded-full w-14 h-14 object-cover">
         <h2 class="text-text-light dark:text-text-dark text-lg font-bold leading-tight tracking-[-0.015em]">
             sorties.com
         </h2>

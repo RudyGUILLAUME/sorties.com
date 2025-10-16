@@ -6,7 +6,6 @@
     <main class="flex-1 p-8 overflow-y-auto">
         <div class="max-w-4xl mx-auto">
 
-            <!-- 🧭 Fil d’Ariane -->
             <div class="flex flex-wrap gap-2 mb-6 text-sm">
                 <a href="{{ path('app_home') }}" class="text-primary hover:underline">Accueil</a>
                 <span class="text-subtext-light dark:text-subtext-dark">/</span>
@@ -15,7 +14,6 @@
                 <span class="text-text-light dark:text-text-dark">{{ lieu.nom }}</span>
             </div>
 
-            <!-- 🏙️ En-tête -->
             <div class="flex items-center justify-between mb-6">
                 <h1 class="text-3xl font-extrabold text-text-light dark:text-text-dark">{{ lieu.nom }}</h1>
 
@@ -38,7 +36,6 @@
                 </div>
             </div>
 
-            <!-- 🧩 Carte de détails -->
             <div class="bg-white dark:bg-[#192633] border border-border-light dark:border-border-dark rounded-xl shadow-sm p-8">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
@@ -72,7 +69,6 @@
                 </div>
             </div>
 
-            <!-- 🔙 Bouton retour -->
             <div class="flex justify-end mt-8">
                 <a href="{{ path('app_lieu_index') }}"
                    class="flex items-center gap-2 h-11 px-6 rounded-lg border border-border-light dark:border-border-dark text-text-light dark:text-text-dark bg-background-light dark:bg-background-dark text-sm font-semibold hover:bg-secondary-light/70 dark:hover:bg-secondary-dark/60 transition">
