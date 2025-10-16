@@ -157,7 +157,7 @@ final class SortieController extends AbstractController
     }
 
     #[Route('/{id}', name: 'show', methods: ['GET','POST'])]
-    public function show(Request $request, EntityManagerInterface $em, Sortie $sortie, MessageRepository $messageRepository, Participant $participant): Response
+    public function show(Request $request, EntityManagerInterface $em, Sortie $sortie, MessageRepository $messageRepository): Response
     {
         if ($sortie->isPrivee() &&
             $sortie->getOrganisateur() !== $this->getUser() &&
@@ -219,22 +219,22 @@ final class SortieController extends AbstractController
             return $this->redirectToRoute('app_sortie_index');
         }
         $form = $this->createForm(SortieType::class, $sortie);
-
-        $invitesIds = array_map(fn($p) => $p->getId(), $sortie->getInvites()->toArray());
-        $form->get('invites')->setData(implode(',', $invitesIds));
-
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $submittedIds = array_filter(explode(',', $form->get('invites')->getData() ?? ''));
+            $raw = (string) $form->get('invites')->getData();
+            $ids = array_filter(array_map('trim', explode(',', $raw)), fn($v) => $v !== '');
+
+            // optional: cast to int and unique
+            $ids = array_values(array_unique(array_map('intval', $ids)));
 
             foreach ($sortie->getInvites() as $invite) {
                 $sortie->removeInvite($invite);
             }
 
             // Ajouter les nouveaux invités
-            foreach ($submittedIds as $id) {
+            foreach ($ids as $id) {
                 $participant = $participantRepository->find($id);
                 if ($participant) {
                     $sortie->addInvite($participant);
@@ -267,7 +267,7 @@ final class SortieController extends AbstractController
 
                 $sortie->setImagePrincipale($newFilename);
             }
-
+            $em->persist($sortie);
             $em->flush();
             $this->addFlash('success', 'La sortie a été mise à jour.');
             return $this->redirectToRoute('app_sortie_index');
@@ -276,7 +276,6 @@ final class SortieController extends AbstractController
         return $this->render('sortie/edit.html.twig', [
             'form' => $form->createView(),
             'sortie' => $sortie,
-            'participantRepository'=>$participantRepository,
         ]);
     }
 
@@ -322,6 +321,11 @@ final class SortieController extends AbstractController
         // Bloquer inscription si sortie non ouverte (Annulée, Clôturée, etc.)
         if ($sortie->getEtat()->getLibelle() !== 'Ouverte') {
             $this->addFlash('danger', 'Vous ne pouvez pas vous inscrire à une sortie qui n’est pas ouverte.');
+            return $this->redirectToRoute('app_sortie_index');
+        }
+
+        if($sortie->isPrivee()&&!$sortie->getInvites()->contains($participant)){
+            $this->addFlash('danger', "Vous ne pouvez pas vous inscrire à une sortie privée à laquelle vous n'êtes pas invités.");
             return $this->redirectToRoute('app_sortie_index');
         }
 

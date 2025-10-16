@@ -80,7 +80,7 @@ class SortieType extends AbstractType
                 'label' => 'Sortie privée ?',
                 'required' => false,
             ])
-            ->add('invites', HiddenType::class, [
+            ->add('invites', TextType::class, [
                 'mapped' => false,
                 'required' => false,
             ]);
