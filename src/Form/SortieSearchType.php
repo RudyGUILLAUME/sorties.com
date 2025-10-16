@@ -54,9 +54,6 @@ class SortieSearchType extends AbstractType
                 'label' => 'Sorties passées',
                 'required' => false,
             ])
-            ->add('search', SubmitType::class, [
-                'label' => 'Rechercher'
-            ])
         ;
     }
 

@@ -42,55 +42,39 @@
                 <!-- Contenu -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-                    <!-- Instructions -->
-                    <div class="bg-white dark:bg-[#192633] rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-                        <h2 class="text-lg font-bold text-text-light dark:text-text-dark mb-4">Format du fichier CSV</h2>
-                        <p class="text-subtext-light dark:text-subtext-dark text-sm mb-6">
-                            Votre fichier doit contenir les colonnes suivantes (dans n’importe quel ordre) :
-                        </p>
-                        <ul class="space-y-3">
-                            <li class="flex items-start gap-3">
-                                <span class="material-symbols-outlined text-primary text-lg">person</span>
-                                <div>
-                                    <p class="font-semibold text-text-light dark:text-text-dark text-sm">first_name</p>
-                                    <p class="text-subtext-light dark:text-subtext-dark text-xs">Prénom de l’utilisateur.</p>
-                                </div>
-                            </li>
-                            <li class="flex items-start gap-3">
-                                <span class="material-symbols-outlined text-primary text-lg">badge</span>
-                                <div>
-                                    <p class="font-semibold text-text-light dark:text-text-dark text-sm">last_name</p>
-                                    <p class="text-subtext-light dark:text-subtext-dark text-xs">Nom de l’utilisateur.</p>
-                                </div>
-                            </li>
-                            <li class="flex items-start gap-3">
-                                <span class="material-symbols-outlined text-primary text-lg">mail</span>
-                                <div>
-                                    <p class="font-semibold text-text-light dark:text-text-dark text-sm">email</p>
-                                    <p class="text-subtext-light dark:text-subtext-dark text-xs">Adresse e-mail unique.</p>
-                                </div>
-                            </li>
-                        </ul>
-
-                        <a href="{{ asset('templates/import_template.csv') }}"
-                           class="inline-flex items-center gap-1 text-primary text-sm font-medium underline mt-6 hover:text-primary/80">
-                            <span class="material-symbols-outlined text-base">download</span>
-                            Télécharger un modèle CSV
-                        </a>
-                    </div>
-
-                    <!-- Import Form -->
-                    <div class="bg-white dark:bg-[#192633] rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                    <!-- Bloc Import -->
+                    <div class="bg-white dark:bg-[#192633] rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700 relative">
                         <h2 class="text-lg font-bold text-text-light dark:text-text-dark mb-4">Importer un fichier CSV</h2>
 
                         {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
-                        <div class="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-10 text-center hover:border-primary transition">
-                            <span class="material-symbols-outlined text-5xl text-subtext-light dark:text-subtext-dark">upload_file</span>
-                            <p class="text-text-light dark:text-text-dark mt-4 text-sm">Glissez-déposez votre fichier ici</p>
-                            <label for="{{ form.csv_file.vars.id }}"
-                                   class="mt-2 text-primary font-semibold hover:underline cursor-pointer">
-                                ou cliquez pour parcourir
-                            </label>
+                        <div id="upload-area"
+                             class="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-10 text-center hover:border-primary transition relative">
+
+                            <!-- Icône upload -->
+                            <span id="upload-icon" class="material-symbols-outlined text-5xl text-subtext-light dark:text-subtext-dark">upload_file</span>
+
+                            <!-- Texte par défaut -->
+                            <div id="upload-text" class="mt-4">
+                                <p class="text-text-light dark:text-text-dark text-sm">Glissez-déposez votre fichier ici</p>
+                                <label for="{{ form.csv_file.vars.id }}"
+                                       class="mt-2 text-primary font-semibold hover:underline cursor-pointer block">
+                                    ou cliquez pour parcourir
+                                </label>
+                            </div>
+
+                            <!-- Texte une fois le fichier sélectionné -->
+                            <div id="file-loaded" class="hidden mt-4 flex flex-col items-center gap-2">
+                                <span class="material-symbols-outlined text-5xl text-green-500">check_circle</span>
+                                <p class="text-green-500 font-semibold">Fichier chargé :</p>
+                                <p id="file-name" class="text-sm text-text-light dark:text-text-dark"></p>
+                                <button id="change-file"
+                                        type="button"
+                                        class="mt-2 text-primary font-medium text-sm hover:underline">
+                                    Changer de fichier
+                                </button>
+                            </div>
+
+                            <!-- Champ input -->
                             {{ form_widget(form.csv_file, {'attr': {'class': 'hidden'}}) }}
                         </div>
 
@@ -103,26 +87,66 @@
                         {{ form_end(form) }}
                     </div>
                 </div>
-
-                <!-- Résumé de l’import -->
-                <div class="mt-10 bg-white dark:bg-[#192633] rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-                    <h2 class="text-lg font-bold text-text-light dark:text-text-dark mb-4">Statut de l’import</h2>
-
-                    {% if app.session.flashbag.has('success') %}
-                        <div class="bg-green-50 border border-green-400 text-green-800 px-4 py-3 rounded-lg">
-                            ✅ Importation terminée avec succès.
-                        </div>
-                    {% elseif app.session.flashbag.has('error') %}
-                        <div class="bg-red-50 border border-red-400 text-red-800 px-4 py-3 rounded-lg">
-                            ⚠️ Une erreur s’est produite lors de l’importation.
-                        </div>
-                    {% else %}
-                        <div class="text-center py-10 text-subtext-light dark:text-subtext-dark">
-                            En attente d’un fichier CSV à importer...
-                        </div>
-                    {% endif %}
-                </div>
             </div>
         </main>
     </div>
+
+    <!-- ✅ JS Dynamique -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const fileInput = document.querySelector('#{{ form.csv_file.vars.id }}');
+            const uploadArea = document.getElementById('upload-area');
+            const uploadIcon = document.getElementById('upload-icon');
+            const uploadText = document.getElementById('upload-text');
+            const fileLoaded = document.getElementById('file-loaded');
+            const fileNameDisplay = document.getElementById('file-name');
+            const changeFileBtn = document.getElementById('change-file');
+
+            if (!fileInput) return;
+
+            // ✅ Quand un fichier est sélectionné
+            fileInput.addEventListener('change', e => {
+                const file = e.target.files[0];
+                if (file) {
+                    fileNameDisplay.textContent = file.name;
+                    uploadText.classList.add('hidden');
+                    uploadIcon.classList.add('hidden');
+                    fileLoaded.classList.remove('hidden');
+                    uploadArea.classList.add('border-green-500');
+                }
+            });
+
+            // ✅ Bouton "Changer de fichier"
+            changeFileBtn.addEventListener('click', () => {
+                fileInput.value = ''; // reset
+                uploadText.classList.remove('hidden');
+                uploadIcon.classList.remove('hidden');
+                fileLoaded.classList.add('hidden');
+                uploadArea.classList.remove('border-green-500');
+            });
+
+            // ✅ Drag & Drop (optionnel)
+            uploadArea.addEventListener('dragover', e => {
+                e.preventDefault();
+                uploadArea.classList.add('border-primary');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('border-primary');
+            });
+
+            uploadArea.addEventListener('drop', e => {
+                e.preventDefault();
+                const file = e.dataTransfer.files[0];
+                if (file) {
+                    fileInput.files = e.dataTransfer.files;
+                    fileNameDisplay.textContent = file.name;
+                    uploadText.classList.add('hidden');
+                    uploadIcon.classList.add('hidden');
+                    fileLoaded.classList.remove('hidden');
+                    uploadArea.classList.add('border-green-500');
+                }
+            });
+        });
+    </script>
 {% endblock %}
