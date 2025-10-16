@@ -13,7 +13,6 @@ class WeatherController extends AbstractController
     #[Route('/meteo/{ville}/{date}', name: 'app_meteo')]
     public function getWeather(string $ville, string $date): JsonResponse
     {
-        // 🗺️ Étape 1 : géolocalisation
         $geoUrl = sprintf('https://geocoding-api.open-meteo.com/v1/search?name=%s&count=1', urlencode($ville));
         $geoResponse = $this->client->request('GET', $geoUrl)->toArray();
 
@@ -24,7 +23,6 @@ class WeatherController extends AbstractController
         $lat = $geoResponse['results'][0]['latitude'];
         $lon = $geoResponse['results'][0]['longitude'];
 
-        // 🌦️ Étape 2 : météo du jour voulu
         $meteoUrl = sprintf(
             'https://api.open-meteo.com/v1/forecast?latitude=%s&longitude=%s&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,weathercode&timezone=Europe/Paris&start_date=%s&end_date=%s',
             $lat,
@@ -41,7 +39,6 @@ class WeatherController extends AbstractController
 
         $daily = $weatherResponse['daily'];
 
-        // 🌈 Étape 3 : traduction du code météo
         $codes = [
             0 => ['Ciel dégagé', '☀️'],
             1 => ['Principalement clair', '🌤️'],

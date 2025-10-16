@@ -15,11 +15,9 @@ final class HomeController extends AbstractController
     #[Route('/', name: 'app_home')]
     public function index(AuthenticationUtils $authenticationUtils): Response
     {
-        // 🔹 Formulaire d’inscription
         $participant = new Participant();
         $registrationForm = $this->createForm(RegistrationFormType::class, $participant);
 
-        // 🔹 Récupère les infos de connexion (erreur + dernier username)
         $error = $authenticationUtils->getLastAuthenticationError();
         $lastUsername = $authenticationUtils->getLastUsername();
 

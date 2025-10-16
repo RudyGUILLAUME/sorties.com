@@ -59,7 +59,6 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('admin_panel');
         }
 
-        // Invalid form submission: flash errors and reopen modal on home
         foreach ($form->getErrors(true) as $error) {
             $this->addFlash('danger', $error->getMessage());
         }
@@ -73,7 +72,6 @@ class RegistrationController extends AbstractController
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
-        // validate email confirmation link, sets User::isVerified=true and persists
         try {
             /** @var Participant $user */
             $user = $this->getUser();
@@ -84,7 +82,6 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        // @TODO Change the redirect on success and handle or remove the flash message in your templates
         $this->addFlash('success', 'Your email address has been verified.');
 
         return $this->redirectToRoute('app_login');

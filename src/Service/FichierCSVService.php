@@ -23,7 +23,6 @@ class FichierCSVService
         while (($data = fgetcsv($handle, 1000, ',')) !== false) {
             [$nom, $prenom, $telephone,$mail,  $site, $administrateur,$actif,$password] = $data;
 
-            // Vérifie si l'utilisateur existe déjà
             $existingUser = $em->getRepository(Participant::class)->findOneBy(['mail' => $mail]);
             if ($existingUser) {
                 $errors[] = "❌ L'adresse mail {$mail} existe déjà.";

@@ -91,7 +91,6 @@ final class SortieController extends AbstractController
             return $this->redirectToRoute('app_home');
         }
 
-        // Préremplissage si besoin
         $sortie->setDateHeureDebut(new \DateTime('+1 day',new \DateTimeZone('Europe/Paris')));
         $sortie->setDateLimiteInscription(new \DateTime('+12 hours',new \DateTimeZone('Europe/Paris')));
         $sortie->setOrganisateur($participant);
@@ -101,7 +100,6 @@ final class SortieController extends AbstractController
 
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Définir l’état par défaut à "En création"
             $etat = $etatRepository->findOneBy(['libelle' => 'Créée']) ?? $etatRepository->findOneBy([]);
             if ($etat) {
                 $sortie->setEtat($etat);
@@ -120,7 +118,6 @@ final class SortieController extends AbstractController
                         $newFilename
                     );
                 } catch (FileException $e) {
-                    // Gestion d’erreur (log, message flash, etc.)
                 }
 
                 $sortie->setImagePrincipale($newFilename);
@@ -242,7 +239,6 @@ final class SortieController extends AbstractController
     public function delete(Request $request, Sortie $sortie, EntityManagerInterface $em,EtatRepository $etatRepository,GestionDateService $gestionDate): Response
     {
         $gestionDate->GestionDate($em,$etatRepository,$sortie);
-        // Vérifier que l'état est "Créée" avant suppression
         if ($sortie->getEtat()->getLibelle() !== 'Créée') {
             $this->addFlash('danger', 'Impossible de supprimer une sortie publiée ou clôturée.');
             return $this->redirectToRoute('app_sortie_index');
@@ -297,7 +293,6 @@ final class SortieController extends AbstractController
             )
         );
 
-        //Redirection vers onglet Disponibles
         $tab = $request->query->get('tab', 'disponibles');
         return $this->redirectToRoute('app_sortie_index', ['tab' => $tab]);
     }
@@ -321,27 +316,23 @@ final class SortieController extends AbstractController
 
         $gestionDate->GestionDate($em,$etatRepository,$sortie);
 
-        // Autoriser désinscription si inscrit, même si la sortie est "Clôturée"
+
         if (!in_array($sortie->getEtat()->getLibelle(), ['Ouverte', 'Créée', 'Clôturée'])) {
             $this->addFlash('danger', 'Vous ne pouvez plus vous désinscrire de cette sortie.');
             return $this->redirectToRoute('app_sortie_index');
         }
 
-        // 🔒 Si la sortie est "Clôturée" ET que la date limite d’inscription est dépassée
         if (
             $sortie->getEtat()->getLibelle() === 'Clôturée' &&
             $sortie->getDateLimiteInscription()->format("Y-m-d H:i:s") < (new \DateTime('now', new \DateTimeZone('Europe/Paris')))->format("Y-m-d H:i:s")
         ) {
             $this->addFlash('danger', 'Vous ne pouvez plus vous désinscrire : la date limite est dépassée.');
 
-            //Redirection vers onglet Disponibles
             $tab = $request->query->get('tab', 'disponibles');
             return $this->redirectToRoute('app_sortie_index', ['tab' => $tab]);        }
 
-        // Désinscription
         $sortie->removeParticipant($participant);
 
-        // Vérifie si la sortie était "Clôturée" uniquement parce qu'elle était pleine
         if (
             $sortie->getEtat()->getLibelle() === 'Clôturée' &&
             count($sortie->getParticipants()) < $sortie->getNbInscriptionsMax()
@@ -391,13 +382,11 @@ final class SortieController extends AbstractController
     public function cancel(Sortie $sortie, EtatRepository $etatRepository, EntityManagerInterface $em,GestionDateService $gestionDate): Response
     {
         $gestionDate->GestionDate($em,$etatRepository,$sortie);
-        // Seul l'organisateur peut annuler
         if ($this->getUser() !== $sortie->getOrganisateur()&&!(in_array($this->isGranted('ROLE_ADMIN'), $this->getUser()->getRoles()))) {
             $this->addFlash('danger', 'Seul l\'organisateur ou un admin peut annuler la sortie.');
             return $this->redirectToRoute('app_sortie_index');
         }
 
-        // Si déjà annulée, ou clôturée, etc. on bloque
         $etat = $sortie->getEtat()->getLibelle();
         if (in_array($etat, ['Annulée', 'Créée', 'Passée','Activité en cours'])) {
             $this->addFlash('warning', 'Cette sortie ne peut pas être annulée.');

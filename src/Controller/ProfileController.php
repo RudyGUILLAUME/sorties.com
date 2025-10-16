@@ -22,25 +22,20 @@ final class ProfileController extends AbstractController
     {
         $roles = $participant->getRoles();
 
-        // 🔹 Nombre de sorties organisées (si ROLE_ORGANISATEUR)
         $sortiesOrganiseesCount = in_array('ROLE_ORGANISATEUR', $roles, true)
             ? $sortieRepository->countByOrganisateur($participant->getId())
             : 0;
 
-        // 🔹 Nombre de sorties auxquelles il a participé (si ROLE_USER)
         $sortiesParticipeesCount = in_array('ROLE_USER', $roles, true)
             ? $sortieRepository->countByParticipant($participant->getId())
             : 0;
 
-        // 🔹 Taux de participation global
         $totalSorties = $sortieRepository->count([]);
         $tauxParticipationGlobal = $totalSorties > 0
             ? ($sortiesParticipeesCount / $totalSorties) * 100
             : 0;
 
-        // 🔹 Organisateur préféré
         $organisateurPref = $sortieRepository->findOrganisateurPrefere($participant->getId());
-        // 🔹 Site préféré
         $sitePref = $sortieRepository->findSitePrefere($participant->getId());
 
         return $this->render('profile/show.html.twig', [

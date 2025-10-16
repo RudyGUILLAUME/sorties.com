@@ -27,14 +27,12 @@ final class AdminController extends AbstractController
             return $this->redirectToRoute('app_home');
         }
 
-        // 🔹 KPI globaux
         $kpi = [
             'activeParticipants' => $participantRepo->countActive(),
             'sorties' => $sortieRepo->count([]),
             'participationRate' => $participantRepo->getParticipationRate(),
         ];
 
-        // 🔹 Données pour le graphique
         $result = $sortieRepo->getSortiesCountPerMonth();
 
         $labels = [];
@@ -59,18 +57,16 @@ final class AdminController extends AbstractController
             'data' => $data,
         ];
 
-        // 🔹 Derniers inscrits (tri par ID décroissant)
         $latestUsers = $participantRepo->createQueryBuilder('p')
             ->orderBy('p.id', 'DESC')
             ->setMaxResults(5)
             ->getQuery()
             ->getResult();
 
-        // 🔹 Rendu
         return $this->render('admin/index.html.twig', [
             'kpi' => $kpi,
             'chart' => $chart,
-            'latestUsers' => $latestUsers, // ✅ Ajout essentiel
+            'latestUsers' => $latestUsers,
         ]);
     }
 

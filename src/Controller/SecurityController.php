@@ -12,13 +12,9 @@ class SecurityController extends AbstractController
     #[Route(path: '/login', name: 'app_login')]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
-        // get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
-
-        // last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();
 
-        // Instead of rendering a standalone login page, redirect to home and open the modal via flash flag
         $this->addFlash('open_login_modal', true);
         return $this->redirectToRoute('app_home', [
             'last_username' => $lastUsername,
