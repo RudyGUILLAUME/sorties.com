@@ -1,129 +1,142 @@
 <!-- FORMULAIRE -->
-{{ form_start(form,{'attr': {'class': 'space-y-8', 'enctype': 'multipart/form-data'}}) }}
+{{ form_start(form, {'attr': {'class': 'space-y-10', 'enctype': 'multipart/form-data'}}) }}
 
-    <div class="grid grid-cols-1 gap-x-12 gap-y-8 lg:grid-cols-1">
-        <div class="lg:col-span-3 space-y-6">
-            <!-- Nom -->
+<div class="grid grid-cols-1 gap-x-12 gap-y-10 lg:grid-cols-5">
 
-            <div>
-                <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Nom de la sortie</p>
-                {{ form_widget(form.nom, {'attr': {
-                    'class': 'w-full rounded-lg border border-subtle-light/30 dark:border-subtle-dark/30 bg-background-light dark:bg-background-dark p-3 text-text-light dark:text-text-dark focus:ring-2 focus:ring-primary/50 focus:outline-none'
-                }}) }}
-            </div>
+    <!-- Colonne principale -->
+    <div class="lg:col-span-3 space-y-8">
 
-            <!-- Description -->
-            <div>
-                <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Informations</p>
-                {{ form_widget(form.infosSortie, {'attr': {
-                    'class': 'w-full rounded-lg border border-subtle-light/30 dark:border-subtle-dark/30 bg-background-light dark:bg-background-dark p-3 text-text-light dark:text-text-dark min-h-[120px] focus:ring-2 focus:ring-primary/50 focus:outline-none'
-                }}) }}
-            </div>
+        <!-- Nom -->
+        <label class="flex flex-col">
+            <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Nom de la sortie</p>
+            {{ form_widget(form.nom, {'attr': {
+                'class': 'form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-light dark:text-text-dark focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark h-14 placeholder:text-subtext-light dark:placeholder:text-subtext-dark p-[15px]'
+            }}) }}
+        </label>
 
-            <!-- Image de couverture -->
-            <div>
-                <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Image de couverture</p>
-                <div class="flex items-center gap-4">
-                    <div class="flex-1">
-                        {{ form_widget(form.image_principale, {'attr': {
-                            'class': 'block w-full text-sm text-gray-700 dark:text-gray-300 border border-subtle-light/30 dark:border-subtle-dark/30 rounded-lg cursor-pointer bg-background-light dark:bg-background-dark focus:ring-2 focus:ring-primary/50 focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-text-light hover:file:bg-primary/90'
-                        }}) }}
-                    </div>
-                    <div id="preview" class="w-24 h-24 rounded-lg bg-center bg-cover bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600"></div>
-                </div>
-                <p class="text-xs text-subtle-light dark:text-subtle-dark mt-1">Formats acceptés : JPG, PNG (max 2 Mo)</p>
-            </div>
+        <!-- Description -->
+        <label class="flex flex-col">
+            <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Description</p>
+            {{ form_widget(form.infosSortie, {'attr': {
+                'class': 'form-textarea w-full rounded-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark p-[15px] text-base min-h-36 focus:ring-2 focus:ring-primary/50 focus:outline-none placeholder:text-subtext-light dark:placeholder:text-subtext-dark'
+            }}) }}
+        </label>
 
-            <!-- Dates -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                <div>
-                    <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Date de début</p>
-                    {{ form_widget(form.dateHeureDebut, {'attr': {
-                        'class': 'w-full rounded-lg border border-subtle-light/30 dark:border-subtle-dark/30 bg-background-light dark:bg-background-dark p-3 focus:ring-2 focus:ring-primary/50 focus:outline-none'
+        <!-- Image -->
+        <div>
+            <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Image de couverture</p>
+            <div class="flex items-center gap-4">
+                <div class="flex-1">
+                    {{ form_widget(form.image_principale, {'attr': {
+                        'class': 'block w-full text-sm border border-border-light dark:border-border-dark rounded-lg cursor-pointer bg-surface-light dark:bg-surface-dark file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-white hover:file:bg-primary/90 focus:ring-2 focus:ring-primary/50 focus:outline-none'
                     }}) }}
                 </div>
-
-                <div>
-                    <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Clôture des inscriptions</p>
-                    {{ form_widget(form.dateLimiteInscription, {'attr': {
-                        'class': 'w-full rounded-lg border border-subtle-light/30 dark:border-subtle-dark/30 bg-background-light dark:bg-background-dark p-3 focus:ring-2 focus:ring-primary/50 focus:outline-none'
-                    }}) }}
-                </div>
+                <div id="preview" class="w-24 h-24 rounded-lg bg-center bg-cover bg-gray-200 dark:bg-gray-700 border border-border-light dark:border-border-dark"></div>
             </div>
-
-            <!-- Duree et places -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                <div>
-                    <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Durée (minutes)</p>
-                    {{ form_widget(form.duree, {'attr': {
-                        'class': 'w-full rounded-lg border border-subtle-light/30 dark:border-subtle-dark/30 bg-background-light dark:bg-background-dark p-3 focus:ring-2 focus:ring-primary/50 focus:outline-none'
-                    }}) }}
-                </div>
-
-                <div>
-                    <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Places disponibles</p>
-                    {{ form_widget(form.nbInscriptionsMax, {'attr': {
-                        'class': 'w-full rounded-lg border border-subtle-light/30 dark:border-subtle-dark/30 bg-background-light dark:bg-background-dark p-3 focus:ring-2 focus:ring-primary/50 focus:outline-none'
-                    }}) }}
-                </div>
-            </div>
-
-            <!-- Site -->
-            <div>
-                <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Site</p>
-                {{ form_widget(form.site, {'attr': {
-                    'class': 'w-full rounded-lg border border-subtle-light/30 dark:border-subtle-dark/30 bg-background-light dark:bg-background-dark p-3 focus:ring-2 focus:ring-primary/50 focus:outline-none'
-                }}) }}
-            </div>
-
-            <!-- Lieu -->
-            <div>
-                <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Lieu</p>
-                {{ form_widget(form.lieu, {'attr': {
-                    'class': 'w-full rounded-lg border border-subtle-light/30 dark:border-subtle-dark/30 bg-background-light dark:bg-background-dark p-3 focus:ring-2 focus:ring-primary/50 focus:outline-none'
-                }}) }}
-            </div>
+            <p class="text-xs text-subtext-light dark:text-subtext-dark mt-1">Formats acceptés : JPG, PNG (max 2 Mo)</p>
         </div>
 
-        <!-- Groupe privé -->
-        {{ form_row(form.privee) }}
+        <!-- Dates -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+            <label class="flex flex-col">
+                <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Date de début</p>
+                {{ form_widget(form.dateHeureDebut, {'attr': {
+                    'class': 'w-full rounded-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark p-[15px] focus:ring-2 focus:ring-primary/50 focus:outline-none'
+                }}) }}
+            </label>
 
-        <div id="invites-container" style="display:none;">
-            <label for="invite-search">Inviter des participants :</label>
-            <div style="display:flex; gap:.5rem; align-items:center;">
-                <input id="invite-search" type="text" class="form-control" placeholder="Rechercher un participant...">
-                <button id="search-btn" type="button" class="btn btn-primary">🔍</button>
-            </div>
-            <div id="invite-results" class="dropdown"></div>
-            <div id="selected-invites" class="mt-2"></div>
+            <label class="flex flex-col">
+                <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Clôture des inscriptions</p>
+                {{ form_widget(form.dateLimiteInscription, {'attr': {
+                    'class': 'w-full rounded-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark p-[15px] focus:ring-2 focus:ring-primary/50 focus:outline-none'
+                }}) }}
+            </label>
         </div>
-        <input type="hidden" id="sortie_invites" name="sortie[invites]" value="{{ form.invites.vars.value|default('') }}">
 
-        <!-- BOUTONS -->
-        <div class="mt-12 flex justify-end border-t border-subtle-light/30 dark:border-subtle-dark/30 pt-8 gap-4">
-            <a href="{{ path('app_home') }}"
-               class="flex items-center justify-center min-w-[160px] rounded-lg h-12 px-6 border border-gray-400 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
-                Annuler
-            </a>
+        <!-- Durée et places -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+            <label class="flex flex-col">
+                <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Durée (minutes)</p>
+                {{ form_widget(form.duree, {'attr': {
+                    'class': 'w-full rounded-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark p-[15px] focus:ring-2 focus:ring-primary/50 focus:outline-none'
+                }}) }}
+            </label>
 
-            {% if sortie is defined %}
-                <button type="submit"
-                        class="flex items-center justify-center min-w-[180px] rounded-lg h-12 px-6 bg-primary text-text-light text-base font-bold hover:opacity-90 transition">
-                    Enregistrer
-                </button>
-            {% else %}
-                <button type="submit"
-                        class="flex items-center justify-center min-w-[180px] rounded-lg h-12 px-6 bg-primary text-text-light text-base font-bold hover:opacity-90 transition">
-                    Créer la sortie
-                </button>
-            {% endif %}
+            <label class="flex flex-col">
+                <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Places disponibles</p>
+                {{ form_widget(form.nbInscriptionsMax, {'attr': {
+                    'class': 'w-full rounded-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark p-[15px] focus:ring-2 focus:ring-primary/50 focus:outline-none'
+                }}) }}
+            </label>
         </div>
+
+        <!-- Site -->
+        <label class="flex flex-col">
+            <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Site</p>
+            {{ form_widget(form.site, {'attr': {
+                'class': 'w-full rounded-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark p-[15px] focus:ring-2 focus:ring-primary/50 focus:outline-none'
+            }}) }}
+        </label>
+
+        <!-- Lieu -->
+        <label class="flex flex-col">
+            <p class="text-text-light dark:text-text-dark text-base font-medium pb-2">Lieu</p>
+            {{ form_widget(form.lieu, {'attr': {
+                'class': 'w-full rounded-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark p-[15px] focus:ring-2 focus:ring-primary/50 focus:outline-none'
+            }}) }}
+        </label>
     </div>
 
+    <!-- Colonne Groupe Privé -->
+    <div class="lg:col-span-2 space-y-6">
+        <div class="p-6 rounded-xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark">
+            <h3 class="text-text-light dark:text-text-dark text-lg font-bold mb-2">Groupe privé</h3>
+            <p class="text-subtext-light dark:text-subtext-dark text-sm mb-3">Coche cette case pour créer une sortie privée et inviter des participants spécifiques.</p>
+            {{ form_widget(form.privee, {'attr': {'class': 'h-5 w-5 accent-primary'}}) }}
+        </div>
+
+        <div id="invites-container" class="p-6 rounded-xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark hidden">
+            <h3 class="text-text-light dark:text-text-dark text-lg font-bold mb-3">Inviter des participants</h3>
+            <div class="flex gap-2 mb-3">
+                <input id="invite-search" type="text" placeholder="Rechercher un participant..."
+                       class="flex-1 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark px-4 py-2 text-sm text-text-light dark:text-text-dark focus:ring-2 focus:ring-primary/50 focus:outline-none">
+                <button id="search-btn" type="button"
+                        class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90">
+                    🔍
+                </button>
+            </div>
+            <div id="invite-results" class="max-h-40 overflow-y-auto border border-border-light dark:border-border-dark rounded-lg p-2 text-sm"></div>
+            <div id="selected-invites" class="mt-3 flex flex-wrap gap-2"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Boutons -->
+<div class="mt-12 flex justify-end border-t border-border-light dark:border-border-dark pt-8 gap-4">
+    <a href="{{ path('app_home') }}"
+       class="flex items-center justify-center min-w-[160px] rounded-lg h-12 px-6 border border-gray-400 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+        Annuler
+    </a>
+
+    {% if sortie is defined %}
+        <button type="submit"
+                class="flex items-center justify-center min-w-[180px] rounded-lg h-12 px-6 bg-primary text-white text-base font-bold hover:opacity-90 transition">
+            Enregistrer
+        </button>
+    {% else %}
+        <button type="submit"
+                class="flex items-center justify-center min-w-[180px] rounded-lg h-12 px-6 bg-primary text-white text-base font-bold hover:opacity-90 transition">
+            Créer la sortie
+        </button>
+    {% endif %}
+</div>
+
+<input type="hidden" id="sortie_invites" name="sortie[invites]" value="{{ form.invites.vars.value|default('') }}">
 <input type="hidden" name="{{ form._token.vars.full_name }}" value="{{ form._token.vars.value }}">
 
 {{ form_end(form, {'render_rest': false}) }}
 
+<!-- Prévisualisation image -->
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const input = document.querySelector('input[type="file"]');
@@ -134,17 +147,14 @@
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = ev => {
-                    preview.style.backgroundImage = `url('${ev.target.result}')`;
-                };
+                reader.onload = ev => preview.style.backgroundImage = `url('${ev.target.result}')`;
                 reader.readAsDataURL(file);
-            } else {
-                preview.style.backgroundImage = 'none';
-            }
+            } else preview.style.backgroundImage = 'none';
         });
     });
 </script>
 
+<!-- Gestion invitations -->
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const priveeCheckbox = document.querySelector('#sortie_privee');
@@ -153,19 +163,17 @@
         const resultsDiv = document.querySelector('#invite-results');
         const selectedDiv = document.querySelector('#selected-invites');
         const hiddenField = document.querySelector('#sortie_invites');
-
         const selected = new Map();
 
         function updateHidden() {
-            const ids = Array.from(selected.keys()).filter(id => id !== '' && id !== null);
+            const ids = Array.from(selected.keys()).filter(id => id);
             hiddenField.value = ids.join(',');
         }
 
         function createTagElement(id, name) {
             const tag = document.createElement('span');
             tag.textContent = name + ' ✖';
-            tag.classList.add('badge', 'bg-primary', 'm-1', 'p-2');
-            tag.style.cursor = 'pointer';
+            tag.classList.add('px-3', 'py-1', 'bg-primary/20', 'text-primary', 'rounded-full', 'text-sm', 'cursor-pointer');
             tag.dataset.id = id;
             return tag;
         }
@@ -174,94 +182,55 @@
             id = String(id);
             if (selected.has(id)) return;
             selected.set(id, name);
-            const tag = createTagElement(id, name);
-            selectedDiv.appendChild(tag);
+            selectedDiv.appendChild(createTagElement(id, name));
             if (update) updateHidden();
         }
 
         function removeInvite(id) {
             id = String(id);
             selected.delete(id);
-
             const tag = selectedDiv.querySelector(`span[data-id="${id}"]`);
             if (tag) tag.remove();
             updateHidden();
         }
 
         const preload = {{ (sortie is defined and sortie.invites|length > 0) ? sortie.invites|map(p => {'id': p.id, 'text': (p.prenom ~ ' ' ~ p.nom)})|json_encode|raw : '[]' }};
+        if (Array.isArray(preload)) preload.forEach(p => addInvite(p.id, p.text, false));
 
-        if (Array.isArray(preload) && preload.length > 0) {
-            preload.forEach(p => {
-                addInvite(p.id, p.text, false);
-            });
-            updateHidden();
-
-            if (priveeCheckbox) priveeCheckbox.checked = true;
-        }
-
-        const toggleInvites = () => {
-            invitesContainer.style.display = (priveeCheckbox && priveeCheckbox.checked) ? 'block' : 'none';
-        };
+        const toggleInvites = () => invitesContainer.classList.toggle('hidden', !(priveeCheckbox && priveeCheckbox.checked));
         if (priveeCheckbox) {
             toggleInvites();
             priveeCheckbox.addEventListener('change', toggleInvites);
-        } else {
-            invitesContainer.style.display = 'block';
         }
 
         let timeout;
         searchInput.addEventListener('input', () => {
             clearTimeout(timeout);
             const query = searchInput.value.trim();
-            if (query.length < 2) {
-                resultsDiv.innerHTML = '';
-                return;
-            }
+            if (query.length < 2) return resultsDiv.innerHTML = '';
             timeout = setTimeout(() => {
                 fetch('{{ path("participants_search") }}?q=' + encodeURIComponent(query))
-                    .then(r => {
-                        if (!r.ok) throw new Error('Network error');
-                        return r.json();
-                    })
+                    .then(r => r.json())
                     .then(data => {
                         resultsDiv.innerHTML = data.map(p =>
-                            `<div class="result" data-id="${p.id}" style="cursor:pointer;padding:6px 8px;">${p.text}</div>`
+                            `<div class="cursor-pointer p-2 hover:bg-primary/10 rounded" data-id="${p.id}">${p.text}</div>`
                         ).join('');
                     })
-                    .catch(e => {
-                        console.error('Recherche participants failed', e);
-                        resultsDiv.innerHTML = '';
-                    });
-            }, 230);
+                    .catch(() => resultsDiv.innerHTML = '');
+            }, 250);
         });
 
-        const searchBtn = document.querySelector('#search-btn');
-        if (searchBtn) {
-            searchBtn.addEventListener('click', () => {
-                const evt = new Event('input');
-                searchInput.dispatchEvent(evt);
-            });
-        }
-
         resultsDiv.addEventListener('click', e => {
-            const div = e.target.closest('.result');
+            const div = e.target.closest('[data-id]');
             if (!div) return;
-            const id = div.dataset.id;
-            const name = div.textContent.trim();
-            addInvite(id, name);
+            addInvite(div.dataset.id, div.textContent.trim());
             resultsDiv.innerHTML = '';
             searchInput.value = '';
         });
 
         selectedDiv.addEventListener('click', e => {
             const tag = e.target.closest('span[data-id]');
-            if (!tag) return;
-            const id = tag.dataset.id;
-            removeInvite(id);
-        });
-
-        searchInput.addEventListener('keydown', e => {
-            if (e.key === 'Enter') e.preventDefault();
+            if (tag) removeInvite(tag.dataset.id);
         });
     });
 </script>
