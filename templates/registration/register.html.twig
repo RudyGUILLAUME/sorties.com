@@ -1,29 +1,169 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Register{% endblock %}
+{% block title %}Créer un compte{% endblock %}
 
 {% block body %}
-    <link rel="stylesheet" href="{{ asset('css/register.css') }}">
-    {% for flash_error in app.flashes('verify_email_error') %}
-        <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
-    {% endfor %}
+    <main class="flex-1 p-8 overflow-y-auto">
+        <div class="max-w-2xl mx-auto">
 
-    <h1 class="admin-h1">Register</h1>
+            <!-- 🧭 Fil d’Ariane -->
+            <div class="flex flex-wrap gap-2 mb-6 text-sm">
+                <a href="{{ path('app_home') }}" class="text-primary hover:underline">Accueil</a>
+                <span class="text-subtext-light dark:text-subtext-dark">/</span>
+                <span class="text-text-light dark:text-text-dark">Créer un compte</span>
+            </div>
 
-    {{ form_errors(registrationForm) }}
+            <!-- 🧑‍💻 En-tête -->
+            <div class="text-center mb-10">
+                <h1 class="text-3xl font-extrabold text-text-light dark:text-text-dark">Créer un compte</h1>
+                <p class="text-subtext-light dark:text-subtext-dark mt-2 text-sm">
+                    Rejoignez la communauté Sorties.com et commencez à participer à des événements !
+                </p>
+            </div>
 
-    {{ form_start(registrationForm) }}
-        {{ form_row(registrationForm.nom) }}
-        {{ form_row(registrationForm.prenom) }}
-        {{ form_row(registrationForm.telephone) }}
-        {{ form_row(registrationForm.mail) }}
-        {{ form_row(registrationForm.site) }}
-        {{ form_row(registrationForm.plainPassword, {
-            label: 'Password'
-        }) }}
-        {{ form_row(registrationForm.administrateur) }}
-        {{ form_row(registrationForm.agreeTerms) }}
+            <!-- ⚠️ Erreurs de vérification email -->
+            {% for flash_error in app.flashes('verify_email_error') %}
+                <div class="bg-red-500/10 border border-red-500 text-red-400 px-4 py-3 rounded-lg mb-4 text-sm">
+                    {{ flash_error }}
+                </div>
+            {% endfor %}
 
-        <button type="submit" class="bouton-form">Register</button>
-    {{ form_end(registrationForm) }}
+            <!-- 🧾 Formulaire -->
+            <div class="bg-white dark:bg-[#192633] rounded-xl border border-border-light dark:border-border-dark shadow-sm p-8">
+                {{ form_start(registrationForm) }}
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                    <!-- Nom -->
+                    <div>
+                        <label for="{{ registrationForm.nom.vars.id }}" class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                            {{ form_label(registrationForm.nom) }}
+                        </label>
+                        {{ form_widget(registrationForm.nom, {
+                            'attr': {
+                                'class': 'w-full h-11 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark
+                                      text-text-light dark:text-text-dark px-4 text-sm focus:ring-2 focus:ring-primary outline-none transition'
+                            }
+                        }) }}
+                        {{ form_errors(registrationForm.nom) }}
+                    </div>
+
+                    <!-- Prénom -->
+                    <div>
+                        <label for="{{ registrationForm.prenom.vars.id }}" class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                            {{ form_label(registrationForm.prenom) }}
+                        </label>
+                        {{ form_widget(registrationForm.prenom, {
+                            'attr': {
+                                'class': 'w-full h-11 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark
+                                      text-text-light dark:text-text-dark px-4 text-sm focus:ring-2 focus:ring-primary outline-none transition'
+                            }
+                        }) }}
+                        {{ form_errors(registrationForm.prenom) }}
+                    </div>
+
+                    <!-- Téléphone -->
+                    <div>
+                        <label for="{{ registrationForm.telephone.vars.id }}" class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                            {{ form_label(registrationForm.telephone) }}
+                        </label>
+                        {{ form_widget(registrationForm.telephone, {
+                            'attr': {
+                                'class': 'w-full h-11 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark
+                                      text-text-light dark:text-text-dark px-4 text-sm focus:ring-2 focus:ring-primary outline-none transition'
+                            }
+                        }) }}
+                        {{ form_errors(registrationForm.telephone) }}
+                    </div>
+
+                    <!-- Email -->
+                    <div>
+                        <label for="{{ registrationForm.mail.vars.id }}" class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                            {{ form_label(registrationForm.mail) }}
+                        </label>
+                        {{ form_widget(registrationForm.mail, {
+                            'attr': {
+                                'class': 'w-full h-11 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark
+                                      text-text-light dark:text-text-dark px-4 text-sm focus:ring-2 focus:ring-primary outline-none transition'
+                            }
+                        }) }}
+                        {{ form_errors(registrationForm.mail) }}
+                    </div>
+
+                    <!-- Site -->
+                    <div class="md:col-span-2">
+                        <label for="{{ registrationForm.site.vars.id }}" class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                            {{ form_label(registrationForm.site) }}
+                        </label>
+                        {{ form_widget(registrationForm.site, {
+                            'attr': {
+                                'class': 'w-full h-11 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark
+                                      text-text-light dark:text-text-dark px-4 text-sm focus:ring-2 focus:ring-primary outline-none transition'
+                            }
+                        }) }}
+                        {{ form_errors(registrationForm.site) }}
+                    </div>
+
+                    <!-- Mot de passe -->
+                    <div class="md:col-span-2">
+                        <label for="{{ registrationForm.plainPassword.first.vars.id }}"
+                               class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                            Mot de passe
+                        </label>
+                        {{ form_widget(registrationForm.plainPassword.first, {
+                            'attr': {
+                                'type': 'password',
+                                'class': 'w-full h-11 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark
+                                      text-text-light dark:text-text-dark px-4 text-sm focus:ring-2 focus:ring-primary outline-none transition'
+                            }
+                        }) }}
+                        {{ form_errors(registrationForm.plainPassword.first) }}
+
+                        <label for="{{ registrationForm.plainPassword.second.vars.id }}"
+                               class="block text-sm font-medium text-text-light dark:text-text-dark mt-4 mb-1">
+                            Confirmer le mot de passe
+                        </label>
+                        {{ form_widget(registrationForm.plainPassword.second, {
+                            'attr': {
+                                'type': 'password',
+                                'class': 'w-full h-11 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark
+                                      text-text-light dark:text-text-dark px-4 text-sm focus:ring-2 focus:ring-primary outline-none transition'
+                            }
+                        }) }}
+                        {{ form_errors(registrationForm.plainPassword.second) }}
+                    </div>
+
+                    <!-- Administrateur -->
+                    <div>
+                        {{ form_widget(registrationForm.administrateur, {
+                            'attr': {'class': 'rounded text-primary focus:ring-primary'}
+                        }) }}
+                        <label for="{{ registrationForm.administrateur.vars.id }}" class="text-sm text-subtext-light dark:text-subtext-dark ml-2">
+                            {{ form_label(registrationForm.administrateur) }}
+                        </label>
+                    </div>
+
+                    <!-- Conditions -->
+                    <div>
+                        {{ form_widget(registrationForm.agreeTerms, {
+                            'attr': {'class': 'rounded text-primary focus:ring-primary'}
+                        }) }}
+                        <label for="{{ registrationForm.agreeTerms.vars.id }}" class="text-sm text-subtext-light dark:text-subtext-dark ml-2">
+                            {{ form_label(registrationForm.agreeTerms, 'J’accepte les conditions générales') }}
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Bouton -->
+                <div class="flex justify-end mt-8">
+                    <button type="submit"
+                            class="h-11 px-6 flex items-center justify-center rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition">
+                        Créer mon compte
+                    </button>
+                </div>
+
+                {{ form_end(registrationForm) }}
+            </div>
+        </div>
+    </main>
 {% endblock %}

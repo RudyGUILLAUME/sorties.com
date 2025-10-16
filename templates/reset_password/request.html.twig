@@ -1,22 +1,77 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Reset your password{% endblock %}
+{% block title %}Mot de passe oublié{% endblock %}
 
 {% block body %}
-    {% for flash_error in app.flashes('reset_password_error') %}
-        <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
-    {% endfor %}
-    <h1>Reset your password</h1>
+    <main class="flex-1 p-8 overflow-y-auto">
+        <div class="max-w-md mx-auto">
 
-    {{ form_start(requestForm) }}
-        {{ form_row(requestForm.mail) }}
-        <div>
-            <small>
-                Enter your email address, and we will send you a
-                link to reset your password.
-            </small>
+            <!-- 🧭 Fil d’Ariane -->
+            <div class="flex flex-wrap gap-2 mb-6 text-sm">
+                <a href="{{ path('app_home') }}" class="text-primary hover:underline">Accueil</a>
+                <span class="text-subtext-light dark:text-subtext-dark">/</span>
+                <span class="text-text-light dark:text-text-dark">Mot de passe oublié</span>
+            </div>
+
+            <!-- 🔐 En-tête -->
+            <div class="text-center mb-10">
+                <h1 class="text-3xl font-extrabold text-text-light dark:text-text-dark">Mot de passe oublié ?</h1>
+                <p class="text-subtext-light dark:text-subtext-dark mt-2 text-sm">
+                    Entrez votre adresse e-mail et nous vous enverrons un lien pour réinitialiser votre mot de passe.
+                </p>
+            </div>
+
+            <!-- ⚠️ Erreurs -->
+            {% for flash_error in app.flashes('reset_password_error') %}
+                <div class="bg-red-500/10 border border-red-500 text-red-400 px-4 py-3 rounded-lg mb-4 text-sm">
+                    {{ flash_error }}
+                </div>
+            {% endfor %}
+
+            <!-- ✉️ Formulaire -->
+            <div class="bg-white dark:bg-[#192633] rounded-xl border border-border-light dark:border-border-dark shadow-sm p-8">
+                {{ form_start(requestForm) }}
+
+                <!-- Champ email -->
+                <div class="mb-6">
+                    <label for="{{ requestForm.mail.vars.id }}"
+                           class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                        Adresse e-mail
+                    </label>
+                    {{ form_widget(requestForm.mail, {
+                        'attr': {
+                            'placeholder': 'exemple@domaine.com',
+                            'class': 'w-full h-11 rounded-lg border border-border-light dark:border-border-dark
+                                  bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark
+                                  px-4 text-sm focus:ring-2 focus:ring-primary outline-none transition'
+                        }
+                    }) }}
+                    {{ form_errors(requestForm.mail) }}
+                </div>
+
+                <!-- Infos -->
+                <p class="text-subtext-light dark:text-subtext-dark text-sm mb-6">
+                    Nous vous enverrons un e-mail contenant un lien sécurisé pour réinitialiser votre mot de passe.
+                </p>
+
+                <!-- Bouton -->
+                <div class="flex justify-end">
+                    <button type="submit"
+                            class="h-11 px-6 flex items-center justify-center rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition">
+                        Envoyer le lien de réinitialisation
+                    </button>
+                </div>
+
+                {{ form_end(requestForm) }}
+            </div>
+
+            <!-- Retour -->
+            <div class="text-center mt-6">
+                <a href="{{ path('app_login') }}"
+                   class="text-primary hover:underline text-sm font-medium">
+                    ← Retour à la connexion
+                </a>
+            </div>
         </div>
-
-        <button class="btn btn-primary">Send password reset email</button>
-    {{ form_end(requestForm) }}
+    </main>
 {% endblock %}
