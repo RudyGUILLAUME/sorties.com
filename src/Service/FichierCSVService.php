@@ -21,7 +21,7 @@ class FichierCSVService
         $count = 0;
         $errors = [];
         while (($data = fgetcsv($handle, 1000, ',')) !== false) {
-            [$nom, $prenom, $telephone,$mail,  $site, $administrateur,$actif,$password] = $data;
+            [$nom, $prenom, $telephone,$mail,  $site, $administrateur,$organisateur,$actif,$password] = $data;
 
             $existingUser = $em->getRepository(Participant::class)->findOneBy(['mail' => $mail]);
             if ($existingUser) {
@@ -45,6 +45,10 @@ class FichierCSVService
             if($participant->isAdministrateur())
             {
                 $participant->addRoles('ROLE_ADMIN');
+            }
+            if($organisateur)
+            {
+                $participant->addRoles('ROLE_ORGANISATEUR');
             }
 
             $hashedPassword = $passwordHasher->hashPassword($participant, $password);
