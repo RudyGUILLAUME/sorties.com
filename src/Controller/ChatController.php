@@ -52,7 +52,7 @@ class ChatController extends AbstractController
     public function send(Request $request, Sortie $sortie, EntityManagerInterface $em): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        $content = trim($data['content'] ?? '');
+        $content = trim($data['content'] ?? $data['message'] ?? '');
 
         if (!$content) {
             return new JsonResponse(['error' => 'Message vide'], 400);
@@ -73,4 +73,5 @@ class ChatController extends AbstractController
             'createdAt' => $message->getCreatedAt()->format('H:i'),
         ]);
     }
+
 }

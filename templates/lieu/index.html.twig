@@ -1,58 +1,90 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Lieux{% endblock %}
+{% block title %}Gestion des lieux{% endblock %}
 
 {% block body %}
-<div class="container mt-4">
-    <div class="d-flex align-items-center justify-content-between mb-3">
-        <h1 class="h4 mb-0">Lieux</h1>
-        <a class="btn btn-primary" href="{{ path('app_lieu_new') }}">Nouveau lieu</a>
-    </div>
+    <div class="flex min-h-screen bg-background-light dark:bg-background-dark">
 
-    <div class="card shadow-sm">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>ID</th>
-                        <th>Nom</th>
-                        <th>Rue</th>
-                        <th>Latitude</th>
-                        <th>Longitude</th>
-                        <th>Ville</th>
-                        <th class="text-end">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for lieu in lieux %}
-                        <tr>
-                            <td>{{ lieu.id }}</td>
-                            <td>{{ lieu.nom }}</td>
-                            <td>{{ lieu.rue }}</td>
-                            <td>{{ lieu.latitude }}</td>
-                            <td>{{ lieu.longitude }}</td>
-                            <td>{{ lieu.ville ? lieu.ville.nom : '' }}</td>
-                            <td class="text-end">
-                                <div class="btn-group btn-group-sm">
-                                    <a class="btn btn-outline-secondary" href="{{ path('app_lieu_edit', {id: lieu.id}) }}">Modifier</a>
-                                    <a class="btn btn-primary" href="{{ path('app_lieu_show', {id: lieu.id}) }}">Afficher</a>
-                                    <form method="post" action="{{ path('app_lieu_delete', {id: lieu.id}) }}" onsubmit="return confirm('Supprimer ce lieu ?');">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ lieu.id) }}">
-                                        <button class="btn btn-outline-danger" type="submit">Supprimer</button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="7" class="text-center text-muted py-4">Aucun lieu.</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+
+        <!-- Contenu principal -->
+        <main class="flex-1 p-8 overflow-y-auto">
+            <div class="max-w-7xl mx-auto">
+
+                <!-- En-tête -->
+                <div class="flex flex-wrap justify-between items-center gap-4 mb-8">
+                    <div>
+                        <h1 class="text-3xl font-extrabold text-text-light dark:text-text-dark">Gestion des lieux</h1>
+                        <p class="text-subtext-light dark:text-subtext-dark mt-1">
+                            Consultez, modifiez ou ajoutez les lieux enregistrés dans la base de données.
+                        </p>
+                    </div>
+                    <a href="{{ path('app_lieu_new') }}"
+                       class="flex items-center justify-center gap-2 h-10 px-5 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors">
+                        <span class="material-symbols-outlined">add</span>
+                        Nouveau lieu
+                    </a>
+                </div>
+
+                <!-- Tableau des lieux -->
+                <div class="bg-white dark:bg-[#192633] rounded-xl shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-subtext-light dark:text-subtext-dark">
+                            <thead class="text-xs text-text-light dark:text-text-dark uppercase bg-gray-50 dark:bg-[#101922]">
+                            <tr>
+                                <th class="px-6 py-3">ID</th>
+                                <th class="px-6 py-3">Nom</th>
+                                <th class="px-6 py-3">Rue</th>
+                                <th class="px-6 py-3">Latitude</th>
+                                <th class="px-6 py-3">Longitude</th>
+                                <th class="px-6 py-3">Ville</th>
+                                <th class="px-6 py-3 text-right">Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for lieu in lieux %}
+                                <tr class="border-b dark:border-border-dark hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+                                    <td class="px-6 py-4 font-medium text-text-light dark:text-text-dark">{{ lieu.id }}</td>
+                                    <td class="px-6 py-4">{{ lieu.nom }}</td>
+                                    <td class="px-6 py-4">{{ lieu.rue ?: '—' }}</td>
+                                    <td class="px-6 py-4">{{ lieu.latitude ?: '—' }}</td>
+                                    <td class="px-6 py-4">{{ lieu.longitude ?: '—' }}</td>
+                                    <td class="px-6 py-4">{{ lieu.ville ? lieu.ville.nom : '—' }}</td>
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="flex justify-end items-center gap-2">
+                                            <a href="{{ path('app_lieu_show', {id: lieu.id}) }}"
+                                               class="p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700"
+                                               title="Afficher">
+                                                <span class="material-symbols-outlined text-base">visibility</span>
+                                            </a>
+                                            <a href="{{ path('app_lieu_edit', {id: lieu.id}) }}"
+                                               class="p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700"
+                                               title="Modifier">
+                                                <span class="material-symbols-outlined text-base">edit</span>
+                                            </a>
+                                            <form method="post"
+                                                  action="{{ path('app_lieu_delete', {id: lieu.id}) }}"
+                                                  onsubmit="return confirm('Supprimer ce lieu ?');"
+                                                  class="inline">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ lieu.id) }}">
+                                                <button type="submit" class="p-1.5 rounded-md hover:bg-danger/20" title="Supprimer">
+                                                    <span class="material-symbols-outlined text-base text-danger">delete</span>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="7" class="text-center py-6 text-subtext-light dark:text-subtext-dark">
+                                        Aucun lieu enregistré.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
-</div>
 {% endblock %}
-
-

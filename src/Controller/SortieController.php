@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Commentaire;
+use App\Entity\Etat;
 use App\Entity\Participant;
 use App\Entity\Sortie;
 use App\Form\CommentaireType;
@@ -156,7 +157,7 @@ final class SortieController extends AbstractController
     }
 
     #[Route('/{id}', name: 'show', methods: ['GET','POST'])]
-    public function show(Request $request, EntityManagerInterface $em,Sortie $sortie, MessageRepository $messageRepository): Response
+    public function show(Request $request, EntityManagerInterface $em, Sortie $sortie, MessageRepository $messageRepository, Participant $participant): Response
     {
         if ($sortie->isPrivee() &&
             $sortie->getOrganisateur() !== $this->getUser() &&
@@ -174,6 +175,9 @@ final class SortieController extends AbstractController
             ['sortie' => $sortie],
             ['createdAt' => 'ASC']
         );
+
+        $etat = $sortie->getEtat();
+        $participant = $sortie->getParticipants();
 
         if ($form->isSubmitted() && $form->isValid()) {
             $commentaire->setAuteur($this->getUser());
@@ -198,6 +202,8 @@ final class SortieController extends AbstractController
             'commentaireForm' => $form->createView(),
             'noteMoyenne' =>count($sortie->getCommentaires())!=0?$total / count($sortie->getCommentaires()):null,
             'messages' => $messages,
+            'etat' => $etat,
+            'participant' => $participant
         ]);
     }
 

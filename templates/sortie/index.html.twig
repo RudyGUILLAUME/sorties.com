@@ -3,91 +3,106 @@
 {% block title %}Toutes les sorties{% endblock %}
 
 {% block body %}
-    <div class="container my-4">
-        <div class="d-flex align-items-center justify-content-between mb-4 p-3 bg-light rounded shadow-sm">
-
-            <div class="d-flex align-items-center gap-3">
-                <!-- Image à gauche (taille adaptée) -->
-                <img src="{{ asset('images/logo.png') }}" alt="Sorties" class="rounded-circle" style="width: 60px; height: 60px; object-fit: cover;">
-
-                <div>
-                    <h2 class="h3 fw-bold mb-1">Toutes les sorties</h2>
-                    <p class="text-secondary mb-0">Découvrez toutes les sorties disponibles</p>
+    <main class="flex-1 container mx-auto px-4 py-8">
+        <div class="flex flex-col gap-8">
+            <!-- HEADER -->
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <img src="{{ asset('images/logo.png') }}" alt="Sorties" class="rounded-full w-14 h-14 object-cover">
+                    <div>
+                        <h1 class="text-3xl md:text-4xl font-black leading-tight tracking-[-0.033em] text-text-light dark:text-text-dark">
+                            Toutes les sorties
+                        </h1>
+                        <p class="text-subtle-light dark:text-subtle-dark text-sm">Découvrez toutes les sorties disponibles</p>
+                    </div>
                 </div>
             </div>
-            {% if app.user %}
-                {% if app.user.actif %}
-                    <div>
-                        <a href="{{ path('app_sortie_new') }}" class="btn btn-primary btn-lg shadow-sm">
-                            <i class="bi bi-plus-lg me-2"></i> Créer une nouvelle sortie
+
+            <!-- FORMULAIRE DE RECHERCHE -->
+            <div class="p-6 rounded-xl bg-white dark:bg-[#192633] border border-border-light dark:border-border-dark shadow-sm">
+                <h2 class="text-lg font-bold text-text-light dark:text-text-dark mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">filter_alt</span>
+                    Filtrer les sorties
+                </h2>
+
+                {{ form_start(searchForm, {attr: {class: 'grid grid-cols-1 md:grid-cols-4 gap-4'}}) }}
+
+                <!-- 🔍 Champ de recherche -->
+                <div class="flex flex-col">
+                    <label class="text-sm font-medium text-text-light dark:text-text-dark mb-1">{{ form_label(searchForm.q) }}</label>
+                    {{ form_widget(searchForm.q, {
+                        'attr': {
+                            'class': 'w-full h-11 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark px-4 text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition'
+                        }
+                    }) }}
+                </div>
+
+                <!-- 🏢 Site -->
+                <div class="flex flex-col">
+                    <label class="text-sm font-medium text-text-light dark:text-text-dark mb-1">{{ form_label(searchForm.site) }}</label>
+                    {{ form_widget(searchForm.site, {
+                        'attr': {
+                            'class': 'w-full h-11 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark px-4 text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition'
+                        }
+                    }) }}
+                </div>
+
+                <!-- 📅 Dates -->
+                <div class="flex flex-col">
+                    <label class="text-sm font-medium text-text-light dark:text-text-dark mb-1">{{ form_label(searchForm.dateMin) }}</label>
+                    {{ form_widget(searchForm.dateMin, {
+                        'attr': {
+                            'class': 'w-full h-11 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark px-4 text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition'
+                        }
+                    }) }}
+                </div>
+
+                <div class="flex flex-col">
+                    <label class="text-sm font-medium text-text-light dark:text-text-dark mb-1">{{ form_label(searchForm.dateMax) }}</label>
+                    {{ form_widget(searchForm.dateMax, {
+                        'attr': {
+                            'class': 'w-full h-11 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark px-4 text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition'
+                        }
+                    }) }}
+                </div>
+
+                <!-- 🧠 Filtres secondaires -->
+                <div class="md:col-span-4 flex flex-wrap items-center gap-3 pt-4 border-t border-border-light dark:border-border-dark mt-2">
+
+                    <!-- Cases à cocher -->
+                    {% for field in [searchForm.organisateur, searchForm.inscrit, searchForm.nonInscrit, searchForm.passees] %}
+                        <label class="flex items-center gap-2 text-sm font-medium text-text-light dark:text-text-dark">
+                            {{ form_widget(field, {
+                                'attr': {
+                                    'class': 'rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary'
+                                }
+                            }) }}
+                            {{ form_label(field) }}
+                        </label>
+                    {% endfor %}
+
+                    <!-- Boutons -->
+                    <div class="ms-auto flex gap-2 mt-3 md:mt-0">
+                        <button type="submit"
+                                class="flex items-center justify-center h-10 px-5 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition">
+                            <span class="material-symbols-outlined text-sm mr-1">search</span>
+                            Rechercher
+                        </button>
+
+                        <a href="{{ path('app_sortie_index') }}"
+                           class="flex items-center justify-center h-10 px-5 text-sm rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark hover:bg-secondary-light/70 dark:hover:bg-secondary-dark/60 transition">
+                            <span class="material-symbols-outlined text-sm mr-1">restart_alt</span>
+                            Réinitialiser
                         </a>
                     </div>
-                {% endif %}
-            {% endif %}
-        </div>
-
-    <div class="card shadow-sm mb-3 p-3">
-        {{ form_start(searchForm, {attr: {class: 'row g-2 align-items-end'}}) }}
-            <div class="col-12 col-md-4">{{ form_row(searchForm.q) }}</div>
-            <div class="col-12 col-md-3">{{ form_row(searchForm.site) }}</div>
-            <div class="col-6 col-md-2">{{ form_row(searchForm.dateMin) }}</div>
-            <div class="col-6 col-md-2">{{ form_row(searchForm.dateMax) }}</div>
-            <div class="col-12 d-flex flex-wrap gap-3 align-items-center">
-                {{ form_row(searchForm.organisateur) }}
-                {{ form_row(searchForm.inscrit) }}
-                {{ form_row(searchForm.nonInscrit) }}
-                {{ form_row(searchForm.passees) }}
-                <div class="ms-auto d-flex gap-2">
-                    {{ form_row(searchForm.search) }}
-                    <a href="{{ path('app_sortie_index') }}" class="btn btn-outline-secondary">Réinitialiser</a>
                 </div>
+
+                {{ form_end(searchForm) }}
             </div>
-        {{ form_end(searchForm) }}
-    </div>
 
 
-        <!-- Menu Onglets -->
-        <ul class="nav nav-tabs mb-3" id="sortieTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="toutes-tab" data-bs-toggle="tab" data-bs-target="#toutes" type="button" role="tab">
-                    Toutes <span class="badge bg-secondary">{{ sorties|length }}</span>
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="disponibles-tab" data-bs-toggle="tab" data-bs-target="#disponibles" type="button" role="tab">
-                    Disponibles <span class="badge bg-success">{{ sortiesDisponibles|length }}</span>
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="pleines-tab" data-bs-toggle="tab" data-bs-target="#pleines" type="button" role="tab">
-                    Pleines <span class="badge bg-warning text-dark">{{ sortiesPleines|length }}</span>
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="archivees-tab" data-bs-toggle="tab" data-bs-target="#archivees" type="button" role="tab">
-                    Archivées <span class="badge bg-danger">{{ sortiesArchivees|length }}</span>
-                </button>
-            </li>
-        </ul>
-
-        <div class="tab-content" id="sortieTabsContent">
-            <!-- Onglet toutes les sorties -->
-            <div class="tab-pane fade show active" id="toutes" role="tabpanel">
-                {% include 'sortie/table.html.twig' with { 'sorties': sorties } %}
-            </div>
-            <!-- Onglet sorties disponibles -->
-            <div class="tab-pane fade" id="disponibles" role="tabpanel" aria-labelledby="disponibles-tab">
-                {% include 'sortie/table.html.twig' with {'sorties': sortiesDisponibles} %}
-            </div>
-            <!-- Onglet sorties pleines -->
-            <div class="tab-pane fade" id="pleines" role="tabpanel" aria-labelledby="pleines-tab">
-                {% include 'sortie/table.html.twig' with {'sorties': sortiesPleines} %}
-            </div>
-            <!-- Onglet sorties archivées -->
-            <div class="tab-pane fade" id="archivees" role="tabpanel" aria-labelledby="archivees-tab">
-                {% include 'sortie/table.html.twig' with {'sorties': sortiesArchivees} %}
-            </div>
-
+            <!-- LISTE DES SORTIES -->
+            {% include 'sortie/table.html.twig' with { 'sorties': sorties } %}
         </div>
-    </div>
+    </main>
 {% endblock %}

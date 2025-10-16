@@ -1,58 +1,75 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark bg-gradient shadow-sm">
-    <div class="container">
-        <a class="navbar-brand d-flex align-items-center" href="{{ path('app_home') }}">
-            <img src="{{ asset('images/logo.png') }}" alt="Logo Sorties.com" height="50" class="me-2">
-            <span class="fw-bold text-white">Sorties.com</span>
-        </a>
-
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link active" href="{{ path('app_home') }}">Accueil</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ path('app_sortie_index') }}">Voir les sorties</a></li>
-                {% if app.user %}
-                    {% if is_granted("ROLE_ADMIN") %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ path('app_lieu_index') }}">Lieux</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ path('app_ville_index') }}">Villes</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ path('admin_panel') }}">Panel Admin</a>
-                        </li>
-                    {% endif %}
-
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ path('app_profile_show', {'id': app.user.id}) }}">
-                            {{ app.user.prenom }}
-                            {% if 'ROLE_ADMIN' in app.user.roles %}
-                                <small class="text-warning">(Admin)</small>
-                            {% elseif 'ROLE_ORGANISATEUR' in app.user.roles %}
-                                <small class="text-info">(Organisateur)</small>
-                            {% endif %}
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="{{ path('app_logout') }}" class="Btn-logout">
-                            <div class="sign-logout">
-                                <svg viewBox="0 0 512 512">
-                                    <path d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z"></path>
-                                </svg>
-                            </div>
-                            <div class="text-logout">Se déconnecter</div>
-                        </a>
-                    </li>
-                {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Se connecter</a>
-                    </li>
-                {% endif %}
-            </ul>
+<header class="fixed top-0 left-0 w-full flex items-center justify-between whitespace-nowrap border-b border-solid border-secondary-light dark:border-secondary-dark px-10 py-3 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md shadow-md z-50">
+    <!-- LOGO -->
+    <div class="flex items-center gap-4">
+        <div class="size-6">
+            <svg class="text-text-light dark:text-text-dark" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                <path fill="currentColor" d="M24 0.757L47.243 24 24 47.243 0.757 24 24 0.757ZM21 35.757V12.243L9.243 24 21 35.757Z" />
+            </svg>
         </div>
+        <h2 class="text-text-light dark:text-text-dark text-lg font-bold leading-tight tracking-[-0.015em]">
+            sorties.com
+        </h2>
     </div>
-</nav>
+
+    <!-- MENU -->
+    <nav class="hidden md:flex flex-1 justify-end gap-8 items-center">
+        <div class="flex items-center gap-9">
+            <a href="{{ path('app_sortie_index') }}" class="text-text-light dark:text-text-dark text-sm font-medium hover:text-primary transition">Voir les sorties</a>
+        </div>
+
+        {% if app.user %}
+        <div class="flex items-center gap-9">
+            <a href="{{ path('app_lieu_index') }}" class="text-text-light dark:text-text-dark text-sm font-medium hover:text-primary transition">Lieux</a>
+        </div>
+        {% endif %}
+
+        {% if app.user %}
+        <div class="flex items-center gap-9">
+            <a href="{{ path('app_ville_index') }}" class="text-text-light dark:text-text-dark text-sm font-medium hover:text-primary transition">Villes</a>
+        </div>
+        {% endif %}
+
+        {% if app.user and 'ROLE_ADMIN' in app.user.roles %}
+        <div class="flex items-center gap-9">
+            <a href="{{ path('admin_panel') }}" class="text-text-light dark:text-text-dark text-sm font-medium hover:text-primary transition">Dashboard Admin</a>
+        </div>
+        {% endif %}
+
+
+        {% if app.user %}
+            <!-- BOUTON CREER -->
+            <a href="{{ path('app_sortie_new') }}"
+               class="flex items-center justify-center h-10 px-4 rounded-xl bg-primary text-text-light text-sm font-bold hover:opacity-90 transition">
+                Créer une sortie
+            </a>
+
+            <!-- AVATAR UTILISATEUR -->
+            <div class="relative flex items-center gap-3">
+                <a href="{{ path('app_profile_show', {id: app.user.id}) }}"
+                   class="block rounded-full overflow-hidden border-2 border-primary shadow-sm hover:scale-105 transition-transform">
+                    <div class="bg-center bg-no-repeat bg-cover size-10"
+                         style="background-image: url('{{ asset('images/uploads/' ~ (app.user.imageProfil ?: 'default-avatar.png')) }}');">
+                    </div>
+                </a>
+            </div>
+
+
+            <div>
+                <!-- BOUTON DECONNEXION -->
+                <form method="post" action="{{ path('app_logout') }}" class="m-0 p-0">
+                    <button type="submit"
+                            class="flex items-center justify-center h-10 px-4 rounded-lg bg-red-500 text-white text-sm font-bold hover:bg-red-600 transition">
+                        <span class="material-symbols-outlined text-base mr-1">logout</span>
+                    </button>
+                </form>
+            </div>
+        {% else %}
+            <a href="javascript:void(0)"
+               onclick="openLoginModal()"
+               class="px-8 py-3 border border-primary text-primary text-lg font-semibold rounded-lg hover:bg-primary/10 transition-colors">
+                Se connecter
+            </a>
+
+        {% endif %}
+    </nav>
+</header>

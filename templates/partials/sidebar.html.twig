@@ -1,0 +1,19 @@
+<!-- Sidebar -->
+<aside class="w-64 bg-primary text-white flex flex-col p-4">
+
+
+    <nav class="flex flex-col gap-2">
+        <a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-white/20" href="{{ path('admin_panel') }}">
+            <span class="material-symbols-outlined text-black">dashboard</span>
+            <p class="text-black text-sm font-medium">Dashboard</p>
+        </a>
+        <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10" href="{{ path('admin_participants') }}">
+            <span class="material-symbols-outlined text-black">group</span>
+            <p class="text-black text-sm font-medium">Utilisateurs</p>
+        </a>
+        <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10" href="{{ path('admin_import_csv') }}">
+            <span class="material-symbols-outlined text-black">event</span>
+            <p class="text-black text-sm font-medium">Importer CSV</p>
+        </a>
+    </nav>
+</aside>

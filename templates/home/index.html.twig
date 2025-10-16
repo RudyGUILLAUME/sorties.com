@@ -3,39 +3,88 @@
 {% block title %}Accueil - Sorties.com{% endblock %}
 
 {% block body %}
-    <!-- 🌄 Section bannière -->
-    <section class="hero text-center">
-        <div>
-            <h1>Bienvenue sur <strong>Sorties.com</strong></h1>
-            <p class="lead">Organisez, partagez et vivez des moments ensemble 🎉</p>
-            <div class="mt-4">
-                <a href="#" class="btn btn-primary btn-lg me-3">Voir les sorties</a>
-            </div>
-        </div>
-    </section>
+    <div class="flex flex-col min-h-screen bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
 
-    <!-- 💡 Section avantages -->
-    <section class="features container text-center">
-        <h2>Pourquoi utiliser Sorties.com ?</h2>
-        <div class="row justify-content-center mt-4">
-            <div class="col-md-4 mb-4">
-                <h5>🤝 Rencontrez des gens</h5>
-                <p>Participez à des activités et rencontrez de nouvelles personnes autour de vous.</p>
-            </div>
-            <div class="col-md-4 mb-4">
-                <h5>🎯 Organisez vos sorties</h5>
-                <p>Créez vos propres événements et invitez vos amis ou collègues en quelques clics.</p>
-            </div>
-            <div class="col-md-4 mb-4">
-                <h5>📅 Gardez le rythme</h5>
-                <p>Visualisez vos sorties passées et à venir dans un calendrier intuitif.</p>
-            </div>
-        </div>
-    </section>
+        <!-- 🌄 HERO SECTION -->
+        <section class="relative flex flex-col items-center justify-center text-center px-6 py-24 bg-gradient-to-b from-primary/10 to-transparent dark:from-primary/20">
+            <h1 class="text-5xl md:text-6xl font-extrabold mb-4">
+                Bienvenue sur <span class="text-primary">Sorties.com</span>
+            </h1>
+            <p class="text-lg md:text-xl text-subtext-light dark:text-subtext-dark max-w-2xl">
+                Organisez, partagez et vivez des moments inoubliables entre amis 🎉
+            </p>
 
-    <footer>
-        <div class="container">
-            &copy; {{ "now"|date("Y") }} Sorties.com — Projet Symfony développé par <strong>Rudy Guillaume, Lucas Robichon & Elowan Coquillau</strong>.
-        </div>
-    </footer>
+            <div class="mt-8 flex flex-wrap justify-center gap-4">
+                <a href="{{ path('app_sortie_index') }}"
+                   class="px-8 py-3 bg-primary text-white text-lg font-semibold rounded-lg hover:bg-primary/90 transition-colors">
+                    Voir les sorties
+                </a>
+                {% if not app.user %}
+                    <a href="javascript:void(0)"
+                       onclick="openLoginModal()"
+                       class="px-8 py-3 border border-primary text-primary text-lg font-semibold rounded-lg hover:bg-primary/10 transition-colors">
+                        Se connecter
+                    </a>
+                {% else %}
+                    <a href="{{ path('app_profile_show', { id: app.user.id }) }}"
+                       class="px-8 py-3 border border-primary text-primary text-lg font-semibold rounded-lg hover:bg-primary/10 transition-colors">
+                        Mon profil
+                    </a>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- 💡 FEATURES SECTION -->
+        <section class="py-20 px-6 bg-white dark:bg-[#192633]">
+            <div class="max-w-6xl mx-auto text-center">
+                <h2 class="text-3xl font-extrabold mb-12">Pourquoi utiliser <span class="text-primary">Sorties.com</span> ?</h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-background-light dark:bg-background-dark p-8 rounded-xl shadow-sm hover:shadow-lg transition">
+                        <div class="text-5xl mb-4">🤝</div>
+                        <h3 class="text-xl font-bold mb-2">Rencontrez des gens</h3>
+                        <p class="text-subtext-light dark:text-subtext-dark">
+                            Participez à des activités et rencontrez de nouvelles personnes près de chez vous.
+                        </p>
+                    </div>
+
+                    <div class="bg-background-light dark:bg-background-dark p-8 rounded-xl shadow-sm hover:shadow-lg transition">
+                        <div class="text-5xl mb-4">🎯</div>
+                        <h3 class="text-xl font-bold mb-2">Organisez vos sorties</h3>
+                        <p class="text-subtext-light dark:text-subtext-dark">
+                            Créez vos propres événements et invitez vos amis ou collègues en quelques clics.
+                        </p>
+                    </div>
+
+                    <div class="bg-background-light dark:bg-background-dark p-8 rounded-xl shadow-sm hover:shadow-lg transition">
+                        <div class="text-5xl mb-4">📅</div>
+                        <h3 class="text-xl font-bold mb-2">Gardez le rythme</h3>
+                        <p class="text-subtext-light dark:text-subtext-dark">
+                            Visualisez vos sorties passées et à venir dans un calendrier intuitif.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ✨ CTA SECTION -->
+        <section class="py-16 bg-primary text-white text-center">
+            <div class="max-w-4xl mx-auto px-6">
+                <h2 class="text-3xl md:text-4xl font-extrabold mb-4">
+                    Prêt à rejoindre la communauté Sorties.com ?
+                </h2>
+            </div>
+        </section>
+        {% include 'partials/modal_connexion.html.twig' %}
+
+        <!-- ⚓ FOOTER -->
+        <footer class="mt-auto border-t border-gray-200 dark:border-gray-700 py-8 bg-background-light dark:bg-background-dark">
+            <div class="text-center text-sm text-subtext-light dark:text-subtext-dark">
+                <p>
+                    &copy; {{ "now"|date("Y") }} <span class="font-semibold text-primary">Sorties.com</span> — Projet Symfony
+                    développé par <strong>Rudy Guillaume</strong>, <strong>Lucas Robichon</strong> & <strong>Elowan Coquillau</strong>.
+                </p>
+            </div>
+        </footer>
+    </div>
 {% endblock %}
