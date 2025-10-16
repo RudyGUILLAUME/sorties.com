@@ -1,11 +1,59 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Password Reset Email Sent{% endblock %}
+{% block title %}Email de réinitialisation envoyé{% endblock %}
 
 {% block body %}
-    <p>
-        If an account matching your email exists, then an email was just sent that contains a link that you can use to reset your password.
-        This link will expire in {{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle') }}.
-    </p>
-    <p>If you don't receive an email please check your spam folder or <a href="{{ path('app_forgot_password_request') }}">try again</a>.</p>
+    <main class="flex-1 p-8 overflow-y-auto">
+        <div class="max-w-md mx-auto text-center">
+
+            <!-- 🧭 Fil d’Ariane -->
+            <div class="flex flex-wrap justify-center gap-2 mb-6 text-sm">
+                <a href="{{ path('app_home') }}" class="text-primary hover:underline">Accueil</a>
+                <span class="text-subtext-light dark:text-subtext-dark">/</span>
+                <span class="text-text-light dark:text-text-dark">Email envoyé</span>
+            </div>
+
+            <!-- ✉️ Icône -->
+            <div class="flex justify-center mb-6">
+                <div class="bg-primary/20 p-4 rounded-full">
+                    <span class="material-symbols-outlined text-primary text-5xl">mail</span>
+                </div>
+            </div>
+
+            <!-- 🧾 Message principal -->
+            <h1 class="text-2xl font-extrabold text-text-light dark:text-text-dark mb-3">
+                Email de réinitialisation envoyé
+            </h1>
+            <p class="text-subtext-light dark:text-subtext-dark text-sm leading-relaxed mb-6">
+                Si un compte correspondant à cette adresse e-mail existe, un message contenant un lien de réinitialisation
+                vous a été envoyé.
+                <br>
+                Ce lien expirera dans
+                <strong class="text-text-light dark:text-text-dark">
+                    {{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle') }}.
+                </strong>
+            </p>
+
+            <!-- 🕒 Bloc d’informations -->
+            <div class="bg-white dark:bg-[#192633] rounded-xl border border-border-light dark:border-border-dark shadow-sm p-6 text-left">
+                <p class="text-text-light dark:text-text-dark text-sm leading-relaxed mb-4">
+                    Si vous ne recevez pas d’e-mail d’ici quelques minutes, vérifiez votre dossier de spam ou cliquez sur le bouton ci-dessous pour réessayer.
+                </p>
+
+                <a href="{{ path('app_forgot_password_request') }}"
+                   class="inline-flex items-center justify-center gap-2 h-10 px-5 mt-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition">
+                    <span class="material-symbols-outlined text-base">refresh</span>
+                    Renvoyer le lien
+                </a>
+            </div>
+
+            <!-- 🔙 Retour -->
+            <div class="mt-6">
+                <a href="{{ path('app_login') }}"
+                   class="text-primary hover:underline text-sm font-medium">
+                    ← Retour à la connexion
+                </a>
+            </div>
+        </div>
+    </main>
 {% endblock %}

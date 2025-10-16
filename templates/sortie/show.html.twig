@@ -63,10 +63,22 @@
                                 <a class="flex w-full sm:w-auto min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-12 px-6 bg-primary text-text-light text-base font-bold leading-normal tracking-[0.015em]" href="#" data-bs-toggle="modal" data-bs-target="#loginModal" onclick="event.stopPropagation();">Se connecter</a>
                             {% endif %}
 
-                            <button class="flex w-full sm:w-auto min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-12 px-6 border border-primary text-primary text-base font-bold leading-normal tracking-[0.015em]">
-                                <span class="material-symbols-outlined mr-2">edit</span>
-                                <span class="truncate">Modifier</span>
-                            </button>
+                            {% if app.user and (sortie.organisateur.id == app.user.id or 'ROLE_ADMIN' in app.user.roles) %}
+                                {% if sortie.etat.libelle == 'Créée' %}
+                                    <a href="{{ path('app_sortie_edit', { id: sortie.id }) }}"
+                                       class="flex w-full sm:w-auto min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-12 px-6 border border-primary text-primary text-base font-bold leading-normal tracking-[0.015em]">
+                                        <span class="material-symbols-outlined mr-2">edit</span>
+                                        <span class="truncate">Modifier</span>
+                                    </a>
+                                {% endif %}
+                            {% endif %}
+                            <a href="{{ path('app_sortie_pdf', { id: sortie.id }) }}"
+                               class="flex w-full sm:w-auto min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-12 px-6 border border-primary text-primary text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary hover:text-white transition">
+                                <span class="material-symbols-outlined mr-2">picture_as_pdf</span>
+                                <span class="truncate">Exporter en PDF</span>
+                            </a>
+
+
                         </div>
                         <div class="border-t border-secondary-light dark:border-secondary-dark pt-8 flex flex-col gap-6">
                             <div class="flex items-center gap-4 bg-background-light dark:bg-background-dark min-h-14 justify-between">
