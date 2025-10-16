@@ -71,12 +71,20 @@ class Sortie
     #[ORM\OneToMany(targetEntity: Message::class, mappedBy: 'sortie')]
     private Collection $messages;
 
+    #[ORM\Column(type: 'boolean')]
+    private bool $privee = false;
+
+    #[ORM\ManyToMany(targetEntity: Participant::class)]
+    #[ORM\JoinTable(name: 'sortie_invites')]
+    private Collection $invites;
+
 
     public function __construct()
     {
         $this->participants = new ArrayCollection();
         $this->commentaires = new ArrayCollection();
         $this->messages = new ArrayCollection();
+        $this->invites = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -292,6 +300,37 @@ class Sortie
             }
         }
 
+        return $this;
+    }
+
+    public function isPrivee(): bool
+    {
+        return $this->privee;
+    }
+
+    public function setPrivee(bool $privee): self
+    {
+        $this->privee = $privee;
+        return $this;
+    }
+
+    /** @return Collection<int, Participant> */
+    public function getInvites(): Collection
+    {
+        return $this->invites;
+    }
+
+    public function addInvite(Participant $participant): self
+    {
+        if (!$this->invites->contains($participant)) {
+            $this->invites->add($participant);
+        }
+        return $this;
+    }
+
+    public function removeInvite(Participant $participant): self
+    {
+        $this->invites->removeElement($participant);
         return $this;
     }
 
