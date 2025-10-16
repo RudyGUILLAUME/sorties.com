@@ -14,16 +14,20 @@
     <!-- MENU -->
     <nav class="hidden md:flex flex-1 justify-end gap-8 items-center">
         <div class="flex items-center gap-9">
-            <a href="{{ path('app_sortie_index') }}" class="text-text-light dark:text-text-dark text-sm font-medium hover:text-primary transition">Tableau de bord</a>
+            <a href="{{ path('app_sortie_index') }}" class="text-text-light dark:text-text-dark text-sm font-medium hover:text-primary transition">Voir les sorties</a>
         </div>
 
+        {% if app.user %}
         <div class="flex items-center gap-9">
             <a href="{{ path('app_lieu_index') }}" class="text-text-light dark:text-text-dark text-sm font-medium hover:text-primary transition">Lieux</a>
         </div>
+        {% endif %}
 
+        {% if app.user %}
         <div class="flex items-center gap-9">
             <a href="{{ path('app_ville_index') }}" class="text-text-light dark:text-text-dark text-sm font-medium hover:text-primary transition">Villes</a>
         </div>
+        {% endif %}
 
         {% if app.user and 'ROLE_ADMIN' in app.user.roles %}
         <div class="flex items-center gap-9">
@@ -60,11 +64,12 @@
                 </form>
             </div>
         {% else %}
-            <!-- BOUTON CONNEXION -->
-            <button class="flex items-center justify-center h-10 px-4 rounded-xl bg-primary text-text-light text-sm font-bold hover:opacity-90 transition"
-                    data-bs-toggle="modal" data-bs-target="#loginModal">
-                Connexion
-            </button>
+            <a href="javascript:void(0)"
+               onclick="openLoginModal()"
+               class="px-8 py-3 border border-primary text-primary text-lg font-semibold rounded-lg hover:bg-primary/10 transition-colors">
+                Se connecter
+            </a>
+
         {% endif %}
     </nav>
 </header>

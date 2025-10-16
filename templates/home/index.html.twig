@@ -20,7 +20,8 @@
                     Voir les sorties
                 </a>
                 {% if not app.user %}
-                    <a href="#" data-bs-toggle="modal" data-bs-target="#loginModal"
+                    <a href="javascript:void(0)"
+                       onclick="openLoginModal()"
                        class="px-8 py-3 border border-primary text-primary text-lg font-semibold rounded-lg hover:bg-primary/10 transition-colors">
                         Se connecter
                     </a>
@@ -72,20 +73,9 @@
                 <h2 class="text-3xl md:text-4xl font-extrabold mb-4">
                     Prêt à rejoindre la communauté Sorties.com ?
                 </h2>
-                <p class="text-lg mb-8">Créez votre compte en quelques secondes et commencez à explorer !</p>
-                {% if not app.user %}
-                    <a href="{{ path('app_register') }}"
-                       class="px-8 py-3 bg-white text-primary font-semibold text-lg rounded-lg hover:bg-gray-100 transition-colors">
-                        S'inscrire maintenant
-                    </a>
-                {% else %}
-                    <a href="{{ path('app_sortie_index') }}"
-                       class="px-8 py-3 bg-white text-primary font-semibold text-lg rounded-lg hover:bg-gray-100 transition-colors">
-                        Découvrir les sorties
-                    </a>
-                {% endif %}
             </div>
         </section>
+        {% include 'partials/modal_connexion.html.twig' %}
 
         <!-- ⚓ FOOTER -->
         <footer class="mt-auto border-t border-gray-200 dark:border-gray-700 py-8 bg-background-light dark:bg-background-dark">
