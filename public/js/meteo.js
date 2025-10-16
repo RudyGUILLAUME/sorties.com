@@ -4,9 +4,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const ville = encodeURIComponent(widget.dataset.ville);
     const date = widget.dataset.date;
-    const url = `/meteo/${ville}/${date}`; // ✅ <-- correction ici
-
-    console.log("🌤️ Récupération de la météo :", url);
+    const url = `/meteo/${ville}/${date}`;
 
     try {
         const res = await fetch(url);
