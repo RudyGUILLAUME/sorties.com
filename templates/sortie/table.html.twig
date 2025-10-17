@@ -57,8 +57,10 @@
                             <span class="material-symbols-outlined text-base">group</span>
                             {{ s.participants|length }} / {{ s.nbInscriptionsMax }} participants
                         </p>
+                        <p class="flex items-center gap-2 text-sm">
+                            <span class="material-symbols-outlined text-base">place</span>
+                            {{ s.lieu.ville.nom }}</p>
                     </div>
-
                     <!-- BOUTONS INSCRIPTION / DESINSCRIPTION -->
                     <div class="flex flex-wrap items-center gap-2 mt-3" onclick="event.stopPropagation();">
                         {% if app.user %}
