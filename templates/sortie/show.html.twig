@@ -219,7 +219,9 @@
                                                     </h4>
                                                     {{ form_start(commentaireForm, {'attr': {'class': 'flex flex-col gap-4'}}) }}
                                                     {{ form_row(commentaireForm.message, {'attr': {'class': 'w-full bg-background-light dark:bg-background-dark rounded-lg p-3 text-sm'}}) }}
-                                                    {{ form_row(commentaireForm.note, {'attr': {'class': 'w-24'}}) }}
+                                                    <div>
+                                                        {{ form_row(commentaireForm.note) }}
+                                                    </div>
                                                     <button class="self-start mt-2 px-4 py-2 bg-primary text-text-light rounded-lg text-sm font-bold hover:opacity-90 transition">
                                                         Envoyer
                                                     </button>
