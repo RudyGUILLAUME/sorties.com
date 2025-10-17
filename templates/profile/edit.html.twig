@@ -37,20 +37,18 @@
                              style="background-image: url('{{ asset('images/uploads/' ~ (p.imageProfil ?: 'default-profile.jpg')) }}');">
                         </div>
 
-                        <!-- Label avec stylo par-dessus -->
-                        <label for="imageProfilInput"
+                        <label for="{{ form.image_profil.vars.id }}"
                                class="absolute bottom-1 right-1 z-10 bg-primary text-white rounded-full p-2 cursor-pointer hover:bg-primary/90 transition focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background-light dark:focus:ring-offset-background-dark">
                             <span class="material-symbols-outlined text-sm">edit</span>
                         </label>
 
-                        <!-- Champ d’upload caché -->
                         {{ form_widget(form.image_profil, {
                             'attr': {
-                                'id': 'imageProfilInput',
                                 'class': 'hidden',
                                 'accept': 'image/png, image/jpeg, image/jpg'
                             }
                         }) }}
+
                     </div>
 
 
@@ -138,23 +136,35 @@
     <!-- Aperçu de l’image -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const input = document.getElementById('imageProfilInput');
+            const input = document.getElementById('{{ form.image_profil.vars.id }}');
             const preview = document.getElementById('imagePreview');
 
-            if (input && preview) {
-                input.addEventListener('change', e => {
-                    const file = e.target.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = ev => {
-                            preview.style.backgroundImage = `url('${ev.target.result}')`;
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                });
-            }
+            if (!input || !preview) return;
+
+            input.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                // ✅ Vérification du type MIME pour éviter les mauvaises surprises
+                if (!file.type.startsWith('image/')) {
+                    alert("Veuillez sélectionner une image (JPG, PNG, WEBP).");
+                    input.value = ''; // réinitialise le champ
+                    return;
+                }
+
+                // ✅ Lecture du fichier pour affichage immédiat
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    preview.style.backgroundImage = `url('${event.target.result}')`;
+                    preview.style.backgroundSize = 'cover';
+                    preview.style.backgroundPosition = 'center';
+                    preview.style.transition = 'background-image 0.3s ease';
+                };
+                reader.readAsDataURL(file);
+            });
         });
     </script>
+
 
 
 {% endblock %}
