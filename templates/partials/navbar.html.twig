@@ -29,16 +29,18 @@
         <div class="flex items-center gap-9">
             <a href="{{ path('admin_panel') }}" class="text-text-light dark:text-text-dark text-sm font-medium hover:text-primary transition">Dashboard Admin</a>
         </div>
+
         {% endif %}
-
-
-        {% if app.user %}
+        {% if app.user and ('ROLE_ADMIN' in app.user.roles or 'ROLE_ORGANISATEUR' in app.user.roles) %}
             <!-- BOUTON CREER -->
             <a href="{{ path('app_sortie_new') }}"
                class="flex items-center justify-center h-10 px-4 rounded-xl bg-primary text-text-light text-sm font-bold hover:opacity-90 transition">
                 Créer une sortie
             </a>
+        {% endif %}
 
+
+        {% if app.user %}
             <!-- AVATAR UTILISATEUR -->
             <div class="relative flex items-center gap-3">
                 <a href="{{ path('app_profile_show', {id: app.user.id}) }}"

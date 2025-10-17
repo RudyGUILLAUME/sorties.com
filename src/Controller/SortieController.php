@@ -43,7 +43,6 @@ final class SortieController extends AbstractController
         $sortiesPleines = $sortieRepository->findPleines($now);
         $sortiesArchivees = $sortieRepository->findArchivees($archivageDate);
 
-        // Build and handle search form
         $form = $this->createForm(\App\Form\SortieSearchType::class, null, [
             'method' => 'GET'
         ]);
